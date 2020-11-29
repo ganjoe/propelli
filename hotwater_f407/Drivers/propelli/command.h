@@ -10,18 +10,22 @@
 
 void Command_init();
 
-/*	config	*/
+//	config
 void selterm(int argc, const char **argv);
 void settime(int argc, const char **argv);
 void setdate(int argc, const char **argv);
-/*	gpios setzen	*/
+//	gpios setzen
 void setword(int argc, const char **argv);
 void writepin(int argc, const char **argv);
 void readpin(int argc, const char **argv);
 void setallin(int argc, const char **argv);
 void setword(int argc, const char **argv);
-
+// neue logdatei, filename ist parameter oder timestring
 void nlogn(int argc, const char **argv);
 void newlog(int argc, const char **argv);
+// zeile aus init-datei drucken/schreiben/ausführen
+void showconf(int argc, const char **argv);
+void writeconf(int argc, const char **argv);
+void readconf(int argc, const char **argv);
 
 #endif /* PROPELLI_COMMAND_H_ */

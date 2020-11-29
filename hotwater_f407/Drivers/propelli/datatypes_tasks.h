@@ -23,7 +23,7 @@ typedef struct
     uint64_t duration, repeat;
     float freq, duty_sp;
     /*
-     * flag		funktion wird ausgeführt, danach rückgesetzt. wird durch mftask gepollt
+     * flag			funktion wird ausgeführt, danach rückgesetzt. wird durch mftask gepollt
      * flag_delay	funktion wird nach ablauf über callback-isr ausgeführt. gehört zu mf_tse
      * flag_reset	error-flag, wird ggf. durch mfinit-funktion rückgesetzt
      * init_done	enable für die funktion

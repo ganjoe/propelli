@@ -31,6 +31,12 @@ void Command_init()
 	    "bool\n", nlogn);
         terminal_register_command_callback("newlog", "\nrtc filename\n",
 	    "bool\n", newlog);
+        terminal_register_command_callback("showconf", "\nrtc filename\n",
+	    "bool\n", newlog);
+        terminal_register_command_callback("writeconf", "\nrtc filename\n",
+	    "bool\n", newlog);
+        terminal_register_command_callback("readconf", "\nrtc filename\n",
+	    "bool\n", newlog);
     }
 
 
@@ -196,3 +202,22 @@ void newlog(int argc, const char **argv)
     	    }
 
    	}
+
+void showconf(int argc, const char **argv)
+{
+    if (argc == 2)
+	{
+    //    strcpy(filelog.sdinfo.Filename, argv[1]);
+
+        commands_printf("\ncmd ok\n");
+
+	    }
+}
+void writeconf(int argc, const char **argv)
+{
+
+}
+void readconf(int argc, const char **argv)
+{
+
+}

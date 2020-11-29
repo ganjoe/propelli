@@ -9,6 +9,7 @@
 #define INC_DATATYPES_H_
 
 #include "stdint.h"
+#include "stdlib.h"
 #include "stdbool.h"
 #include "math.h"
 #include "main.h"

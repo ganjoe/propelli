@@ -129,6 +129,7 @@ void mftask_prettylog(modflag *thismf)
 		db.names=LOGLINES;	pl_ppValues( buffer);
 		strncat		(buffer,"\r",1);
 		strcpy		(filelog.pbuffer.lastLine, buffer);
+
 		FRESULT err = pl_lol_update	(&filelog);
 
 		int len = strlen(filelog.pbuffer.lastLine);

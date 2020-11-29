@@ -112,7 +112,7 @@ FRESULT pl_lol_writebuffer_ptr	(TD_fatlog *log)
 FRESULT pl_lol_readbuffer	(TD_fatlog *log)
     {
     log->errcode =	f_open(&SDFile, log->sdinfo.Filename, FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
-    log->pbuffer.pos_y * log->pbuffer.maxchars;
+    log->pbuffer.pos_x = log->pbuffer.pos_y * log->pbuffer.maxchars;
     log->errcode =	f_lseek(&SDFile,log->pbuffer.pos_x);
 
     }

@@ -19,28 +19,28 @@ typedef struct
 {
     GPIO_InitTypeDef 	GPIO_InitStruct;
     GPIO_TypeDef*	onewire_port;
-    uint8_t	 	pinstate, bufflen, powerflag;
+    uint8_t	 		pinstate, bufflen, powerflag;
     uint8_t* 		writebuffer;
     uint8_t 		ROM_NO[8];
     uint8_t 		LastDiscrepancy,
-			LastFamilyDiscrepancy,
-			LastDeviceFlag;
+					LastFamilyDiscrepancy,
+					LastDeviceFlag;
 }
 ONEWIRE;
-void init_onewire	(ONEWIRE *wire);
+void init_onewire		(ONEWIRE *wire);
 int oneWire_drivePin	(ONEWIRE *wire, int state);
-int oneWire_reset	(ONEWIRE *wire);
+int oneWire_reset		(ONEWIRE *wire);
 
 void oneWire_WriteBit	(ONEWIRE *wire, int bit);
 void oneWire_WriteByte	(ONEWIRE *wire, uint8_t byte);
 void oneWire_WriteBytes	(ONEWIRE *wire, const uint8_t *buf,uint16_t count);
 
-int oneWire_ReadBit	(ONEWIRE *wire);
+int oneWire_ReadBit		(ONEWIRE *wire);
 int oneWire_ReadByte	(ONEWIRE *wire);
 void oneWire_ReadBytes	(ONEWIRE *wire,uint8_t *buf, uint16_t count);
 
 void oneWire_ROMskip	(ONEWIRE *wire);
-void oneWire_SelROM	(ONEWIRE *wire,const uint8_t rom[8]);
+void oneWire_SelROM		(ONEWIRE *wire,const uint8_t rom[8]);
 void oneWire_noPower	(ONEWIRE *wire);
 
 void oneWire_rstSearch	(ONEWIRE *wire);
