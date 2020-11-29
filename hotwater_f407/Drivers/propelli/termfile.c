@@ -21,7 +21,6 @@ void init_cmdfile(TD_TERMFILE* initcmd)
 	strcpy(initcmd->sep, "_");
 	const char* filename = "InitCommBatch.eeprom";
 
-	/* keine userparameter mehr ab hier */
 	initcmd->linebuffer = malloc(initcmd->maxchars);
 	initcmd->filename = malloc(sizeof(filename));
 	strcpy(initcmd->filename, filename);
