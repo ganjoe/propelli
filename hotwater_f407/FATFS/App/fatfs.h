@@ -78,7 +78,6 @@ typedef struct
     TD_fatlog;
 
     FRESULT filelog_init		(TD_fatlog *fatlog);
-    FRESULT fileinit_init		(TD_fatlog *init);
     //TODO: soll pl_lol_writeheader_ptr ersetzt werden
     FRESULT pl_lol_writeheader		(TD_fatlog *fatlog);
     FRESULT pl_lol_writeheader_ptr	(TD_fatlog *log);

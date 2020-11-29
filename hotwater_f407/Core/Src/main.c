@@ -45,7 +45,7 @@
 #include "potis.h"
 #include "terminal.h"
 #include "command.h"
-
+#include "termfile.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -120,21 +120,23 @@ int main(void)
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
   mfinit_prettylog(&prettylog);
+
+  Command_init();
+  //init_cmdfile nach command_init
+  init_cmdfile(&initcmd);
   HAL_TIM_Base_Start_IT(&htim6);
   delay_init(&delay, &htim2);
   mfinit_boardled();
   mfinit_mcp23017();
   mfinit_poti(&analogchan);
-
   mfinit_tsensor(&tsensor_cold);
   mfinit_tsensor(&tsensor_hot);
-
   mfinit_ina219(&batt_hw);
 
   tsensor_cold.wire.GPIO_InitStruct.Pin = onewire_Pin;
-  tsensor_cold.wire.onewire_port 	= onewire_GPIO_Port;
+  tsensor_cold.wire.onewire_port 		= onewire_GPIO_Port;
   tsensor_hot.wire.GPIO_InitStruct.Pin 	= onewire_hot_Pin;
-  tsensor_hot.wire.onewire_port 	= onewire_hot_GPIO_Port;
+  tsensor_hot.wire.onewire_port 		= onewire_hot_GPIO_Port;
 
   oneWire_drivePin(&tsensor_cold.wire, OW_INPUT_HIGHZ);
   oneWire_drivePin(&tsensor_hot.wire, OW_INPUT_HIGHZ);
@@ -146,7 +148,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
 
-  Command_init();
+
 
   while (1)
   {

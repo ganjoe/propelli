@@ -148,24 +148,7 @@ FRESULT filelog_init		(TD_fatlog *fatlog)
 	fatlog->errcode = pl_lol_writeheader(fatlog);
 	return fatlog->errcode;
 }
-FRESULT fileinit_init		(TD_fatlog *init)
-{
-	//pl_rtc_timestring(init->sdinfo.Filename, 1);
 
-	init->pbuffer.maxchars = 80;
-	init->pbuffer.maxlines = 0xF;
-
-	char buffer[]=	"setword 0\r"		//alles aus
-			"readpin 9 1\r"		//eingänge maskieren für wahlschalter
-			"readpin 10 1\r"
-			"readpin 11 1\r"
-			"sethwatr 14.3\r"	//backup für livedaten
-			"setcwatr 14.3\r"
-			"\r\r\0";
-	strcpy(init->pbuffer.firstLine, buffer);
-	init->errcode = pl_lol_writeheader_ptr(init);
-	return init->errcode;
-}
 FRESULT	pl_lol_newlog		(TD_fatlog *log)
 {
 	FRESULT err;

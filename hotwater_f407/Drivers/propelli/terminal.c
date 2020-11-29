@@ -94,15 +94,15 @@ void terminal_process_string(char *str)
     char *argv[kMaxArgs];
     char *p2 = strtok(str, " ");	//argument seperator.
     while (p2 && argc < kMaxArgs)
-	{
-	argv[argc++] = p2;
-	p2 = strtok(0, " ");
-	}
+		{
+		argv[argc++] = p2;
+		p2 = strtok(0, " ");
+		}
     if (argc == 0)
-	{
-	commands_printf("No command received\n");
-	return;
-	}
+		{
+		commands_printf("No command received\n");
+		return;
+		}
     if (strcmp(argv[0], "help") == 0)
 	{
 	commands_printf("registered commands:\n");

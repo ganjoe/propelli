@@ -104,7 +104,7 @@ void mfinit_prettylog(TD_prettylog *prettylog)
     FRESULT fres;
     modflag_init(&prettylog->pp_modflag, HALTICK, 0.3);
     fres = filelog_init(&filelog);
-    fres = fileinit_init(&fileinit);
+
     }
 void mftick_prettylog(TD_prettylog *prettylog)
     {
