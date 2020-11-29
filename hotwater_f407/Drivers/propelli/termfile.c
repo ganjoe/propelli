@@ -22,6 +22,7 @@ void init_cmdfile(TD_TERMFILE* cmd)
 	strcpy(cmd->sep, "_");
 	char filename[] = "InitCommBatch.eeprom";
 
+<<<<<<< HEAD
 	cmd->linebuffer = malloc(cmd->maxchars);
 	int fnlen = strlen(filename);
 	cmd->filename = malloc(fnlen);
@@ -51,6 +52,11 @@ void init_cmdfile(TD_TERMFILE* cmd)
 	cmdfile_lol_readln(&initcmd, strcmd, 5);
 	terminal_process_string(strcmd);
 
+=======
+	initcmd->linebuffer = malloc(initcmd->maxchars);
+	initcmd->filename = malloc(sizeof(filename));
+	strcpy(initcmd->filename, filename);
+>>>>>>> branch 'master' of https://github.com/ganjoe/propelli
 }
 
 void cmdfile_lol_open_create(TD_TERMFILE* initcmd)
