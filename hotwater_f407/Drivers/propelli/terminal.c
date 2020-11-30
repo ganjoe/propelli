@@ -16,7 +16,8 @@
 
 
 #define CALLBACK_LEN		40
-#define TERM_BUFF_RX_LEN 20
+//empfangspuffer für uart-dma
+#define TERM_BUFF_RX_LEN 	20
 enum    {    kMaxArgs = 4    };
 
 char TerminalCharBufferRx[TERM_BUFF_RX_LEN];
@@ -162,18 +163,19 @@ void task_terminalGetKey()
 
     if (!flagTerminal_newString)
 	{
-	HAL_UART_Receive_DMA(&huart1, TerminalCharBufferRx, TERM_BUFF_RX_LEN);
+	HAL_UART_Receive_IT(&huart1, TerminalCharBufferRx, 20);
 	}
     if (flagTerminal_newString) 	// string is terminated by cr
 	{
 	flagTerminal_newString = false;
+
 	terminal_process_string(strptr);
 	}
     }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     {
-    strptr = strtok(TerminalCharBufferRx, "\n");
+
     flagTerminal_newString = true;
 
     }

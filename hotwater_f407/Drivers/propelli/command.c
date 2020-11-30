@@ -12,6 +12,7 @@
 #include "rtc.h"
 #include "PrettyLog.h"
 #include "fatfs.h"
+#include "termfile.h"
     extern TD_fatlog filelog, fileinit;
 void Command_init()
     {
@@ -32,68 +33,58 @@ void Command_init()
         terminal_register_command_callback("newlog", "\nrtc filename\n",
 	    "bool\n", newlog);
         terminal_register_command_callback("showconf", "\nrtc filename\n",
-	    "bool\n", newlog);
+	    "bool\n", showconf);
         terminal_register_command_callback("writeconf", "\nrtc filename\n",
-	    "bool\n", newlog);
+	    "bool\n", writeconf);
         terminal_register_command_callback("readconf", "\nrtc filename\n",
-	    "bool\n", newlog);
+	    "bool\n", readconf);
+        terminal_register_command_callback("selterm", "\nlog upd speed\n",
+	    "bool\n", selterm);
     }
 
+RTC_DateTypeDef date;
+RTC_TimeTypeDef time;
 
 void writepin(int argc, const char **argv)
     {
     int d = -1;	//pinnr
     int e = -1;	//state
     if (argc == 3)
-	{
-	sscanf(argv[1], "%d", &d);
-	sscanf(argv[2], "%d", &e);
+		{
+		sscanf(argv[1], "%d", &d);
+		sscanf(argv[2], "%d", &e);
 
-	mcp_PinMode(&mcp_io, OUTPUT, d);
-	mcp_WritePin(&mcp_io, d, e);
-	commands_printf("\ncmd ok\n");
-	}
+		mcp_PinMode(&mcp_io, OUTPUT, d);
+		mcp_WritePin(&mcp_io, d, e);
+		commands_printf("\rcmd writepin:pinnr %d state %d\r", &d, &e);
+		}
     }
 void readpin(int argc, const char **argv)
     {
     int d = -1;	//pinnr
     int e = -1;	//pullup
     if (argc == 3)
-	{
-	sscanf(argv[1], "%d", &d);
-	sscanf(argv[2], "%d", &e);
-	if (e)
-	    {
-	    mcp_PinMode(&mcp_io, PULLUP, d);
-	    commands_printf("\nread: %x\n", &mcp_io.inputstate);
-	    }
+		{
+		sscanf(argv[1], "%d", &d);
+		sscanf(argv[2], "%d", &e);
+		if (e)
+			{
+			mcp_PinMode(&mcp_io, PULLUP, d);
+			}
 
-	if (!e)
-	    {
-	    mcp_PinMode(&mcp_io, INPUT, d);
-	    commands_printf("\ncmd ok\n");
-	    }
-	}
+		if (!e)
+			{
+			mcp_PinMode(&mcp_io, INPUT, d);
+			}
+		commands_printf("\rcmd readpin:pinnr %d pullup %d\r", &d, &e);
+		}
     }
 void setallin(int argc, const char **argv)
     {
-    int e = -1;	//pullup
-    if (argc == 2)
-	{
-	sscanf(argv[1], "%d", &e);
-	if (e)
-	    {
-	    mcp_set_all_input(&mcp_io);
-	    commands_printf("\ncmd ok\n");
-	    }
-
-	if (!e)
-	    {
-	    mcp_set_all_input(&mcp_io);
-	    commands_printf("\ncmd ok\n");
-	    }
+    mcp_set_all_input(&mcp_io);
+    commands_printf("\rcmd mcp_set_all_input ok\r");
 	}
-    }
+
 void setword(int argc, const char **argv)
     {
     int e = -1;	//
@@ -103,7 +94,7 @@ void setword(int argc, const char **argv)
 	if (e<=0xFFFF)
 	    {
 	    mcp_WriteWord(&mcp_io, e);
-	    commands_printf("\ncmd ok\n");
+	    commands_printf("\rcmd setword: 0x%x ok\r",e);
 	    }
 
 	}
@@ -129,10 +120,11 @@ void setdate(int argc, const char **argv)
     		}
     	else
 			{
-			RTC_DateTypeDef date;
+
 			date.Month = m;
 			date.Date = d;
 			date.Year = y;
+			HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
 			HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
 			char buffer[]="\nrtc sagt: nein\n";
 			pl_rtc_timestring(buffer, DATEMONO);
@@ -164,11 +156,12 @@ void settime(int argc, const char **argv)
     	    commands_printf("\nrange ist 23 59 59\n");
     	else
 	    {
-	    RTC_TimeTypeDef time;
+
 	    time.Hours = h;
 	    time.Minutes = m;
 	    time.Seconds = s;
 	    HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
+	    HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
 	    char buffer[]="\nrtc sagt: nein\n";
 	    pl_rtc_timestring(buffer, TIMEMONO);
 	    commands_printf(buffer);
@@ -181,14 +174,13 @@ void settime(int argc, const char **argv)
 
 void nlogn(int argc, const char **argv)
     {
-
-        if (argc == 2)
-    	{
-            strcpy(filelog.sdinfo.Filename, argv[1]);
-            pl_lol_newlogname(&filelog);
-            commands_printf("\ncmd ok\n");
-            commands_printf(filelog.sdinfo.Filename);
-    	    }
+	if (argc == 2)
+		{
+		strcpy(filelog.sdinfo.Filename, argv[1]);
+		pl_lol_newlogname(&filelog);
+		commands_printf("\rcmd nlogn ok\r");
+		commands_printf(filelog.sdinfo.Filename);
+		}
 
    	}
 void newlog(int argc, const char **argv)
@@ -205,13 +197,18 @@ void newlog(int argc, const char **argv)
 
 void showconf(int argc, const char **argv)
 {
-    if (argc == 2)
-	{
-    //    strcpy(filelog.sdinfo.Filename, argv[1]);
+	int d = -1;	//pinnr
+	int itr=0;
+		sscanf(argv[1], "%d", &d);
+		commands_printf("\rcmd readconf\r:batchcounter: %d\r", &initcmd.cmdcounter);
 
-        commands_printf("\ncmd ok\n");
+		while(itr < initcmd.cmdcounter)
+			{
+			cmdfile_lol_readln(&initcmd, initcmd.linebuffer, itr);
+			commands_printf("[%d] %s\r",itr, initcmd.linebuffer);
+			itr++;
+			}
 
-	    }
 }
 void writeconf(int argc, const char **argv)
 {
@@ -220,4 +217,14 @@ void writeconf(int argc, const char **argv)
 void readconf(int argc, const char **argv)
 {
 
+}
+void selterm(int argc, const char **argv)
+{
+	float f = -1;
+	if (argc == 2)
+	{
+	sscanf(argv[1], "%f", &f);
+	modflag_init(&prettylog.pp_modflag, HALTICK, f);
+	commands_printf("\rcmd selterm ok\r");
+	}
 }

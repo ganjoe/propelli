@@ -26,7 +26,7 @@ typedef struct
 	char cr[2];
 	char ef[2];
 
-	int flag_initdone;
+	int flag_initdone, cmdcounter;
 
 }
 TD_TERMFILE;

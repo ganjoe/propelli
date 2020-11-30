@@ -47,10 +47,17 @@ thismf->init_done = false;
 }
 void modflag_init(modflag *thismf, float systick, float setpoint_hz)
     {
-    utils_truncate_number(&setpoint_hz, 1, systick); // max 1h minimum: systick
+    utils_truncate_number(&setpoint_hz, 0, systick); // max 1h minimum: systick
     thismf->freq = systick;
     thismf->divisor = systick / setpoint_hz;
-    thismf->init_done = true;
+    if (setpoint_hz==0)
+		{
+		thismf->init_done = false;
+		}
+    else
+		{
+		thismf->init_done = true;
+		}
     }
 
 void modflag_ovf_callback()

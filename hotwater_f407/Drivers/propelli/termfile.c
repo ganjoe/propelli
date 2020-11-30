@@ -22,7 +22,6 @@ void init_cmdfile(TD_TERMFILE* cmd)
 	strcpy(cmd->sep, "_");
 	char filename[] = "InitCommBatch.eeprom";
 
-
 	cmd->linebuffer = malloc(cmd->maxchars);
 	int fnlen = strlen(filename);
 	cmd->filename = malloc(fnlen);
@@ -30,15 +29,15 @@ void init_cmdfile(TD_TERMFILE* cmd)
 
 	cmdfile_lol_open_create(cmd);
 	char *strcmd;
-	strcmd = strdup("setdate 29 11 20\r");	cmdfile_lol_writeln(cmd, strcmd, 0);
-	strcmd = strdup("settime 20 08 00\r");	cmdfile_lol_writeln(cmd, strcmd, 1);
-	strcmd = strdup("nlog\r");				cmdfile_lol_writeln(cmd, strcmd, 2);
-	strcmd = strdup("readpin 0 1\r");		cmdfile_lol_writeln(cmd, strcmd, 3);
-	strcmd = strdup("readpin 1 1\r");		cmdfile_lol_writeln(cmd, strcmd, 3);
-	strcmd = strdup("readpin 2 1\r");		cmdfile_lol_writeln(cmd, strcmd, 3);
+	strcmd = strdup("setdate 29 11 20\r");	cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
+	strcmd = strdup("settime 20 08 00\r");	cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
+	strcmd = strdup("nlog\r");				cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
+	strcmd = strdup("readpin 0 1\r");		cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
+	strcmd = strdup("readpin 1 1\r");		cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
+	strcmd = strdup("readpin 2 1\r");		cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
 
 	strcmd = strdup("0");
-
+/*
 	cmdfile_lol_readln(&initcmd, strcmd, 0);
 	terminal_process_string(strcmd);
 	cmdfile_lol_readln(&initcmd, strcmd, 1);
@@ -51,6 +50,7 @@ void init_cmdfile(TD_TERMFILE* cmd)
 	terminal_process_string(strcmd);
 	cmdfile_lol_readln(&initcmd, strcmd, 5);
 	terminal_process_string(strcmd);
+	*/
 
 }
 
@@ -97,16 +97,17 @@ Like strtok(), the strsep() function returns a pointer to the first string yanke
 Unlike strtok(), however, the function is called with the same arguments over and over until it returns a NULL pointer.
  */
 void cmdfile_do_cmd	(TD_TERMFILE* initcmd)
-{
-	if (initcmd->flag_initdone = true)
 	{
-		int linecounter=0;
-		//gültigkeit prüfen
-		cmdfile_lol_readln(initcmd, initcmd->linebuffer, linecounter);
-		//strsep()
-	}
+	int itr = initcmd->cmdcounter;
+	if (initcmd->flag_initdone = true)
+		{
 
-}
+
+		}
+
+
+
+	}
 
 FRESULT cmdfile_lol_readln(TD_TERMFILE* initcmd, char* buffer, int linenr)
 {

@@ -102,7 +102,7 @@ int pl_rtc_timestring	(char* buffer, int fmt)
 void mfinit_prettylog(TD_prettylog *prettylog)
     {
     FRESULT fres;
-    modflag_init(&prettylog->pp_modflag, HALTICK, 0.3);
+    modflag_init(&prettylog->pp_modflag, HALTICK, 1);
     fres = filelog_init(&filelog);
 
     }
