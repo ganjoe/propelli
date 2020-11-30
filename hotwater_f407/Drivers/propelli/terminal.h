@@ -24,14 +24,18 @@ typedef struct td_callbacks
 
 typedef struct
 {
-	int callback_len, buffer_receive_len, maxArguments;
-	char byte_received, TerminalBufferItr;
-	char* bytestring_received;
+	int callback_len, buffer_receive_len, maxArguments, TerminalBufferItr;
+	char byte_received;
+	char* sep;
+	char* eoc;
+	char* string_rx;
+	char* string_tx;
+	int uart_buffer_tx_len;
 	int flag_newString, flag_newTransmission;
-	modflag mf_term;
+
+	modflag mf_cmd;
 	terminal_callback_struct td_callbacks;
 	UART_HandleTypeDef huart;
-
 }
 TD_TERMINAL;
 
@@ -40,14 +44,14 @@ extern int flagTerminal_newString;
 extern int flagTerminal_newTransmission;
 extern int TerminalBufferItr;
 
-mfinit_terminal(TD_TERMINAL* term);
-mftick_terminal(TD_TERMINAL* term);
-mftask_terminal(TD_TERMINAL* term);
+void mfinit_terminal(TD_TERMINAL* term);
+void mftick_terminal(TD_TERMINAL* term);
+void mftask_terminal(TD_TERMINAL* term);
 
 //wrapper für sprintf. erzeugt strings zum senden
 void term_printf(TD_TERMINAL* term, const char *fmt, ...);
 //cmd-string separieren und callbacks aufrufen
-void term_lol_parse			(char *str);
+void term_lol_parse(char *str, TD_TERMINAL* term);
 //funktionsnamen und deren namensstrings mit funktionspointern verknüpfen
 //TODO:
 void term_lol_setCallback	(const char* command,
@@ -56,13 +60,13 @@ void term_lol_setCallback	(const char* command,
 							 void(*cbf)(int argc,
 							 const char **argv));
 //empfangene bytes auf cmd-string prüfen
-void term_lol_searchstring	(TD_TERMINAL* term);
+int term_lol_searchstring	(TD_TERMINAL* term);
 //obsolet
 float term_lol_delay(int len);
 //transferzeit für uart in us zurückgeben
 int term_lol_txtime_us		(TD_TERMINAL* term);
 //aufruf nach jeden neuen byte durch isr o.ä.
-int term_lol_readbyte		(TD_TERMINAL* term);
+int  term_lol_readbyte		(TD_TERMINAL* term);
 void term_lol_writebuff		(TD_TERMINAL* term);
 extern TD_TERMINAL cmdkeen;
 

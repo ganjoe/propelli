@@ -124,6 +124,7 @@ int main(void)
   Command_init();
   //init_cmdfile nach command_init
   init_cmdfile(&initcmd);
+  mfinit_terminal(&cmdkeen);
   HAL_TIM_Base_Start_IT(&htim6);
   delay_init(&delay, &htim2);
   mfinit_boardled();
@@ -146,19 +147,17 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
-
-
-
+  HAL_UART_Receive_IT(&huart1, (uint8_t*)&cmdkeen.byte_received, 1);
   while (1)
   {
 
-    term_lol_searchstring(&cmdkeen);
+    mftask_terminal(&cmdkeen);
     mftask_tsensor(&tsensor_cold);
     mftask_boardled();
     mftask_mcp23017(&mcp_io);
-    mftask_prettylog(&prettylog.pp_modflag);
+   // mftask_prettylog(&prettylog.pp_modflag);
     mftask_ina219(&batt_hw);
+
    // mftask_potis(&analogchan);
      mftask_tsensor(&tsensor_hot);
 

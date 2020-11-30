@@ -31,6 +31,7 @@
 #include "ds18x20.h"
 #include "potis.h"
 #include "ina219_monitor.h"
+#include "terminal.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -213,6 +214,7 @@ void SysTick_Handler(void)
     mftick_ina219(&batt_hw);
     mftick_tsensor(&tsensor_cold);
     mftick_tsensor(&tsensor_hot);
+    mftick_terminal(&cmdkeen);
 
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();

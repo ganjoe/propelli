@@ -15,22 +15,41 @@
 // TODO: formalisieren und aufräumen
 
 
-mfinit_terminal(TD_TERMINAL* term)
+void mfinit_terminal(TD_TERMINAL* term)
 {
-
+	modflag_init(&term->mf_cmd, HALTICK, 1);
+	term->callback_len = 40;
+	term->maxArguments = 4;
+	term->buffer_receive_len = 20;
+	term->uart_buffer_tx_len = 64;
+	term->huart =huart1;
+	term->string_rx = malloc(term->buffer_receive_len);
+	term->string_tx = malloc(term->uart_buffer_tx_len);
+	term->sep = (char*)10;
+	term->eoc = (char*)13;
 }
-mftask_terminal(TD_TERMINAL* term)
-{
+void mftask_terminal(TD_TERMINAL* term)
+	{
+    if (&term->mf_cmd.flag && term->mf_cmd.init_done)
+		{
+    	term->mf_cmd.repeat = modflag_tickdiff(&term->mf_cmd);
 
-}
-mftick_terminal(TD_TERMINAL* term)
-{
+		term_lol_readbyte(&cmdkeen);
 
+		term->mf_cmd.duration = modflag_tickdiff(&term->mf_cmd);
+		term->mf_cmd.callcount++;
+		term->mf_cmd.flag = false;
+		}
+	}
+void mftick_terminal(TD_TERMINAL* term)
+{
+	modflag_upd_regular(&term->mf_cmd);
 }
 
 #define CALLBACK_LEN		40
 //empfangspuffer für uart-dma
 #define TERM_BUFF_RX_LEN 	20
+int flagTerminal_newTransmission;
 enum    {    kMaxArgs = 4    };
 
 char TerminalCharBufferRx[TERM_BUFF_RX_LEN];
@@ -41,10 +60,6 @@ extern TIM_HandleTypeDef htim1;
 static volatile int fault_vec_write = 0;
 static terminal_callback_struct callbacks[CALLBACK_LEN];
 static int callback_write = 0;
-
-int flagTerminal_newString = 0;
-int flagTerminal_newTransmission = 2;
-
 
 float term_lol_delay(int len)
     {
@@ -93,12 +108,14 @@ void term_lol_setCallback(const char *command, const char *help,
 	}
     }
 
-void term_lol_parse(char *str)
+void term_lol_parse(char *str, TD_TERMINAL* term)
     {
-    int argc = 0;	//argument count
-    char *argv[kMaxArgs];
-    char *p2 = strtok(str, " ");	//argument seperator.
-    while (p2 && argc < kMaxArgs)
+    int argc = 0;
+    char *argv[term->maxArguments];
+    //cmd ist der erste stringabschnitt von links
+    char *p2 = strtok(str, " ");
+    //argumente separieren, durchzählen, und in ptr-array speichern
+    while (p2 && argc < term->maxArguments)
 		{
 		argv[argc++] = p2;
 		p2 = strtok(0, " ");
@@ -132,7 +149,7 @@ void term_lol_parse(char *str)
 	    }
 	}
     }
-void vprint(const char *fmt, va_list argp)
+void term_lol_vprint(const char *fmt, va_list argp)
     {
     static char string[120]={0};
     if (flagTerminal_newTransmission)
@@ -160,37 +177,56 @@ void term_printf(TD_TERMINAL* term, const char *fmt, ...) // custom printf() fun
     //http://openbook.rheinwerk-verlag.de/c_von_a_bis_z/018_c_stdarg_h_001.htm
     va_list argp;
     va_start(argp, fmt);
-    vprint(fmt, argp);
+    term_lol_vprint(fmt, argp);
     //term_lol_writebuff
     va_end(argp);
     }
-void term_lol_searchstring	(TD_TERMINAL* term)
+//TODO: für utils_ formalisieren
+int term_lol_searchstring	(TD_TERMINAL* term)
     {
+	char* charptr;
 
-    if (!flagTerminal_newString)
-	{
-	HAL_UART_Receive_IT(&huart1, TerminalCharBufferRx, 20);
-	}
-    if (flagTerminal_newString) 	// string is terminated by cr
-	{
-	flagTerminal_newString = false;
+	charptr = memchr(term->string_rx, (int)term->eoc, term->TerminalBufferItr);
 
-	term_lol_parse(strptr);
-	}
+	return *charptr;
     }
 void term_lol_writebuff		(TD_TERMINAL* term)
+	{
+	int strlen;
+	strlen =sizeof(term->string_tx);
+	HAL_UART_Transmit_DMA(&huart1, (uint8_t*) term->string_tx, strlen);
+	}
+int  term_lol_readbyte		(TD_TERMINAL* term)
 {
-	//HAL_UART_Transmit_DMA(&huart1, (uint8_t*) string, len);
+	//isr scharfschalten für byteempfang
+
+	HAL_UART_Receive_DMA(&huart1, (uint8_t*)&term->byte_received, 1);
 }
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     {
+    cmdkeen.string_rx[cmdkeen.TerminalBufferItr] = cmdkeen.byte_received;
 
-    flagTerminal_newString = true;
+	if (cmdkeen.TerminalBufferItr < cmdkeen.buffer_receive_len)
+		{
+		cmdkeen.TerminalBufferItr++	;
+		}
+	else
+		{
+		cmdkeen.TerminalBufferItr=0;
+		HAL_Delay(100);
+		}
+
+	if (cmdkeen.byte_received == 13)
+		{
+		term_lol_parse(cmdkeen.string_rx, &cmdkeen);
+		cmdkeen.TerminalBufferItr = 0;
+		}
+	term_lol_readbyte(&cmdkeen);
 
     }
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     {
-    flagTerminal_newTransmission++;
+
     }
 
 TD_TERMINAL cmdkeen;
