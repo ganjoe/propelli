@@ -15,6 +15,19 @@
 // TODO: formalisieren und aufräumen
 
 
+mfinit_terminal(TD_TERMINAL* term)
+{
+
+}
+mftask_terminal(TD_TERMINAL* term)
+{
+
+}
+mftick_terminal(TD_TERMINAL* term)
+{
+
+}
+
 #define CALLBACK_LEN		40
 //empfangspuffer für uart-dma
 #define TERM_BUFF_RX_LEN 	20
@@ -22,7 +35,7 @@ enum    {    kMaxArgs = 4    };
 
 char TerminalCharBufferRx[TERM_BUFF_RX_LEN];
 char *strptr;
-typedef struct _terminal_callback_struct terminal_callback_struct;
+typedef struct td_callbacks terminal_callback_struct;
 extern TIM_HandleTypeDef htim1;
 
 static volatile int fault_vec_write = 0;
@@ -33,14 +46,14 @@ int flagTerminal_newString = 0;
 int flagTerminal_newTransmission = 2;
 
 
-float _calc_uart_tx_time(int len)
+float term_lol_delay(int len)
     {
     int halbaudrate = huart1.Init.BaudRate;
     float Txmillis = 10000000 * (float) len / (float) halbaudrate;	//transmission time[s]: 10 bit / n baud
     return Txmillis;
     }
 
-void terminal_register_command_callback(const char *command, const char *help,
+void term_lol_setCallback(const char *command, const char *help,
 	const char *arg_names, void (*cbf)(int argc, const char **argv))
     {
     int callback_num = callback_write;
@@ -79,17 +92,8 @@ void terminal_register_command_callback(const char *command, const char *help,
 	    }
 	}
     }
-void terminal_unregister_callback(void (*cbf)(int argc, const char **argv))
-    {
-    for (int i = 0; i < callback_write; i++)
-	{
-	if (callbacks[i].cbf == cbf)
-	    {
-	    callbacks[i].cbf = 0;
-	    }
-	}
-    }
-void terminal_process_string(char *str)
+
+void term_lol_parse(char *str)
     {
     int argc = 0;	//argument count
     char *argv[kMaxArgs];
@@ -101,19 +105,19 @@ void terminal_process_string(char *str)
 		}
     if (argc == 0)
 		{
-		commands_printf("No command received\n");
+		term_printf(&cmdkeen, "No command received\n");
 		return;
 		}
     if (strcmp(argv[0], "help") == 0)
 	{
-	commands_printf("registered commands:\n");
+	term_printf(&cmdkeen, "registered commands:\n");
 
 	for (int i = 0; i < callback_write; i++)
 	    {
 	    //TODO: blocking variante von ..print mit dma, flag, berechnete transferzeit
-	    commands_printf(callbacks[i].command);
-	    commands_printf(" help: ");
-	    commands_printf(callbacks[i].help);
+	    term_printf(&cmdkeen, callbacks[i].command);
+	    term_printf(&cmdkeen, " help: ");
+	    term_printf(&cmdkeen, callbacks[i].help);
 
 	    }
 
@@ -135,6 +139,7 @@ void vprint(const char *fmt, va_list argp)
 	{
 	if (0 < vsprintf(string, fmt, argp))
 	    {
+		//term_lol_writebuff(term);
 	    int len = strlen(string);
 	    float del;
 	    //HAL_UART_Transmit(&huart1, (uint8_t*)string, len,199);
@@ -142,7 +147,7 @@ void vprint(const char *fmt, va_list argp)
 	    flagTerminal_newTransmission = false;
 	    HAL_UART_Transmit_DMA(&huart1, (uint8_t*) string, len);
 	    //TODO: mit mf delay austauschen
-	    del = _calc_uart_tx_time(len);
+	    del = term_lol_delay(len);
 	    //HAL_Delay(del);
 	    //delay_us(&delay, (uint32_t)del);
 
@@ -150,15 +155,16 @@ void vprint(const char *fmt, va_list argp)
 	    }
 	}
     }
-void commands_printf(const char *fmt, ...) // custom printf() function
+void term_printf(TD_TERMINAL* term, const char *fmt, ...) // custom printf() function
     {
     //http://openbook.rheinwerk-verlag.de/c_von_a_bis_z/018_c_stdarg_h_001.htm
     va_list argp;
     va_start(argp, fmt);
     vprint(fmt, argp);
+    //term_lol_writebuff
     va_end(argp);
     }
-void task_terminalGetKey()
+void term_lol_searchstring	(TD_TERMINAL* term)
     {
 
     if (!flagTerminal_newString)
@@ -169,10 +175,13 @@ void task_terminalGetKey()
 	{
 	flagTerminal_newString = false;
 
-	terminal_process_string(strptr);
+	term_lol_parse(strptr);
 	}
     }
-
+void term_lol_writebuff		(TD_TERMINAL* term)
+{
+	//HAL_UART_Transmit_DMA(&huart1, (uint8_t*) string, len);
+}
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     {
 
@@ -183,3 +192,5 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     {
     flagTerminal_newTransmission++;
     }
+
+TD_TERMINAL cmdkeen;

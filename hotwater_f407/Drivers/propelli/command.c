@@ -16,29 +16,29 @@
     extern TD_fatlog filelog, fileinit;
 void Command_init()
     {
-        terminal_register_command_callback("setword", "\nmcp outlatch\n",
+        term_lol_setCallback("setword", "\nmcp outlatch\n",
 	    "bool\n", setword);
-        terminal_register_command_callback("writepin", "\nGPIOA,B Output no Pullup\n",
+        term_lol_setCallback("writepin", "\nGPIOA,B Output no Pullup\n",
 	    "bool\n", writepin);
-        terminal_register_command_callback("readpin", "\nGPIOA,B Input no Pullup\n",
+        term_lol_setCallback("readpin", "\nGPIOA,B Input no Pullup\n",
 	    "bool\n", readpin);
-        terminal_register_command_callback("setallin", "\nGPIOA,B Input no Pullup\n",
+        term_lol_setCallback("setallin", "\nGPIOA,B Input no Pullup\n",
 	    "bool\n", setallin);
-        terminal_register_command_callback("setdate", "\nDD MM YY\n",
+        term_lol_setCallback("setdate", "\nDD MM YY\n",
 	    "bool\n", setdate);
-        terminal_register_command_callback("settime", "\nhh mm ss\n",
+        term_lol_setCallback("settime", "\nhh mm ss\n",
 	    "bool\n", settime);
-        terminal_register_command_callback("nlogn", "\nfilename[32]\n",
+        term_lol_setCallback("nlogn", "\nfilename[32]\n",
 	    "bool\n", nlogn);
-        terminal_register_command_callback("newlog", "\nrtc filename\n",
+        term_lol_setCallback("newlog", "\nrtc filename\n",
 	    "bool\n", newlog);
-        terminal_register_command_callback("showconf", "\nrtc filename\n",
+        term_lol_setCallback("showconf", "\nrtc filename\n",
 	    "bool\n", showconf);
-        terminal_register_command_callback("writeconf", "\nrtc filename\n",
+        term_lol_setCallback("writeconf", "\nrtc filename\n",
 	    "bool\n", writeconf);
-        terminal_register_command_callback("readconf", "\nrtc filename\n",
+        term_lol_setCallback("readconf", "\nrtc filename\n",
 	    "bool\n", readconf);
-        terminal_register_command_callback("selterm", "\nlog upd speed\n",
+        term_lol_setCallback("selterm", "\nlog upd speed\n",
 	    "bool\n", selterm);
     }
 
@@ -56,7 +56,7 @@ void writepin(int argc, const char **argv)
 
 		mcp_PinMode(&mcp_io, OUTPUT, d);
 		mcp_WritePin(&mcp_io, d, e);
-		commands_printf("\rcmd writepin:pinnr %d state %d\r", &d, &e);
+		term_printf(&cmdkeen, "\rcmd writepin:pinnr %d state %d\r", &d, &e);
 		}
     }
 void readpin(int argc, const char **argv)
@@ -76,13 +76,13 @@ void readpin(int argc, const char **argv)
 			{
 			mcp_PinMode(&mcp_io, INPUT, d);
 			}
-		commands_printf("\rcmd readpin:pinnr %d pullup %d\r", &d, &e);
+		term_printf(&cmdkeen, "\rcmd readpin:pinnr %d pullup %d\r", &d, &e);
 		}
     }
 void setallin(int argc, const char **argv)
     {
     mcp_set_all_input(&mcp_io);
-    commands_printf("\rcmd mcp_set_all_input ok\r");
+    term_printf(&cmdkeen, "\rcmd mcp_set_all_input ok\r");
 	}
 
 void setword(int argc, const char **argv)
@@ -94,7 +94,7 @@ void setword(int argc, const char **argv)
 	if (e<=0xFFFF)
 	    {
 	    mcp_WriteWord(&mcp_io, e);
-	    commands_printf("\rcmd setword: 0x%x ok\r",e);
+	    term_printf(&cmdkeen, "\rcmd setword: 0x%x ok\r",e);
 	    }
 
 	}
@@ -116,7 +116,7 @@ void setdate(int argc, const char **argv)
     	wparam = utils_truncate_number_int(&y, 20, 65);
     	if (wparam)
     		{
-    		commands_printf("\nrange ist 32 12 65\n");
+    		term_printf(&cmdkeen, "\nrange ist 32 12 65\n");
     		}
     	else
 			{
@@ -128,13 +128,13 @@ void setdate(int argc, const char **argv)
 			HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
 			char buffer[]="\nrtc sagt: nein\n";
 			pl_rtc_timestring(buffer, DATEMONO);
-			commands_printf(buffer);
+			term_printf(&cmdkeen, buffer);
 			pl_lol_newlog(&filelog);
 			}
 		}
     else
 		{
-    	commands_printf("\n3 argumente DD MM YY\n");
+    	term_printf(&cmdkeen, "\n3 argumente DD MM YY\n");
 		}
 
 	}
@@ -153,7 +153,7 @@ void settime(int argc, const char **argv)
     	wparam = utils_truncate_number_int(&m, 0, 59);
     	wparam = utils_truncate_number_int(&s, 0, 59);
     	if (wparam)
-    	    commands_printf("\nrange ist 23 59 59\n");
+    	    term_printf(&cmdkeen, "\nrange ist 23 59 59\n");
     	else
 	    {
 
@@ -164,12 +164,12 @@ void settime(int argc, const char **argv)
 	    HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
 	    char buffer[]="\nrtc sagt: nein\n";
 	    pl_rtc_timestring(buffer, TIMEMONO);
-	    commands_printf(buffer);
+	    term_printf(&cmdkeen, buffer);
 	    pl_lol_newlog(&filelog);
 	    }
 	}
 	else
-	    commands_printf("\n3 argumente DD MM YY\n");
+	    term_printf(&cmdkeen, "\n3 argumente DD MM YY\n");
     }
 
 void nlogn(int argc, const char **argv)
@@ -178,8 +178,8 @@ void nlogn(int argc, const char **argv)
 		{
 		strcpy(filelog.sdinfo.Filename, argv[1]);
 		pl_lol_newlogname(&filelog);
-		commands_printf("\rcmd nlogn ok\r");
-		commands_printf(filelog.sdinfo.Filename);
+		term_printf(&cmdkeen, "\rcmd nlogn ok\r");
+		term_printf(&cmdkeen, filelog.sdinfo.Filename);
 		}
 
    	}
@@ -189,8 +189,8 @@ void newlog(int argc, const char **argv)
         if (argc == 1)
     	{
             pl_lol_newlog(&filelog);
-            commands_printf("\ncmd ok\n");
-            commands_printf(filelog.sdinfo.Filename);
+            term_printf(&cmdkeen, "\ncmd ok\n");
+            term_printf(&cmdkeen, filelog.sdinfo.Filename);
     	    }
 
    	}
@@ -200,12 +200,12 @@ void showconf(int argc, const char **argv)
 	int d = -1;	//pinnr
 	int itr=0;
 		sscanf(argv[1], "%d", &d);
-		commands_printf("\rcmd readconf\r:batchcounter: %d\r", &initcmd.cmdcounter);
+		term_printf("\rcmd readconf\r:batchcounter: %d\r", &initcmd.cmdcounter);
 
 		while(itr < initcmd.cmdcounter)
 			{
 			cmdfile_lol_readln(&initcmd, initcmd.linebuffer, itr);
-			commands_printf("[%d] %s\r",itr, initcmd.linebuffer);
+			term_printf("[%d] %s\r",itr, initcmd.linebuffer);
 			itr++;
 			}
 
@@ -225,6 +225,6 @@ void selterm(int argc, const char **argv)
 	{
 	sscanf(argv[1], "%f", &f);
 	modflag_init(&prettylog.pp_modflag, HALTICK, f);
-	commands_printf("\rcmd selterm ok\r");
+	term_printf(&cmdkeen, "\rcmd selterm ok\r");
 	}
 }

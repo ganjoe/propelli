@@ -67,7 +67,7 @@ void cmdfile_lol_open_create(TD_TERMFILE* initcmd)
 		{
 		f_open(&SDFile, initcmd->filename, FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
 		f_close(&SDFile);
-		commands_printf("/r neue initdatei erstellt/r");
+		term_printf(&cmdkeen, "/r neue initdatei erstellt/r");
 
 		}break;
 		case FR_OK:

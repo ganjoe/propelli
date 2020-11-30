@@ -153,7 +153,7 @@ int main(void)
   while (1)
   {
 
-    task_terminalGetKey();
+    term_lol_searchstring(&cmdkeen);
     mftask_tsensor(&tsensor_cold);
     mftask_boardled();
     mftask_mcp23017(&mcp_io);

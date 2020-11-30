@@ -133,7 +133,7 @@ void mftask_prettylog(modflag *thismf)
 		FRESULT err = pl_lol_update	(&filelog);
 
 		int len = strlen(filelog.pbuffer.lastLine);
-		commands_printf(buffer);
+		term_printf(&cmdkeen, buffer);
 		thismf->duration = modflag_tickdiff(thismf);
 		thismf->flag = false;
 		}
