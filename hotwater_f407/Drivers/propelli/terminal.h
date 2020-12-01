@@ -14,13 +14,14 @@
 //datei exisitiert nur wenn von cubeIDE generiert. "generate pair of .c .h files"
 #include "usart.h"
 
-typedef struct td_callbacks
+typedef struct
 	{
 	const char *command;
 	const char *help;
 	const char *arg_names;
 	void (*cbf)(int argc, const char **argv);
-	} terminal_callback_struct;
+	}
+TD_TERMINAL_CALLBACKS;
 
 typedef struct
 {
@@ -34,10 +35,11 @@ typedef struct
 	int flag_newString, flag_newTransmission;
 
 	modflag mf_cmd;
-	terminal_callback_struct td_callbacks;
-	UART_HandleTypeDef huart;
+	TD_TERMINAL_CALLBACKS td_callbacks;
+	UART_HandleTypeDef* huart;
 }
 TD_TERMINAL;
+
 
 extern int flagTerminal_newKey;
 extern int flagTerminal_newString;
@@ -59,8 +61,7 @@ void term_lol_setCallback	(const char* command,
 							 const char *arg_names,
 							 void(*cbf)(int argc,
 							 const char **argv));
-//empfangene bytes auf cmd-string prüfen
-int term_lol_searchstring	(TD_TERMINAL* term);
+
 //obsolet
 float term_lol_delay(int len);
 //transferzeit für uart in us zurückgeben
@@ -68,6 +69,8 @@ int term_lol_txtime_us		(TD_TERMINAL* term);
 //aufruf nach jeden neuen byte durch isr o.ä.
 int  term_lol_readbyte		(TD_TERMINAL* term);
 void term_lol_writebuff		(TD_TERMINAL* term);
+
+void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL term);
 extern TD_TERMINAL cmdkeen;
 
 #endif /* INC_TERMINAL_H_ */

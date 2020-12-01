@@ -150,12 +150,11 @@ int main(void)
   HAL_UART_Receive_IT(&huart1, (uint8_t*)&cmdkeen.byte_received, 1);
   while (1)
   {
-
-    mftask_terminal(&cmdkeen);
+	mftask_terminal(&cmdkeen);
     mftask_tsensor(&tsensor_cold);
     mftask_boardled();
     mftask_mcp23017(&mcp_io);
-   // mftask_prettylog(&prettylog.pp_modflag);
+    mftask_prettylog(&prettylog.pp_modflag);
     mftask_ina219(&batt_hw);
 
    // mftask_potis(&analogchan);

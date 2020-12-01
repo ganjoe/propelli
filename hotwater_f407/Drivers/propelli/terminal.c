@@ -20,13 +20,14 @@ void mfinit_terminal(TD_TERMINAL* term)
 	modflag_init(&term->mf_cmd, HALTICK, 1);
 	term->callback_len = 40;
 	term->maxArguments = 4;
-	term->buffer_receive_len = 20;
+	term->buffer_receive_len = 64;
 	term->uart_buffer_tx_len = 64;
-	term->huart =huart1;
+	term->huart =&huart1;
 	term->string_rx = malloc(term->buffer_receive_len);
 	term->string_tx = malloc(term->uart_buffer_tx_len);
 	term->sep = (char*)10;
 	term->eoc = (char*)13;
+
 }
 void mftask_terminal(TD_TERMINAL* term)
 	{
@@ -48,26 +49,25 @@ void mftick_terminal(TD_TERMINAL* term)
 
 #define CALLBACK_LEN		40
 //empfangspuffer für uart-dma
-#define TERM_BUFF_RX_LEN 	20
+#define TERM_BUFF_RX_LEN 	40
 int flagTerminal_newTransmission;
 enum    {    kMaxArgs = 4    };
 
-char TerminalCharBufferRx[TERM_BUFF_RX_LEN];
+
 char *strptr;
-typedef struct td_callbacks terminal_callback_struct;
-extern TIM_HandleTypeDef htim1;
+
+
 
 static volatile int fault_vec_write = 0;
-static terminal_callback_struct callbacks[CALLBACK_LEN];
+static TD_TERMINAL_CALLBACKS callbacks[CALLBACK_LEN];
 static int callback_write = 0;
 
 float term_lol_delay(int len)
     {
     int halbaudrate = huart1.Init.BaudRate;
-    float Txmillis = 10000000 * (float) len / (float) halbaudrate;	//transmission time[s]: 10 bit / n baud
+    float Txmillis = 1024 * (float) len / (float) halbaudrate;	//transmission time[s]: 10 bit / n baud
     return Txmillis;
     }
-
 void term_lol_setCallback(const char *command, const char *help,
 	const char *arg_names, void (*cbf)(int argc, const char **argv))
     {
@@ -122,19 +122,18 @@ void term_lol_parse(char *str, TD_TERMINAL* term)
 		}
     if (argc == 0)
 		{
-		term_printf(&cmdkeen, "No command received\n");
+		term_printf(term, "No command received\n");
 		return;
 		}
     if (strcmp(argv[0], "help") == 0)
 	{
-	term_printf(&cmdkeen, "registered commands:\n");
+	term_printf(term, "registered commands:\n");
 
 	for (int i = 0; i < callback_write; i++)
 	    {
-	    //TODO: blocking variante von ..print mit dma, flag, berechnete transferzeit
-	    term_printf(&cmdkeen, callbacks[i].command);
-	    term_printf(&cmdkeen, " help: ");
-	    term_printf(&cmdkeen, callbacks[i].help);
+	    term_printf(term, callbacks[i].command);
+	    term_printf(term, " help: ");
+	    term_printf(term, callbacks[i].help);
 
 	    }
 
@@ -149,47 +148,31 @@ void term_lol_parse(char *str, TD_TERMINAL* term)
 	    }
 	}
     }
-void term_lol_vprint(const char *fmt, va_list argp)
+void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL term)
     {
-    static char string[120]={0};
-    if (flagTerminal_newTransmission)
-	{
-	if (0 < vsprintf(string, fmt, argp))
+
+	if (0 < vsprintf(term.string_tx, fmt, argp))
 	    {
-		//term_lol_writebuff(term);
-	    int len = strlen(string);
+	    term.uart_buffer_tx_len = strlen(term.string_tx);
 	    float del;
-	    //HAL_UART_Transmit(&huart1, (uint8_t*)string, len,199);
-	    //HAL_UART_Transmit_IT(&huart1, (uint8_t*)string, len);
-	    flagTerminal_newTransmission = false;
-	    HAL_UART_Transmit_DMA(&huart1, (uint8_t*) string, len);
-	    //TODO: mit mf delay austauschen
-	    del = term_lol_delay(len);
-	    //HAL_Delay(del);
-	    //delay_us(&delay, (uint32_t)del);
-
-
+	    //TODO: auf abschluss vorhandener übertragung warten
+	    HAL_UART_Transmit_DMA(term.huart, (uint8_t*) term.string_tx, term.uart_buffer_tx_len);
+	    del = term_lol_delay(term.uart_buffer_tx_len)*1000;
+	    //term_lol_txtime_us		(TD_TERMINAL* term);
+	    delay_us(&delay, (uint32_t)del);
 	    }
-	}
+
     }
-void term_printf(TD_TERMINAL* term, const char *fmt, ...) // custom printf() function
+void term_printf(TD_TERMINAL* term, const char *fmt, ...)
     {
     //http://openbook.rheinwerk-verlag.de/c_von_a_bis_z/018_c_stdarg_h_001.htm
     va_list argp;
     va_start(argp, fmt);
-    term_lol_vprint(fmt, argp);
-    //term_lol_writebuff
+    term_lol_vprint(fmt, argp, *term);
     va_end(argp);
     }
 //TODO: für utils_ formalisieren
-int term_lol_searchstring	(TD_TERMINAL* term)
-    {
-	char* charptr;
 
-	charptr = memchr(term->string_rx, (int)term->eoc, term->TerminalBufferItr);
-
-	return *charptr;
-    }
 void term_lol_writebuff		(TD_TERMINAL* term)
 	{
 	int strlen;
@@ -199,7 +182,6 @@ void term_lol_writebuff		(TD_TERMINAL* term)
 int  term_lol_readbyte		(TD_TERMINAL* term)
 {
 	//isr scharfschalten für byteempfang
-
 	HAL_UART_Receive_DMA(&huart1, (uint8_t*)&term->byte_received, 1);
 }
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
