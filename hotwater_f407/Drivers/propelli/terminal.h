@@ -53,7 +53,7 @@ void mftask_terminal(TD_TERMINAL* term);
 //wrapper für sprintf. erzeugt strings zum senden
 void term_printf(TD_TERMINAL* term, const char *fmt, ...);
 //cmd-string separieren und callbacks aufrufen
-void term_lol_parse(char *str, TD_TERMINAL* term);
+void term_lol_parse(TD_TERMINAL* term);
 //funktionsnamen und deren namensstrings mit funktionspointern verknüpfen
 //TODO:
 void term_lol_setCallback	(const char* command,

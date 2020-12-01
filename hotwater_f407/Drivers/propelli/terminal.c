@@ -2,8 +2,7 @@
  * terminal.c
  *
  *  Created on: Jul 7, 2020
- *      Author: danie
- *      vesc fork
+ *      Author: daniel
  *
  */
 
@@ -14,6 +13,9 @@
 
 // TODO: formalisieren und aufräumen
 
+#define CALLBACK_LEN		40
+static TD_TERMINAL_CALLBACKS callbacks[CALLBACK_LEN];
+static int callback_write = 0;
 
 void mfinit_terminal(TD_TERMINAL* term)
 {
@@ -25,7 +27,7 @@ void mfinit_terminal(TD_TERMINAL* term)
 	term->huart =&huart1;
 	term->string_rx = malloc(term->buffer_receive_len);
 	term->string_tx = malloc(term->uart_buffer_tx_len);
-	term->sep = (char*)10;
+	term->sep  = strdup(" ");
 	term->eoc = (char*)13;
 
 }
@@ -44,23 +46,21 @@ void mftask_terminal(TD_TERMINAL* term)
 	}
 void mftick_terminal(TD_TERMINAL* term)
 {
-	modflag_upd_regular(&term->mf_cmd);
+modflag_upd_regular(&term->mf_cmd);
 }
+void term_printf(TD_TERMINAL* term, const char *fmt, ...)
+    {
+    //http://openbook.rheinwerk-verlag.de/c_von_a_bis_z/018_c_stdarg_h_001.htm
+    va_list argp;
+    va_start(argp, fmt);
+    term_lol_vprint(fmt, argp, *term);
+    va_end(argp);
+    }
 
-#define CALLBACK_LEN		40
 //empfangspuffer für uart-dma
-#define TERM_BUFF_RX_LEN 	40
-int flagTerminal_newTransmission;
-enum    {    kMaxArgs = 4    };
-
-
-char *strptr;
 
 
 
-static volatile int fault_vec_write = 0;
-static TD_TERMINAL_CALLBACKS callbacks[CALLBACK_LEN];
-static int callback_write = 0;
 
 float term_lol_delay(int len)
     {
@@ -108,17 +108,18 @@ void term_lol_setCallback(const char *command, const char *help,
 	}
     }
 
-void term_lol_parse(char *str, TD_TERMINAL* term)
+void term_lol_parse(TD_TERMINAL* term)
     {
     int argc = 0;
     char *argv[term->maxArguments];
     //cmd ist der erste stringabschnitt von links
-    char *p2 = strtok(str, " ");
-    //argumente separieren, durchzählen, und in ptr-array speichern
+    char *p2 = strtok(term->string_rx, term->sep);
+    //argumente separieren, und in ptr-array speichern
     while (p2 && argc < term->maxArguments)
 		{
 		argv[argc++] = p2;
-		p2 = strtok(0, " ");
+		//sachen passieren
+		p2 = strtok(0,term->sep);
 		}
     if (argc == 0)
 		{
@@ -150,7 +151,6 @@ void term_lol_parse(char *str, TD_TERMINAL* term)
     }
 void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL term)
     {
-
 	if (0 < vsprintf(term.string_tx, fmt, argp))
 	    {
 	    term.uart_buffer_tx_len = strlen(term.string_tx);
@@ -158,20 +158,11 @@ void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL term)
 	    //TODO: auf abschluss vorhandener übertragung warten
 	    HAL_UART_Transmit_DMA(term.huart, (uint8_t*) term.string_tx, term.uart_buffer_tx_len);
 	    del = term_lol_delay(term.uart_buffer_tx_len)*1000;
-	    //term_lol_txtime_us		(TD_TERMINAL* term);
 	    delay_us(&delay, (uint32_t)del);
 	    }
 
     }
-void term_printf(TD_TERMINAL* term, const char *fmt, ...)
-    {
-    //http://openbook.rheinwerk-verlag.de/c_von_a_bis_z/018_c_stdarg_h_001.htm
-    va_list argp;
-    va_start(argp, fmt);
-    term_lol_vprint(fmt, argp, *term);
-    va_end(argp);
-    }
-//TODO: für utils_ formalisieren
+
 
 void term_lol_writebuff		(TD_TERMINAL* term)
 	{
@@ -200,7 +191,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 	if (cmdkeen.byte_received == 13)
 		{
-		term_lol_parse(cmdkeen.string_rx, &cmdkeen);
+		term_lol_parse(&cmdkeen);
 		cmdkeen.TerminalBufferItr = 0;
 		}
 	term_lol_readbyte(&cmdkeen);

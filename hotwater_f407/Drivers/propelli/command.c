@@ -129,7 +129,7 @@ void setdate(int argc, const char **argv)
 			char buffer[]="\nrtc sagt: nein\n";
 			pl_rtc_timestring(buffer, DATEMONO);
 			term_printf(&cmdkeen, buffer);
-			pl_lol_newlog(&filelog);
+			//pl_lol_newlog(&filelog);
 			}
 		}
     else
@@ -156,7 +156,7 @@ void settime(int argc, const char **argv)
     	    term_printf(&cmdkeen, "\nrange ist 23 59 59\n");
     	else
 	    {
-
+    	term_printf(&cmdkeen, "\rsettime\r");
 	    time.Hours = h;
 	    time.Minutes = m;
 	    time.Seconds = s;
@@ -165,7 +165,7 @@ void settime(int argc, const char **argv)
 	    char buffer[]="\nrtc sagt: nein\n";
 	    pl_rtc_timestring(buffer, TIMEMONO);
 	    term_printf(&cmdkeen, buffer);
-	    pl_lol_newlog(&filelog);
+	    //pl_lol_newlog(&filelog);
 	    }
 	}
 	else
