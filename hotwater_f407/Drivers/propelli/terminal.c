@@ -60,8 +60,6 @@ void term_printf(TD_TERMINAL* term, const char *fmt, ...)
 //empfangspuffer für uart-dma
 
 
-
-
 float term_lol_delay(int len)
     {
     int halbaudrate = huart1.Init.BaudRate;
@@ -163,7 +161,6 @@ void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL term)
 
     }
 
-
 void term_lol_writebuff		(TD_TERMINAL* term)
 	{
 	int strlen;
@@ -197,9 +194,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	term_lol_readbyte(&cmdkeen);
 
     }
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
-    {
 
-    }
 
 TD_TERMINAL cmdkeen;
