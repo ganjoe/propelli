@@ -17,7 +17,6 @@
   */
 
 #include "fatfs.h"
-#include "string.h"
 
 uint8_t retSD;    /* Return value for SD */
 char SDPath[4];   /* SD logical drive path */
