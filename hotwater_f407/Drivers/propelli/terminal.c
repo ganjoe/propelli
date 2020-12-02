@@ -13,7 +13,7 @@
 
 // TODO: formalisieren und aufräumen
 
-#define CALLBACK_LEN		40
+
 static TD_TERMINAL_CALLBACKS callbacks[CALLBACK_LEN];
 static int callback_write = 0;
 
@@ -23,7 +23,7 @@ void mfinit_terminal(TD_TERMINAL* term)
 	term->callback_len = 40;
 	term->maxArguments = 4;
 	term->uart_buffer_rx_len = 32;
-	term->uart_buffer_tx_len = 256;
+	term->uart_buffer_tx_len = 128;
 	term->string_rx = calloc(term->uart_buffer_rx_len, 1);
 	term->string_tx = calloc(term->uart_buffer_tx_len, 1);
 	term->sep  = strdup(" ");
@@ -146,12 +146,14 @@ void term_lol_parse(TD_TERMINAL* term)
 	    }
 	}
     }
+
 void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL* term)
     {
 	HAL_StatusTypeDef stat;
 	int txlen = strlen(fmt);
-	utils_truncate_int_ptr(&txlen, (int*)1, (int)term->uart_buffer_tx_len);
-	uint8_t* localbuff = calloc(txlen,1);
+	utils_truncate_number_int(&txlen, 1,term->uart_buffer_tx_len);
+	uint8_t* localbuff = calloc(term->uart_buffer_tx_len,1);
+	//uint8_t localbuff[txlen];
 
 	if (0 < vsprintf(localbuff, fmt, argp))
 	    {
@@ -160,9 +162,9 @@ void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL* term)
 	    stat = HAL_UART_Transmit_DMA(&huart1, localbuff, txlen);
 	    del = term_lol_delay(txlen)*1000;
 	    delay_us(&delay, (uint32_t)del);
-	    free (localbuff);
-	    }
 
+	    }
+	free (localbuff);
     }
 
 void term_lol_writebuff		(TD_TERMINAL* term)
@@ -187,7 +189,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	else
 		{
 		btTerm.TerminalBufferItr=0;
-		HAL_Delay(100);
+		//delay_us(&delay,100);
 		}
 
 	if (btTerm.byte_received == 13)

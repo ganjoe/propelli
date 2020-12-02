@@ -11,50 +11,41 @@
 #include "utils.h"
 
 TD_TERMFILE initcmd;
-
+/* ließt terminal commandos aus textdatei. im sinne einer init-batch*/
 void init_cmdfile(TD_TERMFILE* cmd)
 {
 	cmd->maxarguments = 3;
 	cmd->maxchars = 32;
 	cmd->maxlines = 0xF;
-	strcpy(cmd->cr, "+");
-	strcpy(cmd->ef, "#");
-	strcpy(cmd->sep, "_");
 	char *filename = strdup("InitCommBatch.eeprom");
-
-	cmd->linebuffer = malloc(cmd->maxchars);
-	cmd->filename 	= malloc(strlen(filename));
+	char *strcmd;
+	cmd->linebuffer = calloc(cmd->maxchars,1);
+	cmd->filename 	= calloc(strlen(filename),1);
 	strcpy(cmd->filename, filename);
 
-	cmdfile_lol_open_create(cmd);
+	FRESULT stat = 	cmdfile_lol_open_create(cmd);
 
-	char *strcmd;
+	if (stat == FR_NO_FILE)
+	{
 	strcmd = strdup("setdate 29 11 20\r");	cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
 	strcmd = strdup("settime 20 08 00\r");	cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
-	strcmd = strdup("nlog\r");				cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
 	strcmd = strdup("readpin 0 1\r");		cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
 	strcmd = strdup("readpin 1 1\r");		cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
 	strcmd = strdup("readpin 2 1\r");		cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
-
 	strcmd = strdup("0");
-/*
-	cmdfile_lol_readln(&initcmd, strcmd, 0);
-	terminal_process_string(strcmd);
-	cmdfile_lol_readln(&initcmd, strcmd, 1);
-	terminal_process_string(strcmd);
-	cmdfile_lol_readln(&initcmd, strcmd, 2);
-	terminal_process_string(strcmd);
-	cmdfile_lol_readln(&initcmd, strcmd, 3);
-	terminal_process_string(strcmd);
-	cmdfile_lol_readln(&initcmd, strcmd, 4);
-	terminal_process_string(strcmd);
-	cmdfile_lol_readln(&initcmd, strcmd, 5);
-	terminal_process_string(strcmd);
-	*/
+	stat = FR_OK;
+	}
+	if (stat == FR_OK)
+	{
+		//TODO: unheil abwenden
+		cmd->cmdcounter=5;
+	cmdfile_do_cmds(&initcmd);
+	}
 
 }
 
-void cmdfile_lol_open_create(TD_TERMFILE* initcmd)
+
+FRESULT cmdfile_lol_open_create(TD_TERMFILE* initcmd)
 {
 	FRESULT stat;
 	stat = f_open(&initcmd->SDFile, initcmd->filename, FA_READ | FA_WRITE  );
@@ -84,6 +75,7 @@ void cmdfile_lol_open_create(TD_TERMFILE* initcmd)
 		}break;
 
 	}
+	return stat;
 }
 /*
 https://c-for-dummies.com/blog/?p=1769
@@ -98,18 +90,42 @@ similar to the strtok() function.
 Like strtok(), the strsep() function returns a pointer to the first string yanked out of **strngp.
 Unlike strtok(), however, the function is called with the same arguments over and over until it returns a NULL pointer.
  */
-void cmdfile_do_cmd	(TD_TERMFILE* initcmd)
+void cmdfile_do_cmds	(TD_TERMFILE* initcmd)
 	{
-	int itr = initcmd->cmdcounter;
-	if (initcmd->flag_initdone = true)
+	if (initcmd->flag_initdone == true)
 		{
-
-
+		for (int var = 0; var < initcmd->cmdcounter; ++var)
+			{
+			cmdfile_lol_readln(initcmd, initcmd->linebuffer, var);
+			//termfile_lol_parse(initcmd->linebuffer, initcmd->maxarguments);
+			memcpy(btTerm.string_rx, initcmd->linebuffer, strlen(initcmd->linebuffer));
+			term_lol_parse(&btTerm);
+			}
 		}
-
-
-
 	}
+static int callback_write = 0;
+void termfile_lol_parse(/*cmd parser typedef*/char* buffer, int maxArguments )
+    {
+    int argc = 0;
+    char *argv[maxArguments];
+    //cmd ist der erste stringabschnitt von links
+    char *p2 = strtok(buffer, " ");
+    //argumente separieren, und in ptr-array speichern
+    while (p2 && argc < maxArguments)
+		{
+		argv[argc++] = p2;
+		//sachen passieren
+		p2 = strtok(0," ");
+		}
+    for (int i = 0; i < callback_write; i++)
+		{
+    	if (callbacks[i].cbf != 0 && strcmp(argv[0], callbacks[i].command) == 0)
+	    	{
+    		callbacks[i].cbf(argc, (const char**) argv);
+    		return;
+	    	}
+		}
+    }
 
 FRESULT cmdfile_lol_readln(TD_TERMFILE* initcmd, char* buffer, int linenr)
 {
@@ -122,7 +138,6 @@ FRESULT cmdfile_lol_readln(TD_TERMFILE* initcmd, char* buffer, int linenr)
 	stat = f_close(&SDFile);
 	return stat;
 }
-
 FRESULT cmdfile_lol_writeln(TD_TERMFILE* initcmd, char* buffer, int linenr)
 {
 	FRESULT stat;

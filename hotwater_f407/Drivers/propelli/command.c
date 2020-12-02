@@ -56,7 +56,7 @@ void writepin(int argc, const char **argv)
 
 		mcp_PinMode(&mcp_io, OUTPUT, d);
 		mcp_WritePin(&mcp_io, d, e);
-		term_printf(&btTerm, "\rcmd writepin:pinnr %d state %d\r", &d, &e);
+		term_printf(&btTerm, "\rcmd writepin:pinnr %d state %d\r", d, e);
 		}
     }
 void readpin(int argc, const char **argv)
@@ -228,6 +228,6 @@ void selterm(int argc, const char **argv)
 	{
 	sscanf(argv[1], "%f", &f);
 	modflag_init(&prettylog.pp_modflag, HALTICK, f);
-	term_printf(&btTerm, "\rcmd selterm ok\r");
+	term_printf(&btTerm, "\rcmd selterm:%3.1fHz ok\r", f);
 	}
 }

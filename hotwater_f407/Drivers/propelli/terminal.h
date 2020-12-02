@@ -8,6 +8,8 @@
 #ifndef INC_TERMINAL_H_
 #define INC_TERMINAL_H_
 
+#define CALLBACK_LEN		40
+
 #include "datatypes.h"
 #include "datatypes_tasks.h"
 #include "main.h"
@@ -71,5 +73,6 @@ void term_lol_writebuff		(TD_TERMINAL* term);
 
 void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL* term);
 extern TD_TERMINAL btTerm;
+static TD_TERMINAL_CALLBACKS callbacks[CALLBACK_LEN];
 
 #endif /* INC_TERMINAL_H_ */

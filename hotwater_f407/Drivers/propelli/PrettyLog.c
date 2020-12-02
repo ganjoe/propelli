@@ -103,7 +103,7 @@ void mfinit_prettylog(TD_prettylog *prettylog)
     {
     FRESULT fres;
     modflag_init(&prettylog->pp_modflag, HALTICK, 1);
-    fres = filelog_init(&filelog);
+    //fres = filelog_init(&filelog);
 
     }
 void mftick_prettylog(TD_prettylog *prettylog)
@@ -130,7 +130,7 @@ void mftask_prettylog(modflag *thismf)
 		strncat		(buffer,"\r",1);
 		strcpy		(filelog.pbuffer.lastLine, buffer);
 
-		FRESULT err = pl_lol_update	(&filelog);
+		//FRESULT err = pl_lol_update	(&filelog);
 
 		int len = strlen(filelog.pbuffer.lastLine);
 		term_printf(&btTerm, buffer);

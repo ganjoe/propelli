@@ -120,14 +120,13 @@ int main(void)
   /* USER CODE BEGIN 2 */
   //als erstes für uart
   delay_init(&delay, &htim2);
-  //mfinit_prettylog(&prettylog);
+  //als zweites für meldung
   mfinit_terminal(&btTerm);
+  //als drittes für init commands
   Command_init();
-  //init_cmdfile nach command_ini
+   //init_cmdfile nach command_ini
   init_cmdfile(&initcmd);
-
-
-
+  mfinit_prettylog(&prettylog);
 
   mfinit_boardled();
  // mfinit_mcp23017();
@@ -157,7 +156,7 @@ int main(void)
     mftask_boardled();
 
     //mftask_mcp23017(&mcp_io);
-    //mftask_prettylog(&prettylog.pp_modflag);
+    mftask_prettylog(&prettylog.pp_modflag);
    // mftask_ina219(&batt_hw);
 
 

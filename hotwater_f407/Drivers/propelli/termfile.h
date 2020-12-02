@@ -32,7 +32,9 @@ typedef struct
 TD_TERMFILE;
 
 void init_cmdfile(TD_TERMFILE* initcmd);
-void cmdfile_lol_open_create(TD_TERMFILE* initcmd);
+FRESULT cmdfile_lol_open_create(TD_TERMFILE* initcmd);
+void termfile_lol_parse(/*cmd parser typedef*/char* buffer, int maxArguments );
+void cmdfile_do_cmds	(TD_TERMFILE* initcmd);
 FRESULT cmdfile_lol_readln(TD_TERMFILE* initcmd, char* buffer, int linenr);
 FRESULT cmdfile_lol_writeln(TD_TERMFILE* initcmd, char* buffer, int linenr);
 extern TD_TERMFILE initcmd;
