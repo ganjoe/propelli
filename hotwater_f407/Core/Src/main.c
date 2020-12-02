@@ -124,10 +124,17 @@ int main(void)
   mfinit_terminal(&btTerm);
   Command_init();
   //init_cmdfile nach command_init
+<<<<<<< HEAD
   init_cmdfile(&initcmd);
 
 
 
+=======
+  //init_cmdfile(&initcmd);
+  mfinit_terminal(&cmdkeen);
+  HAL_TIM_Base_Start_IT(&htim6);
+  delay_init(&delay, &htim2);
+>>>>>>> branch 'master' of https://github.com/ganjoe/propelli/
   mfinit_boardled();
  // mfinit_mcp23017();
  // mfinit_poti(&analogchan);
@@ -155,9 +162,15 @@ int main(void)
    // mftask_tsensor(&tsensor_cold);
     mftask_boardled();
 
+<<<<<<< HEAD
     //mftask_mcp23017(&mcp_io);
     //mftask_prettylog(&prettylog.pp_modflag);
    // mftask_ina219(&batt_hw);
+=======
+    mftask_mcp23017(&mcp_io);
+    mftask_prettylog(&prettylog.pp_modflag);
+    mftask_ina219(&batt_hw);
+>>>>>>> branch 'master' of https://github.com/ganjoe/propelli/
 
    // mftask_potis(&analogchan);
     // mftask_tsensor(&tsensor_hot);

@@ -128,8 +128,13 @@ void setdate(int argc, const char **argv)
 			HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
 			char buffer[]="\nrtc sagt: nein\n";
 			pl_rtc_timestring(buffer, DATEMONO);
+<<<<<<< HEAD
 			term_printf(&btTerm, buffer);
 			//pl_lol_newlog(&filelog);
+=======
+			term_printf(&cmdkeen, buffer);
+			pl_lol_newlog(&filelog);
+>>>>>>> branch 'master' of https://github.com/ganjoe/propelli/
 			}
 		}
     else
@@ -164,8 +169,13 @@ void settime(int argc, const char **argv)
 	    HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
 	    char buffer[]="\nrtc sagt: nein\n";
 	    pl_rtc_timestring(buffer, TIMEMONO);
+<<<<<<< HEAD
 	    term_printf(&btTerm, buffer);
 	    //pl_lol_newlog(&filelog);
+=======
+	    term_printf(&cmdkeen, buffer);
+	    pl_lol_newlog(&filelog);
+>>>>>>> branch 'master' of https://github.com/ganjoe/propelli/
 	    }
 	}
 	else
@@ -174,9 +184,8 @@ void settime(int argc, const char **argv)
 
 void nlogn(int argc, const char **argv)
     {
-	if (argc == 2)
+	if (argc == 3)
 		{
-		strcpy(filelog.sdinfo.Filename, argv[1]);
 		pl_lol_newlogname(&filelog);
 		term_printf(&btTerm, "\rcmd nlogn ok\r");
 		term_printf(&btTerm, filelog.sdinfo.Filename);
