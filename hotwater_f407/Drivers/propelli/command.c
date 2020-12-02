@@ -129,7 +129,7 @@ void setdate(int argc, const char **argv)
 			char buffer[]="\nrtc sagt: nein\n";
 			pl_rtc_timestring(buffer, DATEMONO);
 			term_printf(&cmdkeen, buffer);
-			//pl_lol_newlog(&filelog);
+			pl_lol_newlog(&filelog);
 			}
 		}
     else
@@ -165,7 +165,7 @@ void settime(int argc, const char **argv)
 	    char buffer[]="\nrtc sagt: nein\n";
 	    pl_rtc_timestring(buffer, TIMEMONO);
 	    term_printf(&cmdkeen, buffer);
-	    //pl_lol_newlog(&filelog);
+	    pl_lol_newlog(&filelog);
 	    }
 	}
 	else
@@ -174,9 +174,8 @@ void settime(int argc, const char **argv)
 
 void nlogn(int argc, const char **argv)
     {
-	if (argc == 2)
+	if (argc == 3)
 		{
-		strcpy(filelog.sdinfo.Filename, argv[1]);
 		pl_lol_newlogname(&filelog);
 		term_printf(&cmdkeen, "\rcmd nlogn ok\r");
 		term_printf(&cmdkeen, filelog.sdinfo.Filename);

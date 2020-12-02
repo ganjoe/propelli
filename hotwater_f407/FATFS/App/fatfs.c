@@ -24,7 +24,7 @@ FATFS SDFatFS;    /* File system object for SD logical drive */
 FIL SDFile;       /* File object for SD */
 
 /* USER CODE BEGIN Variables */
-TD_fatlog filelog, fileinit;
+TD_fatlog filelog;
 /* USER CODE END Variables */
 
 void MX_FATFS_Init(void)
@@ -127,6 +127,7 @@ FRESULT pl_lol_update		(TD_fatlog *fatlog)
 FRESULT filelog_init		(TD_fatlog *fatlog)
 {
 	pl_rtc_timestring(fatlog->sdinfo.Filename, 1);
+
 	//prettylog->mf_prettylog.init_done = 1;
 
 	fatlog->pbuffer.maxchars = 120;
@@ -150,12 +151,8 @@ FRESULT filelog_init		(TD_fatlog *fatlog)
 
 FRESULT	pl_lol_newlog		(TD_fatlog *log)
 {
-	FRESULT err;
-	pl_rtc_timestring	(log->sdinfo.Filename, 1);
-	err=pl_lol_writeheader	(log);
-	log->pbuffer.pos_y = 0;
-	log->pbuffer.filecount +=1;
-	return err;
+	pl_rtc_timestring(&filelog, 1);
+	pl_lol_writeheader(&filelog);
 }
 FRESULT	pl_lol_newlogname	(TD_fatlog *log)
 {
