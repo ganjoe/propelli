@@ -48,8 +48,8 @@ typedef struct
 	//int Lines, Cols;
 
 	int pos_x, pos_y, filecount;
-	UINT bytesWrote;
-	int maxlines, maxchars;
+	UINT bytesWrote, maxlines;
+	int maxchars;
 	//TODO: dynamisch
 	char firstLine [120];
 	char lastLine [120];
