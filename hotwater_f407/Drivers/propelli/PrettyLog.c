@@ -116,17 +116,17 @@ void mftask_prettylog(modflag *thismf)
 		{
 		thismf->repeat = modflag_tickdiff(thismf);
 		char buffer[80]={0};
-		db.names=DATE; 		pl_ppValues( buffer);
-		db.names=TIME;		pl_ppValues( buffer);
+		db.names=DATE; 			pl_ppValues( buffer);
+		db.names=TIME;			pl_ppValues( buffer);
 		//db.names=MCUVOLT;   	pl_ppValues( buffer);
 		db.names=BATTHWVOLT;	pl_ppValues( buffer);
 		db.names=BATTHWCURR;	pl_ppValues( buffer);
-		db.names=BATTHWPWR;	pl_ppValues( buffer);
+		db.names=BATTHWPWR;		pl_ppValues( buffer);
 		//db.names=TEMPMCU;   	pl_ppValues( buffer);
 		db.names=TEMPCOLD;  	pl_ppValues( buffer);
 		db.names=TEMPHOT;   	pl_ppValues( buffer);
-		db.names=STATUS;	pl_ppValues( buffer);
-		db.names=LOGLINES;	pl_ppValues( buffer);
+		db.names=STATUS;		pl_ppValues( buffer);
+		db.names=LOGLINES;		pl_ppValues( buffer);
 		strncat		(buffer,"\r",1);
 		strcpy		(filelog.pbuffer.lastLine, buffer);
 
