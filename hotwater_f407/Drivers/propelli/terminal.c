@@ -22,11 +22,10 @@ void mfinit_terminal(TD_TERMINAL* term)
 	modflag_init(&term->mf_cmd, HALTICK, 1);
 	term->callback_len = 40;
 	term->maxArguments = 4;
-	term->buffer_receive_len = 64;
-	term->uart_buffer_tx_len = 64;
-	term->huart =&huart1;
-	term->string_rx = malloc(term->buffer_receive_len);
-	term->string_tx = malloc(term->uart_buffer_tx_len);
+	term->uart_buffer_rx_len = 32;
+	term->uart_buffer_tx_len = 256;
+	term->string_rx = calloc(term->uart_buffer_rx_len, 1);
+	term->string_tx = calloc(term->uart_buffer_tx_len, 1);
 	term->sep  = strdup(" ");
 	term->eoc = (char*)13;
 
@@ -37,7 +36,7 @@ void mftask_terminal(TD_TERMINAL* term)
 		{
     	term->mf_cmd.repeat = modflag_tickdiff(&term->mf_cmd);
 
-		term_lol_readbyte(&cmdkeen);
+		term_lol_readbyte(&btTerm);
 
 		term->mf_cmd.duration = modflag_tickdiff(&term->mf_cmd);
 		term->mf_cmd.callcount++;
@@ -48,12 +47,12 @@ void mftick_terminal(TD_TERMINAL* term)
 {
 modflag_upd_regular(&term->mf_cmd);
 }
-void term_printf(TD_TERMINAL* term, const char *fmt, ...)
+void term_printf	(TD_TERMINAL* term, const char *fmt, ...)
     {
     //http://openbook.rheinwerk-verlag.de/c_von_a_bis_z/018_c_stdarg_h_001.htm
     va_list argp;
     va_start(argp, fmt);
-    term_lol_vprint(fmt, argp, *term);
+    term_lol_vprint(fmt, argp, term);
     va_end(argp);
     }
 
@@ -147,16 +146,21 @@ void term_lol_parse(TD_TERMINAL* term)
 	    }
 	}
     }
-void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL term)
+void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL* term)
     {
-	if (0 < vsprintf(term.string_tx, fmt, argp))
+	HAL_StatusTypeDef stat;
+	int txlen = strlen(fmt);
+	utils_truncate_int_ptr(&txlen, (int*)1, (int)term->uart_buffer_tx_len);
+	uint8_t* localbuff = calloc(txlen,1);
+
+	if (0 < vsprintf(localbuff, fmt, argp))
 	    {
-	    term.uart_buffer_tx_len = strlen(term.string_tx);
 	    float del;
 	    //TODO: auf abschluss vorhandener übertragung warten
-	    HAL_UART_Transmit_DMA(term.huart, (uint8_t*) term.string_tx, term.uart_buffer_tx_len);
-	    del = term_lol_delay(term.uart_buffer_tx_len)*1000;
+	    stat = HAL_UART_Transmit_DMA(&huart1, localbuff, txlen);
+	    del = term_lol_delay(txlen)*1000;
 	    delay_us(&delay, (uint32_t)del);
+	    free (localbuff);
 	    }
 
     }
@@ -174,26 +178,24 @@ int  term_lol_readbyte		(TD_TERMINAL* term)
 }
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     {
-    cmdkeen.string_rx[cmdkeen.TerminalBufferItr] = cmdkeen.byte_received;
+    btTerm.string_rx[btTerm.TerminalBufferItr] = btTerm.byte_received;
 
-	if (cmdkeen.TerminalBufferItr < cmdkeen.buffer_receive_len)
+	if (btTerm.TerminalBufferItr < btTerm.uart_buffer_rx_len)
 		{
-		cmdkeen.TerminalBufferItr++	;
+		btTerm.TerminalBufferItr++	;
 		}
 	else
 		{
-		cmdkeen.TerminalBufferItr=0;
+		btTerm.TerminalBufferItr=0;
 		HAL_Delay(100);
 		}
 
-	if (cmdkeen.byte_received == 13)
+	if (btTerm.byte_received == 13)
 		{
-		term_lol_parse(&cmdkeen);
-		cmdkeen.TerminalBufferItr = 0;
+		term_lol_parse(&btTerm);
+		btTerm.TerminalBufferItr = 0;
 		}
-	term_lol_readbyte(&cmdkeen);
-
+	term_lol_readbyte(&btTerm);
     }
 
-
-TD_TERMINAL cmdkeen;
+TD_TERMINAL btTerm;

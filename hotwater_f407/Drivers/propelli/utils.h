@@ -13,7 +13,7 @@
 #define FROMBCD(x)      (((x) >> 4) * 10 + ((x) & 0xf))
 
 int utils_truncate_number(float *number, float min, float max);
-
+int utils_truncate_int_ptr(int *number, int *min, int *max);
 int utils_truncate_number_int(int *number, int min, int max);
 
 int utils_truncate_number_long(int64_t *number, int64_t min, int64_t max);

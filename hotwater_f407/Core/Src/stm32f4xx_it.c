@@ -214,7 +214,7 @@ void SysTick_Handler(void)
     mftick_ina219(&batt_hw);
     mftick_tsensor(&tsensor_cold);
     mftick_tsensor(&tsensor_hot);
-    mftick_terminal(&cmdkeen);
+    mftick_terminal(&btTerm);
 
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();

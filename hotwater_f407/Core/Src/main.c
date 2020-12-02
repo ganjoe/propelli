@@ -118,20 +118,22 @@ int main(void)
   MX_ADC1_Init();
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
-  mfinit_prettylog(&prettylog);
-
+  //als erstes für uart
+  delay_init(&delay, &htim2);
+  //mfinit_prettylog(&prettylog);
+  mfinit_terminal(&btTerm);
   Command_init();
   //init_cmdfile nach command_init
   init_cmdfile(&initcmd);
-  mfinit_terminal(&cmdkeen);
-  HAL_TIM_Base_Start_IT(&htim6);
-  delay_init(&delay, &htim2);
+
+
+
   mfinit_boardled();
-  mfinit_mcp23017();
-  mfinit_poti(&analogchan);
-  mfinit_tsensor(&tsensor_cold);
-  mfinit_tsensor(&tsensor_hot);
-  mfinit_ina219(&batt_hw);
+ // mfinit_mcp23017();
+ // mfinit_poti(&analogchan);
+ // mfinit_tsensor(&tsensor_cold);
+ // mfinit_tsensor(&tsensor_hot);
+ // mfinit_ina219(&batt_hw);
 
   tsensor_cold.wire.GPIO_InitStruct.Pin = onewire_Pin;
   tsensor_cold.wire.onewire_port 		= onewire_GPIO_Port;
@@ -140,8 +142,8 @@ int main(void)
 
   oneWire_drivePin(&tsensor_cold.wire, OW_INPUT_HIGHZ);
   oneWire_drivePin(&tsensor_hot.wire, OW_INPUT_HIGHZ);
-
-
+  //schnellen tasktimer starten
+  HAL_TIM_Base_Start_IT(&htim6);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -149,16 +151,16 @@ int main(void)
 
   while (1)
   {
-	mftask_terminal(&cmdkeen);
-    mftask_tsensor(&tsensor_cold);
+	mftask_terminal(&btTerm);
+   // mftask_tsensor(&tsensor_cold);
     mftask_boardled();
 
     //mftask_mcp23017(&mcp_io);
-    mftask_prettylog(&prettylog.pp_modflag);
+    //mftask_prettylog(&prettylog.pp_modflag);
    // mftask_ina219(&batt_hw);
 
    // mftask_potis(&analogchan);
-     mftask_tsensor(&tsensor_hot);
+    // mftask_tsensor(&tsensor_hot);
 
     db.temphot = tsensor_hot.lastTempF;
     db.tempcold = tsensor_cold.lastTempF;

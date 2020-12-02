@@ -25,7 +25,7 @@ TD_TERMINAL_CALLBACKS;
 
 typedef struct
 {
-	int callback_len, buffer_receive_len, maxArguments, TerminalBufferItr;
+	int callback_len, uart_buffer_rx_len, maxArguments, TerminalBufferItr;
 	char byte_received;
 	char* sep;
 	char* eoc;
@@ -36,7 +36,6 @@ typedef struct
 
 	modflag mf_cmd;
 	TD_TERMINAL_CALLBACKS td_callbacks;
-	UART_HandleTypeDef* huart;
 }
 TD_TERMINAL;
 
@@ -70,7 +69,7 @@ int term_lol_txtime_us		(TD_TERMINAL* term);
 int  term_lol_readbyte		(TD_TERMINAL* term);
 void term_lol_writebuff		(TD_TERMINAL* term);
 
-void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL term);
-extern TD_TERMINAL cmdkeen;
+void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL* term);
+extern TD_TERMINAL btTerm;
 
 #endif /* INC_TERMINAL_H_ */

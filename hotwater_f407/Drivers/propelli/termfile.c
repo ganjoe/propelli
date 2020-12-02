@@ -20,14 +20,14 @@ void init_cmdfile(TD_TERMFILE* cmd)
 	strcpy(cmd->cr, "+");
 	strcpy(cmd->ef, "#");
 	strcpy(cmd->sep, "_");
-	char filename[] = "InitCommBatch.eeprom";
+	char *filename = strdup("InitCommBatch.eeprom");
 
 	cmd->linebuffer = malloc(cmd->maxchars);
-	int fnlen = strlen(filename);
-	cmd->filename = malloc(fnlen);
+	cmd->filename 	= malloc(strlen(filename));
 	strcpy(cmd->filename, filename);
 
 	cmdfile_lol_open_create(cmd);
+
 	char *strcmd;
 	strcmd = strdup("setdate 29 11 20\r");	cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
 	strcmd = strdup("settime 20 08 00\r");	cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
@@ -57,7 +57,7 @@ void init_cmdfile(TD_TERMFILE* cmd)
 void cmdfile_lol_open_create(TD_TERMFILE* initcmd)
 {
 	FRESULT stat;
-	stat = f_open(&SDFile, initcmd->filename, FA_READ | FA_WRITE  );
+	stat = f_open(&initcmd->SDFile, initcmd->filename, FA_READ | FA_WRITE  );
 
 	switch (stat)
 	{
@@ -65,19 +65,21 @@ void cmdfile_lol_open_create(TD_TERMFILE* initcmd)
 		dateisystem wird in fatfs.c gemountet */
 		case FR_NO_FILE:
 		{
-		f_open(&SDFile, initcmd->filename, FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
-		f_close(&SDFile);
-		term_printf(&cmdkeen, "/r neue initdatei erstellt/r");
+		f_open(&initcmd->SDFile, initcmd->filename, FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
+		f_close(&initcmd->SDFile);
+		term_printf(&btTerm, "cmdfile_lol_open_create:\rneue initdatei erstellt\r");
 
 		}break;
 		case FR_OK:
 		{
 			initcmd->flag_initdone = true;
-			stat  =	f_close(&SDFile);
+			stat  =	f_close(&initcmd->SDFile);
+			term_printf(&btTerm, "cmdfile_lol_open_create:\r initdatei vorhanden\r");
 		}break;
 
 		default:
 		{
+			term_printf(&btTerm, "cmdfile_lol_open_create:\r Status FATFS != (FR_OK | FR_NO_FILE)\r");
 			initcmd->flag_initdone = false;
 		}break;
 

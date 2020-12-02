@@ -25,7 +25,7 @@ typedef struct
 	char sep[2];
 	char cr[2];
 	char ef[2];
-
+	FIL SDFile;
 	int flag_initdone, cmdcounter;
 
 }

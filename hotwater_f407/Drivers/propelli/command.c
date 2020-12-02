@@ -13,7 +13,7 @@
 #include "PrettyLog.h"
 #include "fatfs.h"
 #include "termfile.h"
-    extern TD_fatlog filelog, fileinit;
+    extern TD_fatlog filelog;
 void Command_init()
     {
         term_lol_setCallback("setword", "\nmcp outlatch\n",
@@ -56,7 +56,7 @@ void writepin(int argc, const char **argv)
 
 		mcp_PinMode(&mcp_io, OUTPUT, d);
 		mcp_WritePin(&mcp_io, d, e);
-		term_printf(&cmdkeen, "\rcmd writepin:pinnr %d state %d\r", &d, &e);
+		term_printf(&btTerm, "\rcmd writepin:pinnr %d state %d\r", &d, &e);
 		}
     }
 void readpin(int argc, const char **argv)
@@ -76,13 +76,13 @@ void readpin(int argc, const char **argv)
 			{
 			mcp_PinMode(&mcp_io, INPUT, d);
 			}
-		term_printf(&cmdkeen, "\rcmd readpin:pinnr %d pullup %d\r", &d, &e);
+		term_printf(&btTerm, "\rcmd readpin:pinnr %d pullup %d\r", &d, &e);
 		}
     }
 void setallin(int argc, const char **argv)
     {
     mcp_set_all_input(&mcp_io);
-    term_printf(&cmdkeen, "\rcmd mcp_set_all_input ok\r");
+    term_printf(&btTerm, "\rcmd mcp_set_all_input ok\r");
 	}
 
 void setword(int argc, const char **argv)
@@ -94,7 +94,7 @@ void setword(int argc, const char **argv)
 	if (e<=0xFFFF)
 	    {
 	    mcp_WriteWord(&mcp_io, e);
-	    term_printf(&cmdkeen, "\rcmd setword: 0x%x ok\r",e);
+	    term_printf(&btTerm, "\rcmd setword: 0x%x ok\r",e);
 	    }
 
 	}
@@ -116,7 +116,7 @@ void setdate(int argc, const char **argv)
     	wparam = utils_truncate_number_int(&y, 20, 65);
     	if (wparam)
     		{
-    		term_printf(&cmdkeen, "\nrange ist 32 12 65\n");
+    		term_printf(&btTerm, "\nrange ist 32 12 65\n");
     		}
     	else
 			{
@@ -128,13 +128,13 @@ void setdate(int argc, const char **argv)
 			HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
 			char buffer[]="\nrtc sagt: nein\n";
 			pl_rtc_timestring(buffer, DATEMONO);
-			term_printf(&cmdkeen, buffer);
+			term_printf(&btTerm, buffer);
 			//pl_lol_newlog(&filelog);
 			}
 		}
     else
 		{
-    	term_printf(&cmdkeen, "\n3 argumente DD MM YY\n");
+    	term_printf(&btTerm, "\n3 argumente DD MM YY\n");
 		}
 
 	}
@@ -153,10 +153,10 @@ void settime(int argc, const char **argv)
     	wparam = utils_truncate_number_int(&m, 0, 59);
     	wparam = utils_truncate_number_int(&s, 0, 59);
     	if (wparam)
-    	    term_printf(&cmdkeen, "\nrange ist 23 59 59\n");
+    	    term_printf(&btTerm, "\nrange ist 23 59 59\n");
     	else
 	    {
-    	term_printf(&cmdkeen, "\rsettime\r");
+    	term_printf(&btTerm, "\rsettime\r");
 	    time.Hours = h;
 	    time.Minutes = m;
 	    time.Seconds = s;
@@ -164,12 +164,12 @@ void settime(int argc, const char **argv)
 	    HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
 	    char buffer[]="\nrtc sagt: nein\n";
 	    pl_rtc_timestring(buffer, TIMEMONO);
-	    term_printf(&cmdkeen, buffer);
+	    term_printf(&btTerm, buffer);
 	    //pl_lol_newlog(&filelog);
 	    }
 	}
 	else
-	    term_printf(&cmdkeen, "\n3 argumente DD MM YY\n");
+	    term_printf(&btTerm, "\n3 argumente DD MM YY\n");
     }
 
 void nlogn(int argc, const char **argv)
@@ -178,8 +178,8 @@ void nlogn(int argc, const char **argv)
 		{
 		strcpy(filelog.sdinfo.Filename, argv[1]);
 		pl_lol_newlogname(&filelog);
-		term_printf(&cmdkeen, "\rcmd nlogn ok\r");
-		term_printf(&cmdkeen, filelog.sdinfo.Filename);
+		term_printf(&btTerm, "\rcmd nlogn ok\r");
+		term_printf(&btTerm, filelog.sdinfo.Filename);
 		}
 
    	}
@@ -189,8 +189,8 @@ void newlog(int argc, const char **argv)
         if (argc == 1)
     	{
             pl_lol_newlog(&filelog);
-            term_printf(&cmdkeen, "\ncmd ok\n");
-            term_printf(&cmdkeen, filelog.sdinfo.Filename);
+            term_printf(&btTerm, "\ncmd ok\n");
+            term_printf(&btTerm, filelog.sdinfo.Filename);
     	    }
 
    	}
@@ -225,6 +225,6 @@ void selterm(int argc, const char **argv)
 	{
 	sscanf(argv[1], "%f", &f);
 	modflag_init(&prettylog.pp_modflag, HALTICK, f);
-	term_printf(&cmdkeen, "\rcmd selterm ok\r");
+	term_printf(&btTerm, "\rcmd selterm ok\r");
 	}
 }
