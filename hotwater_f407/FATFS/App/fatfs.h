@@ -87,7 +87,7 @@ typedef struct
     FRESULT pl_lol_writebuffer_ptr	(TD_fatlog *log);
     FRESULT pl_lol_update		(TD_fatlog *fatlog);
 
-    extern TD_fatlog filelog, fileinit;
+    extern TD_fatlog filelog;
 
 /* USER CODE END Prototypes */
 #ifdef __cplusplus

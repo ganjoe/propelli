@@ -12,7 +12,7 @@
 
 TD_TERMFILE initcmd;
 /* ließt terminal commandos aus textdatei. im sinne einer init-batch*/
-void init_cmdfile(TD_TERMFILE* cmd)
+void 	init_cmdfile(TD_TERMFILE* cmd)
 {
 	cmd->maxarguments = 3;
 	cmd->maxchars = 32;
@@ -24,6 +24,7 @@ void init_cmdfile(TD_TERMFILE* cmd)
 	strcpy(cmd->filename, filename);
 
 	FRESULT stat = 	cmdfile_lol_open_create(cmd);
+	cmd->cmdcounter = 0;
 
 	if (stat == FR_NO_FILE)
 	{
@@ -32,15 +33,17 @@ void init_cmdfile(TD_TERMFILE* cmd)
 	strcmd = strdup("readpin 0 1\r");		cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
 	strcmd = strdup("readpin 1 1\r");		cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
 	strcmd = strdup("readpin 2 1\r");		cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
+	strcmd = strdup("#");
 	strcmd = strdup("0");
 	stat = FR_OK;
 	}
 	if (stat == FR_OK)
 	{
 		//TODO: unheil abwenden
-	cmd->cmdcounter=6;
+
 	cmdfile_do_cmds(&initcmd);
 	}
+	term_printf(&btTerm, "\rinit_cmdfile:\r%d done\r",cmd->cmdcounter);
 
 }
 
@@ -48,20 +51,24 @@ void 	cmdfile_do_cmds			(TD_TERMFILE* initcmd)
 	{
 	if (initcmd->flag_initdone == true)
 		{
-		for (int var = 0; var < initcmd->cmdcounter; ++var)
+		while (initcmd->cmdcounter<initcmd->maxlines)
 			{
-			cmdfile_lol_readln(initcmd, initcmd->linebuffer, var);
-			//termfile_lol_parse(initcmd->linebuffer, initcmd->maxarguments);
+			cmdfile_lol_readln(initcmd, initcmd->linebuffer, initcmd->cmdcounter);
+			if(strchr(initcmd->linebuffer, '#'))
+				{
+				break;
+				}
+			initcmd->cmdcounter++;
 			memcpy(btTerm.string_rx, initcmd->linebuffer, strlen(initcmd->linebuffer));
 			term_lol_parse(&btTerm);
 			}
 		}
 	}
 
-FRESULT cmdfile_lol_open_create(TD_TERMFILE* initcmd)
+FRESULT cmdfile_lol_open_create	(TD_TERMFILE* initcmd)
 {
 	FRESULT stat;
-	stat = f_open(&initcmd->SDFile, initcmd->filename, FA_READ | FA_WRITE  );
+	stat = f_open(&initcmd->InitFIle, initcmd->filename, FA_READ | FA_WRITE  );
 
 	switch (stat)
 	{
@@ -69,15 +76,15 @@ FRESULT cmdfile_lol_open_create(TD_TERMFILE* initcmd)
 		dateisystem wird in fatfs.c gemountet */
 		case FR_NO_FILE:
 		{
-		f_open(&initcmd->SDFile, initcmd->filename, FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
-		f_close(&initcmd->SDFile);
+		f_open(&initcmd->InitFIle, initcmd->filename, FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
+		f_close(&initcmd->InitFIle);
 		term_printf(&btTerm, "cmdfile_lol_open_create:\rneue initdatei erstellt\r");
 
 		}break;
 		case FR_OK:
 		{
 			initcmd->flag_initdone = true;
-			stat  =	f_close(&initcmd->SDFile);
+			stat  =	f_close(&initcmd->InitFIle);
 			term_printf(&btTerm, "cmdfile_lol_open_create:\r initdatei vorhanden\r");
 		}break;
 
@@ -111,13 +118,13 @@ FRESULT cmdfile_lol_writeln		(TD_TERMFILE* initcmd, char* buffer, int linenr)
 
 	bufflen = strlen(buffer);										//zu lange strings werden abgeschnitten gesendet
 	utils_truncate_number_int(&bufflen, 0, initcmd->maxchars);
-	utils_truncate_number_int(&linenr, 0, initcmd->maxlines);		//in der letzten zeile sollte nichts wichtiges stehen
+	utils_truncate_number_int(&linenr, 	0, initcmd->maxlines);		//in der letzten zeile sollte nichts wichtiges stehen
 
-
-	stat = f_open(&SDFile, initcmd->filename, FA_WRITE | FA_READ);
-	stat = f_lseek(&SDFile, linenr * initcmd->maxchars);			// immer ab anfang der zeile schreiben.
-	stat = f_write(&SDFile, buffer, bufflen, &byteswrote);
-	stat = f_close(&SDFile);
+	stat = f_open	(&SDFile, initcmd->filename, FA_WRITE | FA_READ);
+	stat = f_lseek	(&SDFile, linenr * initcmd->maxchars);			// immer ab anfang der zeile schreiben.
+	stat = f_write	(&SDFile, buffer, bufflen, &byteswrote);
+	stat = f_close	(&SDFile);
 
 	return stat;
 }
+

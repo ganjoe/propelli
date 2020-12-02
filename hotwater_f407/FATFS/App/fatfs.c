@@ -25,6 +25,7 @@ FIL SDFile;       /* File object for SD */
 
 /* USER CODE BEGIN Variables */
 TD_fatlog filelog;
+
 /* USER CODE END Variables */
 
 void MX_FATFS_Init(void)
@@ -39,7 +40,6 @@ void MX_FATFS_Init(void)
    fres = 	f_mount(&SDFatFS, SDPath, 1);	//1=sofortmount wenn das dateisystem bereits passt
    fres = 	f_setlabel("HAPPYLOG");
    filelog.sdinfo.notPresent = fres;
-
 
   /* additional user code for init */
   /* USER CODE END Init */
@@ -151,8 +151,8 @@ FRESULT filelog_init		(TD_fatlog *fatlog)
 
 FRESULT	pl_lol_newlog		(TD_fatlog *log)
 {
-	pl_rtc_timestring(&filelog, 1);
-	pl_lol_writeheader(&filelog);
+	pl_rtc_timestring(&log, 1);
+	pl_lol_writeheader(log);
 }
 FRESULT	pl_lol_newlogname	(TD_fatlog *log)
 {

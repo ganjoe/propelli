@@ -17,11 +17,8 @@ typedef struct
 	char* filename;
 	//dateiformat
 	int maxchars, maxlines, maxarguments;
-	//steuerzeichen
-	char sep[2];
-	char cr[2];
-	char ef[2];
-	FIL SDFile;
+
+	FIL InitFIle;
 	int flag_initdone, cmdcounter;
 
 }
