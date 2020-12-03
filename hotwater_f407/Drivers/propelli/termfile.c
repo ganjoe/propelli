@@ -40,11 +40,9 @@ void 	init_cmdfile(TD_TERMFILE* cmd)
 	if (stat == FR_OK)
 	{
 		//TODO: unheil abwenden
-
 	cmdfile_do_cmds(&initcmd);
 	}
-	term_printf(&btTerm, "\rinit_cmdfile:\r%d done\r",cmd->cmdcounter);
-
+	term_printf(&btTerm, "\rinit_cmdfile:\r%d commands done\r",cmd->cmdcounter);
 }
 
 void 	cmdfile_do_cmds			(TD_TERMFILE* initcmd)
@@ -103,10 +101,10 @@ FRESULT cmdfile_lol_readln		(TD_TERMFILE* initcmd, char* buffer, int linenr)
 	utils_truncate_number_int(&linenr, 0, initcmd->maxlines);
 	FRESULT stat;
 	UINT bytesread;
-	stat = f_open(&SDFile, initcmd->filename, FA_READ);
-	stat = f_lseek(&SDFile, linenr * initcmd->maxchars);
-	stat = f_read(&SDFile, buffer, initcmd->maxchars, &bytesread);
-	stat = f_close(&SDFile);
+	stat = f_open(&initcmd->InitFIle, initcmd->filename, FA_READ);
+	stat = f_lseek(&initcmd->InitFIle, linenr * initcmd->maxchars);
+	stat = f_read(&initcmd->InitFIle, buffer, initcmd->maxchars, &bytesread);
+	stat = f_close(&initcmd->InitFIle);
 	return stat;
 }
 
@@ -120,10 +118,10 @@ FRESULT cmdfile_lol_writeln		(TD_TERMFILE* initcmd, char* buffer, int linenr)
 	utils_truncate_number_int(&bufflen, 0, initcmd->maxchars);
 	utils_truncate_number_int(&linenr, 	0, initcmd->maxlines);		//in der letzten zeile sollte nichts wichtiges stehen
 
-	stat = f_open	(&SDFile, initcmd->filename, FA_WRITE | FA_READ);
-	stat = f_lseek	(&SDFile, linenr * initcmd->maxchars);			// immer ab anfang der zeile schreiben.
-	stat = f_write	(&SDFile, buffer, bufflen, &byteswrote);
-	stat = f_close	(&SDFile);
+	stat = f_open	(&initcmd->InitFIle, initcmd->filename, FA_WRITE | FA_READ);
+	stat = f_lseek	(&initcmd->InitFIle, linenr * initcmd->maxchars);			// immer ab anfang der zeile schreiben.
+	stat = f_write	(&initcmd->InitFIle, buffer, bufflen, &byteswrote);
+	stat = f_close	(&initcmd->InitFIle);
 
 	return stat;
 }

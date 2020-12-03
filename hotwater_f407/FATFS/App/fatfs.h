@@ -59,7 +59,7 @@ typedef struct
 
 typedef struct
     {
-	int files, freebyte, totalbyte;
+	int files, freebyte, totalbyte, filenamesize;
 	char *LABEL;
 	char Filename[32];
 	FIL SDFile;

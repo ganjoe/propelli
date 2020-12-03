@@ -40,6 +40,7 @@ void MX_FATFS_Init(void)
    fres = 	f_mount(&SDFatFS, SDPath, 1);	//1=sofortmount wenn das dateisystem bereits passt
    fres = 	f_setlabel("HAPPYLOG");
    filelog.sdinfo.notPresent = fres;
+   filelog.sdinfo.filenamesize = 32;
 
   /* additional user code for init */
   /* USER CODE END Init */
@@ -151,8 +152,10 @@ FRESULT filelog_init		(TD_fatlog *fatlog)
 
 FRESULT	pl_lol_newlog		(TD_fatlog *log)
 {
-	pl_rtc_timestring(&log->sdinfo.Filename, 1);
-	pl_lol_writeheader(log);
+	/*	*/
+	 pl_rtc_timestring(&log->sdinfo.Filename, 1);
+	//pl_lol_writeheader(log);
+	log->pbuffer.pos_y = 0;
 	log->pbuffer.filecount +=1;
 	log->pbuffer.bytesWrote=0;
 
@@ -160,9 +163,10 @@ FRESULT	pl_lol_newlog		(TD_fatlog *log)
 FRESULT	pl_lol_newlogname	(TD_fatlog *log)
 {
 	FRESULT err;
-	err=pl_lol_writeheader	(log);
+	//err=pl_lol_writeheader	(log);
 	log->pbuffer.pos_y = 0;
 	log->pbuffer.filecount +=1;
+	log->pbuffer.bytesWrote=0;
 	return err;
 }
 

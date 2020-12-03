@@ -17,32 +17,32 @@
     extern TD_fatlog filelog;
 void Command_init()
     {
-        term_lol_setCallback("setword", "\nmcp outlatch\n",
-	    "bool\n", setword);
-        term_lol_setCallback("writepin", "\nGPIOA,B Output no Pullup\n",
-	    "bool\n", writepin);
-        term_lol_setCallback("readpin", "\nGPIOA,B Input no Pullup\n",
-	    "bool\n", readpin);
-        term_lol_setCallback("setallin", "\nGPIOA,B Input no Pullup\n",
-	    "bool\n", setallin);
-        term_lol_setCallback("setdate", "\nDD MM YY\n",
-	    "bool\n", setdate);
-        term_lol_setCallback("settime", "\nhh mm ss\n",
-	    "bool\n", settime);
-        term_lol_setCallback("nlogn", "\nfilename[32]\n",
-	    "bool\n", nlogn);
-        term_lol_setCallback("newlog", "\nrtc filename\n",
-	    "bool\n", newlog);
-        term_lol_setCallback("showconf", "\nrtc filename\n",
-	    "bool\n", showconf);
-        term_lol_setCallback("writeconf", "\nrtc filename\n",
-	    "bool\n", writeconf);
-        term_lol_setCallback("readconf", "\nrtc filename\n",
-	    "bool\n", readconf);
-        term_lol_setCallback("selterm", "\nlog upd speed\n",
-	    "bool\n", selterm);
-        term_lol_setCallback("reset", "\nreset mit countdown\n",
-	    "bool\n", reset);
+        term_lol_setCallback("setword", "\rmcp outlatch\r",
+	    "bool\r", setword);
+        term_lol_setCallback("writepin", "\rGPIOA,B Output no Pullup\r",
+	    "bool\r", writepin);
+        term_lol_setCallback("readpin", "\rGPIOA,B Input no Pullup\r",
+	    "bool\r", readpin);
+        term_lol_setCallback("setallin", "\rGPIOA,B Input no Pullup\r",
+	    "bool\r", setallin);
+        term_lol_setCallback("setdate", "\rDD MM YY\r",
+	    "bool\r", setdate);
+        term_lol_setCallback("settime", "\rhh mm ss\r",
+	    "bool\r", settime);
+        term_lol_setCallback("nlogn", "\rfilename[32]\r",
+	    "bool\r", nlogn);
+        term_lol_setCallback("newlog", "\rrtc filename\r",
+	    "bool\r", newlog);
+        term_lol_setCallback("showconf", "\rrtc filename\r",
+	    "bool\r", showconf);
+        term_lol_setCallback("writeconf", "\rrtc filename\r",
+	    "bool\r", writeconf);
+        term_lol_setCallback("readconf", "\rrtc filename\r",
+	    "bool\r", readconf);
+        term_lol_setCallback("selterm", "\rlog upd speed\r",
+	    "bool\r", selterm);
+        term_lol_setCallback("reset", "\rreset mit countdown\r",
+	    "bool\r", reset);
     }
 
 RTC_DateTypeDef date;
@@ -119,7 +119,7 @@ void setdate(int argc, const char **argv)
     	wparam = utils_truncate_number_int(&y, 20, 65);
     	if (wparam)
     		{
-    		term_printf(&btTerm, "\nrange ist 32 12 65\n");
+    		term_printf(&btTerm, "\rrange ist 32 12 65\r");
     		}
     	else
 			{
@@ -129,7 +129,7 @@ void setdate(int argc, const char **argv)
 			date.Year = y;
 			HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
 			HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
-			char buffer[]="\nrtc sagt: nein\n";
+			char buffer[]="\rrtc sagt: nein\r";
 			pl_rtc_timestring(buffer, DATEMONO);
 
 			term_printf(&btTerm, buffer);
@@ -140,7 +140,7 @@ void setdate(int argc, const char **argv)
 		}
     else
 		{
-    	term_printf(&btTerm, "\n3 argumente DD MM YY\n");
+    	term_printf(&btTerm, "\r3 argumente DD MM YY\r");
 		}
 
 	}
@@ -159,7 +159,7 @@ void settime(int argc, const char **argv)
     	wparam = utils_truncate_number_int(&m, 0, 59);
     	wparam = utils_truncate_number_int(&s, 0, 59);
     	if (wparam)
-    	    term_printf(&btTerm, "\nrange ist 23 59 59\n");
+    	    term_printf(&btTerm, "\rrange ist 23 59 59\r");
     	else
 	    {
     	term_printf(&btTerm, "\rsettime\r");
@@ -168,7 +168,7 @@ void settime(int argc, const char **argv)
 	    time.Seconds = s;
 	    HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
 	    HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
-	    char buffer[]="\nrtc sagt: nein\n";
+	    char buffer[]="\rrtc sagt: nein\r";
 	    pl_rtc_timestring(buffer, TIMEMONO);
 	    term_printf(&btTerm, buffer);
 	    //pl_lol_newlog(&filelog);
@@ -176,29 +176,30 @@ void settime(int argc, const char **argv)
 	    }
 	}
 	else
-	    term_printf(&btTerm, "\n3 argumente DD MM YY\n");
+	    term_printf(&btTerm, "\r3 argumente DD MM YY\r");
     }
 
 void nlogn(int argc, const char **argv)
     {
-	if (argc == 3)
+	if (argc == 2)
 		{
+		char* filename = calloc(32,1);
+		//strcpy(filename, argv[1]);
+		filename = strtok(argv[1], "\r");
+		//filelog.sdinfo.Filename = memset()
+		strncpy(filelog.sdinfo.Filename, filename,32);
 		pl_lol_newlogname(&filelog);
 		term_printf(&btTerm, "\rcmd nlogn ok\r");
 		term_printf(&btTerm, filelog.sdinfo.Filename);
+		free (filename);
 		}
 
    	}
 void newlog(int argc, const char **argv)
     {
-
-        if (argc == 1)
-    	{
-            pl_lol_newlog(&filelog);
-            term_printf(&btTerm, "\ncmd ok\n");
-            term_printf(&btTerm, filelog.sdinfo.Filename);
-    	    }
-
+	pl_lol_newlog(&filelog);
+	term_printf(&btTerm, "\rcmd ok\r");
+	//term_printf(&btTerm, filelog.sdinfo.Filename);
    	}
 
 void showconf(int argc, const char **argv)
