@@ -14,8 +14,8 @@
 
 void mfinit_ina219	(TD_INA219 *batt_hw)
     {
-    modflag_init(&batt_hw->mf_ina219, SYSTICK, 90);
-    batt_hw->hi2c = hi2c2;
+    modflag_init(&batt_hw->mf_ina219, SYSTICK, 20);
+    batt_hw->hi2c = hi2c1;
     batt_hw->addr = 0x40 << 1;
     //bits im configbuffer werden nur durch reset gelöscht
 
@@ -23,7 +23,7 @@ void mfinit_ina219	(TD_INA219 *batt_hw)
     batt_hw->max_current = 2;
 
     ina_setup(batt_hw);
-    //measurement setup
+    batt_hw->mf_ina219.init_done=1;
 
     }
 void mftick_ina219	(TD_INA219 *batt_hw)
@@ -55,7 +55,7 @@ void mftask_ina219	(TD_INA219 *batt_hw)
 		batt_hw->mf_ina219.callcount++;
 		batt_hw->mf_ina219.flag = false;
 		}
-    else
+    if(!batt_hw->mf_ina219.init_done)
     	{
     	 batt_hw->pwerbuff = -1;
     	 batt_hw->voltbuff = -1;
@@ -181,8 +181,7 @@ HAL_StatusTypeDef ina_lolreadword 	(TD_INA219 *batt_hw, int16_t *buffer, uint8_t
     /* read_dma oder _it brauchen variablen die auch nach verlassen der funktion beschrieben werden können */
     xfer = HAL_I2C_Mem_Read(&batt_hw->hi2c, batt_hw->addr, reg, 1, dword, 2, HAL_TIMEOUT);
     *buffer = utils_get_word_from_bytes(dword[0], dword[1], 1);
-	HAL_StatusTypeDef err;
-    if(err == !HAL_OK)
+    if(xfer != HAL_OK)
     	{
     	batt_hw->mf_ina219.init_done = 0;
     	}

@@ -16,7 +16,7 @@ void mfinit_mcp23017()
     modflag_init(&mcp_io.mf_mcp23017, SYSTICK, 10);
     mcp_io.hi2c = hi2c1;
     mcp_io.addr = 0x20 << 1;
-    //mcp_set_all_output(&mcp_io);
+
     //mcp_PinMode(&mcp_io, OUTPUT, 1);
     //mcp_io.outlatch = 0xFFFF;	// alle lampen an
     //AddressIOCON.BANK = 0 - default
@@ -54,7 +54,7 @@ void mftask_mcp23017(TD_MCP *io)
 	io->mf_mcp23017.callcount++;
 	io->mf_mcp23017.flag = false;
 	}
-    else
+    if (!io->mf_mcp23017.init_done)
     {
     	db.iostatus=666;
     }

@@ -146,7 +146,6 @@ void term_lol_parse(TD_TERMINAL* term)
 	    }
 	}
     }
-
 void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL* term)
     {
 	HAL_StatusTypeDef stat;

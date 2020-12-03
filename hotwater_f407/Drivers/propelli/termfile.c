@@ -33,7 +33,7 @@ void 	init_cmdfile(TD_TERMFILE* cmd)
 	strcmd = strdup("readpin 0 1\r");		cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
 	strcmd = strdup("readpin 1 1\r");		cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
 	strcmd = strdup("readpin 2 1\r");		cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter++);
-	strcmd = strdup("#");
+	strcmd = strdup("#");					cmdfile_lol_writeln(cmd, strcmd, cmd->cmdcounter);
 	strcmd = strdup("0");
 	stat = FR_OK;
 	}

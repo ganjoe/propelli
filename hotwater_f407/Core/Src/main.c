@@ -133,7 +133,7 @@ int main(void)
  // mfinit_poti(&analogchan);
  // mfinit_tsensor(&tsensor_cold);
  // mfinit_tsensor(&tsensor_hot);
- // mfinit_ina219(&batt_hw);
+  mfinit_ina219(&batt_hw);
 
   tsensor_cold.wire.GPIO_InitStruct.Pin = onewire_Pin;
   tsensor_cold.wire.onewire_port 		= onewire_GPIO_Port;
