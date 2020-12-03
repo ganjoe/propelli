@@ -13,6 +13,7 @@
 #include "PrettyLog.h"
 #include "fatfs.h"
 #include "termfile.h"
+#include "delay.h"
     extern TD_fatlog filelog;
 void Command_init()
     {
@@ -40,6 +41,8 @@ void Command_init()
 	    "bool\n", readconf);
         term_lol_setCallback("selterm", "\nlog upd speed\n",
 	    "bool\n", selterm);
+        term_lol_setCallback("reset", "\nreset mit countdown\n",
+	    "bool\n", reset);
     }
 
 RTC_DateTypeDef date;
@@ -229,5 +232,20 @@ void selterm(int argc, const char **argv)
 	sscanf(argv[1], "%f", &f);
 	modflag_init(&prettylog.pp_modflag, HALTICK, f);
 	term_printf(&btTerm, "\rcmd selterm:%3.1fHz ok\r", f);
+	}
+}
+
+void reset(int argc, const char **argv)
+{
+
+	if (argc == 2)
+	{
+	float f = -1;
+	float counter;
+	float cntdownms = 300;
+	sscanf(argv[1], "%f", &f);
+	term_printf(&btTerm, "\rcmd reset ok:%5fs ok\r", f);
+
+	HAL_NVIC_SystemReset();
 	}
 }

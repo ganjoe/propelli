@@ -152,7 +152,7 @@ void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL* term)
 	HAL_StatusTypeDef stat;
 	int txlen = strlen(fmt);
 	utils_truncate_number_int(&txlen, 1,term->uart_buffer_tx_len);
-	uint8_t* localbuff = calloc(term->uart_buffer_tx_len,1);
+	uint8_t* localbuff = calloc(txlen,1);
 	//uint8_t localbuff[txlen];
 
 	if (0 < vsprintf(localbuff, fmt, argp))

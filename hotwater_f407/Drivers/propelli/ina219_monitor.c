@@ -33,28 +33,34 @@ void mftick_ina219	(TD_INA219 *batt_hw)
 void mftask_ina219	(TD_INA219 *batt_hw)
     {
     if (batt_hw->mf_ina219.flag && batt_hw->mf_ina219.init_done)
-	{
-	batt_hw->mf_ina219.repeat = modflag_tickdiff(&batt_hw->mf_ina219);
-	batt_hw->mf_ina219.rampcounter = batt_hw->mf_ina219.callcount % 3;
+		{
+		batt_hw->mf_ina219.repeat = modflag_tickdiff(&batt_hw->mf_ina219);
+		batt_hw->mf_ina219.rampcounter = batt_hw->mf_ina219.callcount % 3;
 
 
-	if (batt_hw->mf_ina219.rampcounter==0)
-	    {
-	    ina_getvoltage(batt_hw);
-	    }
-	if (batt_hw->mf_ina219.rampcounter==1)
-	    {
-	    ina_getcurrent(batt_hw);
-	    }
-	if (batt_hw->mf_ina219.rampcounter==2)
-	    {
-	    ina_getpower(batt_hw);
-	     }
+		if (batt_hw->mf_ina219.rampcounter==0)
+			{
+			ina_getvoltage(batt_hw);
+			}
+		if (batt_hw->mf_ina219.rampcounter==1)
+			{
+			ina_getcurrent(batt_hw);
+			}
+		if (batt_hw->mf_ina219.rampcounter==2)
+			{
+			ina_getpower(batt_hw);
+			 }
 
-	batt_hw->mf_ina219.duration = modflag_tickdiff(&batt_hw->mf_ina219);
-	batt_hw->mf_ina219.callcount++;
-	batt_hw->mf_ina219.flag = false;
-	}
+		batt_hw->mf_ina219.duration = modflag_tickdiff(&batt_hw->mf_ina219);
+		batt_hw->mf_ina219.callcount++;
+		batt_hw->mf_ina219.flag = false;
+		}
+    else
+    	{
+    	 batt_hw->pwerbuff = -1;
+    	 batt_hw->voltbuff = -1;
+    	 batt_hw->currbuff = -1;
+    	}
     }
 
 void ina_setup		(TD_INA219 *batt_hw)
@@ -121,36 +127,38 @@ void ina_writeconfig	(TD_INA219 *batt_hw, uint16_t config)
 
 float ina_getpower	(TD_INA219 *batt_hw)
     {
+	HAL_StatusTypeDef err;
     int16_t powerbuff;
     float power;
-    ina_lolreadword(batt_hw, &powerbuff, POWER);
+    err = ina_lolreadword(batt_hw, &powerbuff, POWER);
     power = (float)powerbuff;
     batt_hw->pwerbuff = power * batt_hw->power_lsb;
     return power;
     }
 float ina_getcurrent	(TD_INA219 *batt_hw)
     {
+	HAL_StatusTypeDef err;
     int16_t currbuff;
     float current;
-    ina_lolreadword(batt_hw, &currbuff, CURRENT);
+    err = ina_lolreadword(batt_hw, &currbuff, CURRENT);
     current = (float)currbuff * batt_hw->current_lsb;
     batt_hw->currbuff = current;
     return current;
     }
 float ina_getvoltage	(TD_INA219 *batt_hw)
     {
+	HAL_StatusTypeDef err;
     int16_t voltage;
-    ina_lolreadword(batt_hw, &voltage, BUS);
+    err = ina_lolreadword(batt_hw, &voltage, BUS);
     voltage = voltage >>3;
     batt_hw->voltbuff = (float)voltage*(float)0.004;
-    return voltage;
-
    // batt_hw->voltbuff = voltage * batt_hw->calibration;
+    return voltage;
     }
 
 HAL_StatusTypeDef ina_lolwriteword	(TD_INA219 *batt_hw, uint16_t buffer, uint8_t reg)
     {
-    HAL_StatusTypeDef xfer;
+    HAL_StatusTypeDef err;
     uint8_t dword[2];
     uint8_t lowbyte,highbyte;
     utils_get_bytes_in_word(&buffer, &lowbyte, &highbyte);
@@ -158,9 +166,12 @@ HAL_StatusTypeDef ina_lolwriteword	(TD_INA219 *batt_hw, uint16_t buffer, uint8_t
     dword[0]=highbyte;
     dword[1]=lowbyte;
 
-    xfer = HAL_I2C_Mem_Write(&batt_hw->hi2c, batt_hw->addr, reg, 1, dword, 2, HAL_TIMEOUT);
-
-    return xfer;
+    err = HAL_I2C_Mem_Write(&batt_hw->hi2c, batt_hw->addr, reg, 1, dword, 2, HAL_TIMEOUT);
+    if(err == !HAL_OK)
+    	{
+    	batt_hw->mf_ina219.init_done = 0;
+    	}
+    return err;
     }
 HAL_StatusTypeDef ina_lolreadword 	(TD_INA219 *batt_hw, int16_t *buffer, uint8_t reg)
     {
@@ -170,6 +181,11 @@ HAL_StatusTypeDef ina_lolreadword 	(TD_INA219 *batt_hw, int16_t *buffer, uint8_t
     /* read_dma oder _it brauchen variablen die auch nach verlassen der funktion beschrieben werden können */
     xfer = HAL_I2C_Mem_Read(&batt_hw->hi2c, batt_hw->addr, reg, 1, dword, 2, HAL_TIMEOUT);
     *buffer = utils_get_word_from_bytes(dword[0], dword[1], 1);
+	HAL_StatusTypeDef err;
+    if(err == !HAL_OK)
+    	{
+    	batt_hw->mf_ina219.init_done = 0;
+    	}
 
     return xfer;
     }

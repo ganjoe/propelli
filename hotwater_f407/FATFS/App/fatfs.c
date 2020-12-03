@@ -131,7 +131,7 @@ FRESULT filelog_init		(TD_fatlog *fatlog)
 	//prettylog->mf_prettylog.init_done = 1;
 
 	fatlog->pbuffer.maxchars = 120;
-	fatlog->pbuffer.maxlines = 0xF;
+	fatlog->pbuffer.maxlines = 0xFFFF;
 
 	fatlog->sdinfo.LABEL="HAPPYLOG";
 	char buffer[]=	"log_date\t"

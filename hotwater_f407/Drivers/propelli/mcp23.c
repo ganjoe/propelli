@@ -54,6 +54,10 @@ void mftask_mcp23017(TD_MCP *io)
 	io->mf_mcp23017.callcount++;
 	io->mf_mcp23017.flag = false;
 	}
+    else
+    {
+    	db.iostatus=666;
+    }
     }
 /*
  * die aufsteigenden registeradressen vom mcp
@@ -149,22 +153,22 @@ void mcp_lolReadBuffer	(TD_MCP *mcp_io, uint16_t *buffer, uint16_t addr)
 void mcp_lolWriteByte	(TD_MCP *io, uint16_t regaddr, uint8_t data)
     {
     HAL_StatusTypeDef complete = !HAL_OK;
-    while (complete == !HAL_OK)
-	{
-	complete = HAL_I2C_Mem_Write_DMA(&hi2c1, io->addr, regaddr, 1, &data, 1);
-	}
+    complete = HAL_I2C_Mem_Write_DMA(&hi2c1, io->addr, regaddr, 1, &data, 1);
+    if (complete == !HAL_OK)
+    	{
+    	io->mf_mcp23017.init_done = false;
+    	}
     }
 void mcp_lolReadByte	(TD_MCP *io, uint16_t regaddr, uint8_t *data)
     {
     uint8_t localbuff;
     HAL_StatusTypeDef complete = !HAL_OK;
-    while (complete == !HAL_OK)
-	{
 	//complete =  HAL_I2C_Mem_Read_DMA(&hi2c1, io->addr, &regaddr, 1, &localbuff, 1);
 	complete =  HAL_I2C_Master_Transmit(&hi2c1, io->addr, &regaddr, 1, HAL_TIMEOUT);
 	complete = HAL_I2C_Master_Receive(&hi2c1, io->addr, &localbuff, 1, HAL_TIMEOUT);
-	}
+    if (complete == !HAL_OK)
+    	{
+    	io->mf_mcp23017.init_done = false;
+    	}
     *data = localbuff;
-
-
     }
