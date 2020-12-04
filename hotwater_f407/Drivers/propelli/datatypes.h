@@ -39,10 +39,19 @@ typedef enum
     LOGLINES,
     }
     colnames;
+
 typedef struct
     {
-    float battvolt, mcuvolt, temphot,tempcold, tempmcu, batthwcurr, batthwvolt, batthwpwr;
-    uint16_t iostatus, loglines;
+    float 	battvolt,
+			mcuvolt,
+			temphot,
+			tempcold,
+			tempmcu,
+			batthwcurr,
+			batthwvolt,
+			batthwpwr;
+    uint16_t iostatus,
+			loglines;
     colnames names;
     }
     Valuebuffer;

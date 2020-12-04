@@ -24,6 +24,7 @@ void modflag_upd_regular(modflag *thismf)
 	    }
 	}
     }
+
 uint64_t modflag_tickdiff(modflag *cnt)
     {
     uint64_t counter = TIM6->CNT;
@@ -36,11 +37,11 @@ uint64_t modflag_tickdiff(modflag *cnt)
     return cnt->tickdiff;
     }
 
-
 void modflag_enable(modflag *thismf)
-{
-thismf->init_done = true;
-}
+	{
+	thismf->init_done = true;
+	}
+
 void modflag_disable(modflag *thismf)
 {
 thismf->init_done = false;
