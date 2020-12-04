@@ -36,13 +36,12 @@ HHW_STATES;
 typedef enum
 {
 	//outputs
-	SPUELE_KALT,
-	SPUELE_WARM,
-	BRAUSE_KALT,
-	BRAUSE_WARM,
-	DRAIN,
-	REFILL_HOT,	//von kalt nach warmwassertank
-	REFILL_COLD,
+	VALVE_DRAIN,
+	VALVE_SHOWR,
+	VALVE_COLD,
+	VALVE_HOT,
+	PUMP_HOT,
+	PUMP_COLD,
 	HOTROD_300,	//heizung 300W
 	//user inputs
 	BTN_KALT,
@@ -57,18 +56,25 @@ HHW_WORD_NAMES;
 
 typedef struct
 {
+
+	//schaltzustände und deren zahl an aufrufen
+	uint16_t iowords[16];
+	uint16_t iocount[16];
+
+	//bitmaske für Betriebszustände
+	uint16_t states;
+
+	/*--hhw_lol_shower--*/
+	/*--hhw_lol_drain--*/
+
 	//zielwert regelung
 	float hw_temperature;
 
 	//hysterese zweipunktregler in grad
 	float hw_tempdelta;
 
-	//array mit bitmasken für schaltzustände
-	uint16_t outwords[16];
-
-	//bitmaske für Betriebszustände
-	uint16_t states;
-	float VoltLevel_pwrok, VoltLevel_lowbatt;
+	//Spannungsschwellen für Betrieb
+	float VoltLevel_power_ok, VoltLevel_lowbatt;
 
 	//enums als zeiger auf array mit bitsets
 	HHW_WORD_NAMES outnames;
@@ -77,6 +83,7 @@ typedef struct
 
 }
 TD_HappyHotwater;
+void mfinit_happyhotwater	(TD_HappyHotwater* hhw);
 
 void mftask_happyhotwater(TD_HappyHotwater* hhw, Valuebuffer* db);
 
