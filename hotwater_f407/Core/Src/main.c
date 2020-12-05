@@ -125,8 +125,10 @@ int main(void)
   //als drittes für init commands
   Command_init();
    //init_cmdfile nach command_ini
-  init_cmdfile(&initcmd);
   mfinit_prettylog(&prettylog);
+  init_cmdfile(&initcmd);
+
+
 
   mfinit_boardled();
   mfinit_mcp23017();
@@ -156,7 +158,7 @@ int a=0;
     mftask_boardled();
 
     mftask_mcp23017(&mcp_io);
-    mftask_prettylog(&prettylog.pp_modflag);
+  //  mftask_prettylog(&prettylog.pp_modflag);
     mftask_ina219(&batt_hw);
 
    // mftask_potis(&analogchan);

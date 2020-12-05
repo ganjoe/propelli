@@ -17,32 +17,19 @@
     extern TD_fatlog filelog;
 void Command_init()
     {
-        term_lol_setCallback("setword", "\rmcp outlatch\r",
-	    "bool\r", setword);
-        term_lol_setCallback("writepin", "\rGPIOA,B Output no Pullup\r",
-	    "bool\r", writepin);
-        term_lol_setCallback("readpin", "\rGPIOA,B Input no Pullup\r",
-	    "bool\r", readpin);
-        term_lol_setCallback("setallin", "\rGPIOA,B Input no Pullup\r",
-	    "bool\r", setallin);
-        term_lol_setCallback("setdate", "\rDD MM YY\r",
-	    "bool\r", setdate);
-        term_lol_setCallback("settime", "\rhh mm ss\r",
-	    "bool\r", settime);
-        term_lol_setCallback("nlogn", "\rfilename[32]\r",
-	    "bool\r", nlogn);
-        term_lol_setCallback("newlog", "\rrtc filename\r",
-	    "bool\r", newlog);
-        term_lol_setCallback("showconf", "\rrtc filename\r",
-	    "bool\r", showconf);
-        term_lol_setCallback("writeconf", "\rrtc filename\r",
-	    "bool\r", writeconf);
-        term_lol_setCallback("readconf", "\rrtc filename\r",
-	    "bool\r", readconf);
-        term_lol_setCallback("selterm", "\rlog upd speed\r",
-	    "bool\r", selterm);
-        term_lol_setCallback("reset", "\rreset mit countdown\r",
-	    "bool\r", reset);
+        term_lol_setCallback("setword", "\rmcp outlatch\r",	    "bool\r", setword);
+        term_lol_setCallback("writepin", "\rGPIOA,B Output no Pullup\r",	    "bool\r", writepin);
+        term_lol_setCallback("readpin", "\rGPIOA,B Input no Pullup\r",	    "bool\r", readpin);
+        term_lol_setCallback("setallin", "\rGPIOA,B Input no Pullup\r",	    "bool\r", setallin);
+        term_lol_setCallback("setdate", "\rDD MM YY\r",	    "bool\r", setdate);
+        term_lol_setCallback("settime", "\rhh mm ss\r",	    "bool\r", settime);
+        term_lol_setCallback("nlogn", "\rfilename[32]\r",	    "bool\r", nlogn);
+        term_lol_setCallback("newlog", "\rrtc filename\r",	    "bool\r", newlog);
+        term_lol_setCallback("showconf", "\rrtc filename\r",	    "bool\r", showconf);
+        term_lol_setCallback("writeconf", "\rrtc filename\r",	    "bool\r", writeconf);
+        term_lol_setCallback("readconf", "\rrtc filename\r",	    "bool\r", readconf);
+        term_lol_setCallback("selterm", "\rlog upd speed\r",	    "bool\r", selterm);
+        term_lol_setCallback("reset", "\rreset mit countdown\r",	    "bool\r", reset);
     }
 
 RTC_DateTypeDef date;
@@ -204,17 +191,12 @@ void newlog(int argc, const char **argv)
 
 void showconf(int argc, const char **argv)
 {
-	int d = -1;	//pinnr
+	int d = -1;	//
 	int itr=0;
 		sscanf(argv[1], "%d", &d);
-		term_printf("\rcmd readconf\r:batchcounter: %d\r", &initcmd.cmdcounter);
+		term_printf(&btTerm, "\rcmd ok\r");
 
-		while(itr < initcmd.cmdcounter)
-			{
-			cmdfile_lol_readln(&initcmd, initcmd.linebuffer, itr);
-			term_printf("[%d] %s\r",itr, initcmd.linebuffer);
-			itr++;
-			}
+		cmdfile_scan_cmd();
 
 }
 void writeconf(int argc, const char **argv)

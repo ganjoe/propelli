@@ -5,9 +5,7 @@
  *      Author: daniel
  */
 
-
 #include "datatypes_tasks.h"
-
 #include "tim.h"
 #include "stdlib.h"
 
@@ -46,6 +44,7 @@ void modflag_disable(modflag *thismf)
 {
 thismf->init_done = false;
 }
+
 void modflag_init(modflag *thismf, float systick, float setpoint_hz)
     {
     utils_truncate_number(&setpoint_hz, 0, systick); // max 1h minimum: systick

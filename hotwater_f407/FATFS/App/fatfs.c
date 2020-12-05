@@ -25,6 +25,7 @@ FIL SDFile;       /* File object for SD */
 
 /* USER CODE BEGIN Variables */
 TD_fatlog filelog;
+FIL filecmd;
 
 /* USER CODE END Variables */
 

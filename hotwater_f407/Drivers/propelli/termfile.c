@@ -9,8 +9,10 @@
 #include "termfile.h"
 #include "terminal.h"
 #include "utils.h"
+#include "fatfs.h"
 
 TD_TERMFILE initcmd;
+
 /* ließt terminal commandos aus textdatei. im sinne einer init-batch*/
 void 	init_cmdfile(TD_TERMFILE* cmd)
 {
@@ -63,6 +65,70 @@ void 	cmdfile_do_cmds			(TD_TERMFILE* initcmd)
 		}
 	}
 
+void	cmdfile_app_cmd			(TD_TERMFILE* initcmd, char* buffer)
+	{
+	cmdfile_lol_readln(initcmd, initcmd->linebuffer, initcmd->cmdcounter);
+	if((strchr(initcmd->linebuffer, '#')))
+		{
+		if(initcmd->cmdcounter <= initcmd->maxlines)
+			{
+			//eof wird überschrieben
+			strncpy(initcmd->linebuffer, buffer, initcmd->maxchars);
+			cmdfile_lol_writeln(initcmd, 0, initcmd->cmdcounter);
+			initcmd->cmdcounter++;
+			//eof wird neu gesetzt
+			initcmd->linebuffer = strdup("#");
+			cmdfile_lol_writeln(initcmd, 0, initcmd->cmdcounter);
+			}
+		else
+			{
+			term_printf(&btTerm, "\rhöchstzahl befehle erreicht: %d", initcmd->maxarguments);
+			}
+		}
+	else
+		{
+		term_printf(&btTerm, "\rdateiende nicht gefunden");
+		}
+	}
+
+void 	cmdfile_add_cmd(TD_TERMFILE* initcmd, char* buffer, uint8_t line)
+{
+	if(line <= initcmd->maxlines)
+		{
+
+		}
+	else
+		{
+		term_printf(&btTerm, "\rhöchstzahl befehle ist: %d", initcmd->maxarguments);
+		}
+
+}
+
+int	cmdfile_scan_cmd()
+	{
+	initcmd.cmdcounter = 0;
+	while (initcmd.cmdcounter < initcmd.maxlines)
+		{
+		cmdfile_lol_readln(&initcmd, initcmd.linebuffer, initcmd.cmdcounter);
+		term_printf(&btTerm, initcmd.linebuffer);
+		if(strchr(&initcmd.linebuffer, '#'))
+			{
+			term_printf(&btTerm, "\rAnzahl Befehle sind: %d", initcmd.linebuffer);
+			return 1;
+			}
+		initcmd.cmdcounter++;
+		}
+	if (initcmd.cmdcounter == initcmd.maxlines)
+		{
+		term_printf(&btTerm, "\rdateiende nicht gefunden");
+		initcmd.cmdcounter = 0;
+		return 0;
+		}
+
+
+	}
+
+
 FRESULT cmdfile_lol_open_create	(TD_TERMFILE* initcmd)
 {
 	FRESULT stat;
@@ -101,10 +167,11 @@ FRESULT cmdfile_lol_readln		(TD_TERMFILE* initcmd, char* buffer, int linenr)
 	utils_truncate_number_int(&linenr, 0, initcmd->maxlines);
 	FRESULT stat;
 	UINT bytesread;
-	stat = f_open(&initcmd->InitFIle, initcmd->filename, FA_READ);
-	stat = f_lseek(&initcmd->InitFIle, linenr * initcmd->maxchars);
-	stat = f_read(&initcmd->InitFIle, buffer, initcmd->maxchars, &bytesread);
-	stat = f_close(&initcmd->InitFIle);
+
+	stat = f_open(&SDFile, initcmd->filename, FA_READ);
+	stat = f_lseek(&SDFile, linenr * initcmd->maxchars);
+	stat = f_read(&SDFile, initcmd->linebuffer, initcmd->maxchars, &bytesread);
+	stat = f_close(&SDFile);
 	return stat;
 }
 
@@ -118,10 +185,10 @@ FRESULT cmdfile_lol_writeln		(TD_TERMFILE* initcmd, char* buffer, int linenr)
 	utils_truncate_number_int(&bufflen, 0, initcmd->maxchars);
 	utils_truncate_number_int(&linenr, 	0, initcmd->maxlines);		//in der letzten zeile sollte nichts wichtiges stehen
 
-	stat = f_open	(&initcmd->InitFIle, initcmd->filename, FA_WRITE | FA_READ);
-	stat = f_lseek	(&initcmd->InitFIle, linenr * initcmd->maxchars);			// immer ab anfang der zeile schreiben.
-	stat = f_write	(&initcmd->InitFIle, buffer, bufflen, &byteswrote);
-	stat = f_close	(&initcmd->InitFIle);
+	stat = f_open	(&SDFile, initcmd->filename, FA_WRITE | FA_READ);
+	stat = f_lseek	(&SDFile, linenr * initcmd->maxchars);			// immer ab anfang der zeile schreiben.
+	stat = f_write	(&SDFile, buffer, bufflen, &byteswrote);
+	stat = f_close	(&SDFile);
 
 	return stat;
 }
