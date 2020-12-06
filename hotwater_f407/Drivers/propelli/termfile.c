@@ -104,27 +104,27 @@ void 	cmdfile_add_cmd(TD_TERMFILE* initcmd, char* buffer, uint8_t line)
 
 }
 
-int	cmdfile_scan_cmd()
+int		cmdfile_scan_cmd(TD_TERMFILE* initcmd)
 	{
-	initcmd.cmdcounter = 0;
-	while (initcmd.cmdcounter < initcmd.maxlines)
+	initcmd->cmdcounter = 0;
+	while (initcmd->cmdcounter < initcmd->maxlines)
 		{
-		cmdfile_lol_readln(&initcmd, initcmd.linebuffer, initcmd.cmdcounter);
-		term_printf(&btTerm, initcmd.linebuffer);
-		if(strchr(&initcmd.linebuffer, '#'))
+		cmdfile_lol_readln(initcmd, initcmd->linebuffer, initcmd->cmdcounter);
+		term_printf(&btTerm, initcmd->linebuffer);
+		if(strchr((const char*)&initcmd->linebuffer, '#'))
 			{
-			term_printf(&btTerm, "\rAnzahl Befehle sind: %d", initcmd.linebuffer);
+			term_printf(&btTerm, "\rAnzahl Befehle sind: %d", initcmd->linebuffer);
 			return 1;
 			}
-		initcmd.cmdcounter++;
+		initcmd->cmdcounter++;
 		}
-	if (initcmd.cmdcounter == initcmd.maxlines)
+	if (initcmd->cmdcounter == initcmd->maxlines)
 		{
 		term_printf(&btTerm, "\rdateiende nicht gefunden");
-		initcmd.cmdcounter = 0;
-		return 0;
-		}
+		initcmd->cmdcounter = 0;
 
+		}
+		return 0;
 
 	}
 

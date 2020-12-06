@@ -30,7 +30,7 @@ void 	cmdfile_do_cmds			(TD_TERMFILE* initcmd);
 
 void	cmdfile_app_cmd			(TD_TERMFILE* initcmd, char* buffer);
 
-int		cmdfile_scan_cmd		();
+int		cmdfile_scan_cmd		(TD_TERMFILE* initcmd);
 
 FRESULT cmdfile_lol_open_create	(TD_TERMFILE* initcmd);
 

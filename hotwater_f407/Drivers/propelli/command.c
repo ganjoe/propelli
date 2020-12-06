@@ -196,7 +196,7 @@ void showconf(int argc, const char **argv)
 		sscanf(argv[1], "%d", &d);
 		term_printf(&btTerm, "\rcmd ok\r");
 
-		cmdfile_scan_cmd();
+		cmdfile_scan_cmd(&initcmd);
 
 }
 void writeconf(int argc, const char **argv)
