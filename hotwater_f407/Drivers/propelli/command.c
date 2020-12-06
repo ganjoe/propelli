@@ -205,7 +205,8 @@ void writeconf(int argc, const char **argv)
 }
 void readconf(int argc, const char **argv)
 {
-
+//cmdfile_scan_cmd(&initcmd);
+	cmdfile_lol_readln(&initcmd, initcmd.linebuffer, initcmd.cmdcounter);
 }
 void selterm(int argc, const char **argv)
 {

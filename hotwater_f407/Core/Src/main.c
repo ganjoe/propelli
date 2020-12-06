@@ -158,7 +158,7 @@ int a=0;
     mftask_boardled();
 
     mftask_mcp23017(&mcp_io);
-  //  mftask_prettylog(&prettylog.pp_modflag);
+    mftask_prettylog(&prettylog.pp_modflag);
     mftask_ina219(&batt_hw);
 
    // mftask_potis(&analogchan);

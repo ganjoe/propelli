@@ -168,10 +168,10 @@ FRESULT cmdfile_lol_readln		(TD_TERMFILE* initcmd, char* buffer, int linenr)
 	FRESULT stat;
 	UINT bytesread;
 
-	stat = f_open(&SDFile, initcmd->filename, FA_READ);
-	stat = f_lseek(&SDFile, linenr * initcmd->maxchars);
-	stat = f_read(&SDFile, initcmd->linebuffer, initcmd->maxchars, &bytesread);
-	stat = f_close(&SDFile);
+	stat = f_open(&initcmd->InitFIle, initcmd->filename, FA_READ);
+	stat = f_lseek(&initcmd->InitFIle, linenr * initcmd->maxchars);
+	stat = f_read(&initcmd->InitFIle, initcmd->linebuffer, initcmd->maxchars, &bytesread);
+	stat = f_close(&initcmd->InitFIle);
 	return stat;
 }
 
