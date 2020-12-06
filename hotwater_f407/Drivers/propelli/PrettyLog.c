@@ -7,7 +7,7 @@
 
 #include "PrettyLog.h"
 #include "rtc.h"
-#include "fatfs.h"
+
 #include "terminal.h"
 #include "usart.h"
 
@@ -101,9 +101,8 @@ int pl_rtc_timestring	(char* buffer, int fmt)
 
 void mfinit_prettylog(TD_prettylog *prettylog)
     {
-    FRESULT fres;
+
     modflag_init(&prettylog->pp_modflag, HALTICK, 1);
-    fres = filelog_init(&filelog);
 
     }
 void mftick_prettylog(TD_prettylog *prettylog)
@@ -128,11 +127,7 @@ void mftask_prettylog(modflag *thismf)
 		db.names=STATUS;		pl_ppValues( buffer);
 		db.names=LOGLINES;		pl_ppValues( buffer);
 		strncat		(buffer,"\r",1);
-		strcpy		(filelog.pbuffer.lastLine, buffer);
 
-		pl_lol_update	(&filelog);
-
-		int len = strlen(filelog.pbuffer.lastLine);
 		term_printf(&btTerm, buffer);
 		thismf->duration = modflag_tickdiff(thismf);
 		thismf->flag = false;

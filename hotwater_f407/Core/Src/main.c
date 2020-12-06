@@ -22,7 +22,6 @@
 #include "adc.h"
 #include "dac.h"
 #include "dma.h"
-#include "fatfs.h"
 #include "i2c.h"
 #include "rtc.h"
 #include "sdio.h"
@@ -44,7 +43,7 @@
 #include "potis.h"
 #include "terminal.h"
 #include "command.h"
-#include "termfile.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -113,7 +112,6 @@ int main(void)
   MX_USART1_UART_Init();
   MX_DAC_Init();
   MX_TIM2_Init();
-  MX_FATFS_Init();
   MX_I2C1_Init();
   MX_ADC1_Init();
   MX_I2C2_Init();
@@ -126,7 +124,7 @@ int main(void)
   Command_init();
    //init_cmdfile nach command_ini
   mfinit_prettylog(&prettylog);
-  init_cmdfile(&initcmd);
+
 
 
 
@@ -167,7 +165,7 @@ int a=0;
     db.temphot = tsensor_hot.lastTempF;
     db.tempcold = tsensor_cold.lastTempF;
     db.iostatus = mcp_io.inputstate;
-    db.loglines = filelog.pbuffer.pos_x;
+
     db.batthwvolt = batt_hw.voltbuff;
     db.batthwcurr = batt_hw.currbuff;
     db.batthwpwr = batt_hw.pwerbuff;

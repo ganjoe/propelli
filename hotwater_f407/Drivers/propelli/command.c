@@ -11,10 +11,9 @@
 #include "utils.h"
 #include "rtc.h"
 #include "PrettyLog.h"
-#include "fatfs.h"
-#include "termfile.h"
+
 #include "delay.h"
-    extern TD_fatlog filelog;
+
 void Command_init()
     {
         term_lol_setCallback("setword", "\rmcp outlatch\r",	    "bool\r", setword);
@@ -174,17 +173,17 @@ void nlogn(int argc, const char **argv)
 		//strcpy(filename, argv[1]);
 		filename = strtok(argv[1], "\r");
 		//filelog.sdinfo.Filename = memset()
-		strncpy(filelog.sdinfo.Filename, filename,32);
-		pl_lol_newlogname(&filelog);
+
+
 		term_printf(&btTerm, "\rcmd nlogn ok\r");
-		term_printf(&btTerm, filelog.sdinfo.Filename);
+
 		free (filename);
 		}
 
    	}
 void newlog(int argc, const char **argv)
     {
-	pl_lol_newlog(&filelog);
+
 	term_printf(&btTerm, "\rcmd ok\r");
 	//term_printf(&btTerm, filelog.sdinfo.Filename);
    	}
@@ -196,7 +195,7 @@ void showconf(int argc, const char **argv)
 		sscanf(argv[1], "%d", &d);
 		term_printf(&btTerm, "\rcmd ok\r");
 
-		cmdfile_scan_cmd(&initcmd);
+
 
 }
 void writeconf(int argc, const char **argv)
@@ -206,7 +205,7 @@ void writeconf(int argc, const char **argv)
 void readconf(int argc, const char **argv)
 {
 //cmdfile_scan_cmd(&initcmd);
-	cmdfile_lol_readln(&initcmd, initcmd.linebuffer, initcmd.cmdcounter);
+
 }
 void selterm(int argc, const char **argv)
 {
