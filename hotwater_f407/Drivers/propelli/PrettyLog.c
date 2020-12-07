@@ -7,6 +7,7 @@
 
 #include "PrettyLog.h"
 #include "rtc.h"
+#include "sdfile.h"
 
 #include "terminal.h"
 #include "usart.h"
@@ -58,6 +59,7 @@ void pl_ppValues	(char* buffer)
 	valstrsize += strlen(tabulator);
 	strncat(pbuffer,tabulator,1);
 	strncat(buffer,pbuffer,valstrsize);
+
     }
 
 int pl_rtc_timestring	(char* buffer, int fmt)
@@ -129,6 +131,7 @@ void mftask_prettylog(modflag *thismf)
 		strncat		(buffer,"\r",1);
 
 		term_printf(&btTerm, buffer);
+		sdfile_add_logline(&happylog, buffer);
 		thismf->duration = modflag_tickdiff(thismf);
 		thismf->flag = false;
 		}

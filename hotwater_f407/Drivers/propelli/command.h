@@ -26,6 +26,8 @@ void sdwrite(int argc, const char **argv);
 void sdread(int argc, const char **argv);
 void readinit(int argc, const char **argv);
 void writeinit(int argc, const char **argv);
+void nlog(int argc, const char **argv);
+void nlogn(int argc, const char **argv);
 // zeile aus init-datei drucken/schreiben/ausführen
 
 

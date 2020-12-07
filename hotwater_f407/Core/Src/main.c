@@ -127,7 +127,7 @@ int main(void)
   Command_init();
    //init_cmdfile nach command_ini
   mfinit_prettylog(&prettylog);
-  init_sdfile_eeprom(&eeprom);
+  init_sdfile_initcmd(&initcmd);
   init_sdfile_happylog(&happylog);
 
 
@@ -170,7 +170,7 @@ int a=0;
     db.temphot = tsensor_hot.lastTempF;
     db.tempcold = tsensor_cold.lastTempF;
     db.iostatus = mcp_io.inputstate;
-
+    db.loglines = happylog.act_line;
     db.batthwvolt = batt_hw.voltbuff;
     db.batthwcurr = batt_hw.currbuff;
     db.batthwpwr = batt_hw.pwerbuff;

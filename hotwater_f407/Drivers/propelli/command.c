@@ -17,21 +17,23 @@
 
 void Command_init()
     {
-        term_lol_setCallback("setword", "\rmcp outlatch\r",	    "bool\r", setword);
-        term_lol_setCallback("writepin", "\rGPIOA,B Output no Pullup\r",	    "bool\r", writepin);
-        term_lol_setCallback("readpin", "\rGPIOA,B Input no Pullup\r",	    "bool\r", readpin);
-        term_lol_setCallback("setallin", "\rGPIOA,B Input no Pullup\r",	    "bool\r", setallin);
+        term_lol_setCallback("setword", "help", 	"arghelp",	setword);
+        term_lol_setCallback("writepin", "help",    "arghelp", 	writepin);
+        term_lol_setCallback("readpin", "help",	    "arghelp", 	readpin);
+        term_lol_setCallback("setallin", "help",    "arghelp", 	setallin);
 
-        term_lol_setCallback("setdate", "\rDD MM YY\r",	    "bool\r", setdate);
-        term_lol_setCallback("settime", "\rhh mm ss\r",	    "bool\r", settime);
+        term_lol_setCallback("setdate", "help",	    "barghelp", setdate);
+        term_lol_setCallback("settime", "help",	    "arghelp", 	settime);
 
-        term_lol_setCallback("sdwrite", "\filename string linenr\r",   "bool\r", sdwrite);
-        term_lol_setCallback("sdread", "\rrtc filename\r",	    "bool\r", sdread);
-        term_lol_setCallback("readinit", "\read eeprom.hhw\r",	    "bool\r", readinit);
-        term_lol_setCallback("writeinit", "\read eeprom.hhw\r",	    "bool\r", writeinit);
+        term_lol_setCallback("sdwrite", "help",		"arghelp", 	sdwrite);
+        term_lol_setCallback("sdread", 	"help",	    "arghelp", 	sdread);
+        term_lol_setCallback("readinit","help",	    "arghelp", 	readinit);
+        term_lol_setCallback("writeinit","help",	"arghelp", 	writeinit);
+        term_lol_setCallback("nlogn",	"help",		"arghelp", 	nlogn);
+        term_lol_setCallback("nlog",	"help",		"arghelp", 	nlog);
 
-        term_lol_setCallback("selterm", "\rlog upd speed\r",    "bool\r", selterm);
-        term_lol_setCallback("reset", "\rreset mit countdown\r","bool\r", reset);
+        term_lol_setCallback("selterm",	"help",		"arghelp", 	selterm);
+        term_lol_setCallback("reset", 	"help",		"arghelp", 	reset);
     }
 
 RTC_DateTypeDef date;
@@ -172,10 +174,12 @@ void sdwrite(int argc, const char **argv)
     {
 	if (argc == 4)
 		{
-		int line;
-		sscanf(argv[3], "%d", &line);
+		int lines, chars;
 
-		int bytesWrote = sd_lol_writeline(argv[1], argv[2], 32, line);
+		sscanf(argv[3], "%d", &chars);
+		sscanf(argv[4], "%d", &lines);
+
+		int bytesWrote = sd_lol_writeline(argv[1], argv[2], chars, lines);
 		if (bytesWrote>0)
 			{
 			term_printf(&btTerm, "\rcmd nlogn: %d bytes Writen\r", bytesWrote);
@@ -214,6 +218,7 @@ void sdread(int argc, const char **argv)
 		}
 
 	}
+
 void readinit(int argc, const char **argv)
 	{
 	int d = -1;
@@ -221,8 +226,8 @@ void readinit(int argc, const char **argv)
 	{
 	sscanf(argv[1], "%d", &d);
 	int bytesRead;
-	char* linebuffer = calloc(eeprom.maxchars,1);
-	bytesRead = sd_lol_readline(eeprom.filename, linebuffer, eeprom.maxchars, d);
+	char* linebuffer = calloc(initcmd.maxchars,1);
+	bytesRead = sd_lol_readline(initcmd.filename, linebuffer, initcmd.maxchars, d);
 	term_printf(&btTerm, "\rcmd sdread: %d bytes Read:\r%s", bytesRead, linebuffer);
 	free (linebuffer);
 	}
@@ -234,18 +239,35 @@ if (argc == 3)
 	int line;
 	sscanf(argv[2], "%d", &line);
 
-	eeprom.bytesWrote = sd_lol_writeline(eeprom.filename, argv[1], eeprom.maxchars, line);
-	if (eeprom.bytesWrote>0)
+	initcmd.bytesWrote = sd_lol_writeline(initcmd.filename, argv[1], initcmd.maxchars, line);
+	if (initcmd.bytesWrote>0)
 		{
-		term_printf(&btTerm, "\rcmd nlogn: %d bytes Writen\r", eeprom.bytesWrote);
+		term_printf(&btTerm, "\rcmd writeinit: %d bytes Writen\r", initcmd.bytesWrote);
 		}
 	else
 		{
-		term_printf(&btTerm, "\rcmd nlogn: not ready\r", eeprom.bytesWrote);
+		term_printf(&btTerm, "\rcmd writeinit: not ready\r", initcmd.bytesWrote);
 		}
 
 	}
 
+}
+
+void nlogn(int argc, const char **argv)
+{
+if (argc == 2)
+	{
+	strcpy(initcmd.filename,	argv[1] );
+	term_printf(&btTerm, "\rcmd nlogn ok\r");
+	}
+}
+void nlog(int argc, const char **argv)
+{
+if (argc == 2)
+	{
+	sdfile_lol_newhappylog(&happylog);
+	term_printf(&btTerm, "\rcmd nlogn ok\r newlog:%s",happylog.filename);
+	}
 }
 
 void selterm(int argc, const char **argv)
@@ -258,7 +280,6 @@ void selterm(int argc, const char **argv)
 	term_printf(&btTerm, "\rcmd selterm:%3.1fHz ok\r", f);
 	}
 }
-
 void reset(int argc, const char **argv)
 {
 

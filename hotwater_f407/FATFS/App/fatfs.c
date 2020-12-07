@@ -69,7 +69,7 @@ int sd_lol_writeline(char* filename, char* linebuff, uint8_t chars, uint8_t line
 	slen =strlen(linebuffer);
 	if (slen>chars)
 		{
-		linebuffer =strdup("string not valid");
+		linebuffer =strdup("to boku");
 		}
 
 /*---------------------------------------------------------*/
