@@ -21,10 +21,11 @@ void writepin(int argc, const char **argv);
 void readpin(int argc, const char **argv);
 void setallin(int argc, const char **argv);
 void setword(int argc, const char **argv);
-// neue logdatei, filename ist parameter oder timestring
+//
 void sdwrite(int argc, const char **argv);
 void sdread(int argc, const char **argv);
 void readinit(int argc, const char **argv);
+void writeinit(int argc, const char **argv);
 // zeile aus init-datei drucken/schreiben/ausführen
 
 

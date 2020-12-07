@@ -28,6 +28,7 @@ void Command_init()
         term_lol_setCallback("sdwrite", "\filename string linenr\r",   "bool\r", sdwrite);
         term_lol_setCallback("sdread", "\rrtc filename\r",	    "bool\r", sdread);
         term_lol_setCallback("readinit", "\read eeprom.hhw\r",	    "bool\r", readinit);
+        term_lol_setCallback("writeinit", "\read eeprom.hhw\r",	    "bool\r", writeinit);
 
         term_lol_setCallback("selterm", "\rlog upd speed\r",    "bool\r", selterm);
         term_lol_setCallback("reset", "\rreset mit countdown\r","bool\r", reset);
@@ -225,6 +226,26 @@ void readinit(int argc, const char **argv)
 	term_printf(&btTerm, "\rcmd sdread: %d bytes Read:\r%s", bytesRead, linebuffer);
 	free (linebuffer);
 	}
+}
+void writeinit(int argc, const char **argv)
+{
+if (argc == 3)
+	{
+	int line;
+	sscanf(argv[2], "%d", &line);
+
+	eeprom.bytesWrote = sd_lol_writeline(eeprom.filename, argv[1], eeprom.maxchars, line);
+	if (eeprom.bytesWrote>0)
+		{
+		term_printf(&btTerm, "\rcmd nlogn: %d bytes Writen\r", eeprom.bytesWrote);
+		}
+	else
+		{
+		term_printf(&btTerm, "\rcmd nlogn: not ready\r", eeprom.bytesWrote);
+		}
+
+	}
+
 }
 
 void selterm(int argc, const char **argv)

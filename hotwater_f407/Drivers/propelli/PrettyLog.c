@@ -92,7 +92,7 @@ int pl_rtc_timestring	(char* buffer, int fmt)
 	    }
 	case DATETIMEFAT:
 	    {
-	    sprintf(buffer,"log_%.2d.%.2d.%.2d-%d_%.2d_%.2d.hhw", rtd.Date, rtd.Month, rtd.Year, rtc.Hours, rtc.Minutes, rtc.Seconds);
+	    sprintf(buffer,"log_%.2d.%.2d.%.2d-%d_%.2d_%.2d.hhw\0", rtd.Date, rtd.Month, rtd.Year, rtc.Hours, rtc.Minutes, rtc.Seconds);
 	    }
 	}
 
