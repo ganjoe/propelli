@@ -21,12 +21,15 @@ void Command_init()
         term_lol_setCallback("writepin", "\rGPIOA,B Output no Pullup\r",	    "bool\r", writepin);
         term_lol_setCallback("readpin", "\rGPIOA,B Input no Pullup\r",	    "bool\r", readpin);
         term_lol_setCallback("setallin", "\rGPIOA,B Input no Pullup\r",	    "bool\r", setallin);
+
         term_lol_setCallback("setdate", "\rDD MM YY\r",	    "bool\r", setdate);
         term_lol_setCallback("settime", "\rhh mm ss\r",	    "bool\r", settime);
+
         term_lol_setCallback("sdwrite", "\filename string linenr\r",   "bool\r", sdwrite);
         term_lol_setCallback("sdread", "\rrtc filename\r",	    "bool\r", sdread);
-        term_lol_setCallback("selterm", "\rlog upd speed\r",	    "bool\r", selterm);
-        term_lol_setCallback("reset", "\rreset mit countdown\r",	    "bool\r", reset);
+
+        term_lol_setCallback("selterm", "\rlog upd speed\r",    "bool\r", selterm);
+        term_lol_setCallback("reset", "\rreset mit countdown\r","bool\r", reset);
     }
 
 RTC_DateTypeDef date;
@@ -167,13 +170,7 @@ void sdwrite(int argc, const char **argv)
     {
 	if (argc == 4)
 		{
-		char* filename = calloc(32,1);
-		char* linebuffer = calloc(32,1);
-		int bytesWrote;
 		int line;
-
-		strcpy(filename, argv[1]);
-		strcpy(linebuffer, argv[2]);
 		sscanf(argv[3], "%d", &line);
 
 		bytesWrote = sd_lol_writeline(argv[1], argv[2], 32, line);
@@ -195,13 +192,28 @@ void sdwrite(int argc, const char **argv)
 
 void sdread(int argc, const char **argv)
 {
-	int d = -1;	//
-	int itr=0;
-		sscanf(argv[1], "%d", &d);
-		term_printf(&btTerm, "\rcmd ok\r");
+	if (argc == 3)
+		{
+		char* filename = calloc(32,1);
+		char* linebuffer = calloc(128,1);
+		int bytesWrote;
+		int lines, chars;
 
+		sscanf(argv[2], "%d", &chars);
+		sscanf(argv[3], "%d", &lines);
 
+		bytesWrote = sd_lol_readline(argv[1], linebuffer, chars, lines);
+		if (bytesWrote>0)
+			{
+			term_printf(&btTerm, "\rcmd nlogn: %d bytes Writen\r", bytesWrote);
+			}
+		else
+			{
+			term_printf(&btTerm, "\rcmd nlogn: not ready\r", bytesWrote);
+			}
 
+		free (filename);
+		free (linebuffer);
 }
 
 void selterm(int argc, const char **argv)
