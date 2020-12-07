@@ -59,9 +59,9 @@ int sd_lol_writeline(char* filename, char* linebuff, uint8_t chars, uint8_t line
 	int slen;
 	char* linebuffer;
 /*---------------------------------------------------------*/
-	linebuffer = calloc(chars + 2, 1);	// + \r und platz für die letzte \0 von calloc
+	linebuffer = calloc(chars, 1);	// + \r und platz für die letzte \0 von calloc
 	strcpy(linebuffer, linebuff);
-	memcpy(linebuffer+chars, "\r",1);
+	memcpy(linebuffer+chars-1, "\r",1);
 
 	if (line == 0)
 	{
@@ -85,19 +85,18 @@ int sd_lol_writeline(char* filename, char* linebuff, uint8_t chars, uint8_t line
 	 f_close(&SDFile);
 	 f_mount(&SDFatFS, SDPath, 0);
 /*---------------------------------------------------------*/
+	 free (linebuffer);
 	 if (fres == FR_OK)
 		 return bytesWrote;
-	 free (linebuffer);
 	 return -1;
 }
-
-int sd_lol_readline(char* filename, char* linebuff, uint8_t chars, uint8_t line)
+int sd_lol_readline (char* filename, char* linebuff, uint8_t chars, uint8_t line)
 {
-	UINT bytesWrote;
+	UINT bytesRead;
 	FRESULT fres;
 	int slen;
-	char* linebuffer = calloc(chars+2,1);
-	/*---------------------------------------------------------*/
+	//char* linebuffer = calloc(chars+2,1);
+/*---------------------------------------------------------*/
 		fres = 	f_mount(&SDFatFS, SDPath, 1);
 		fres =	f_open(&SDFile, filename, FA_READ);
 		if (fres == FR_NO_FILE)
@@ -105,11 +104,16 @@ int sd_lol_readline(char* filename, char* linebuff, uint8_t chars, uint8_t line)
 			 return 0;
 			 }
 		 fres =	f_lseek(&SDFile, chars * line);
-		 fres = f_read(&SDFile, linebuffer, chars, &bytesWrote);
+		 fres = f_read(&SDFile, linebuff, chars, &bytesRead);
 		 f_close(&SDFile);
 		 f_mount(&SDFatFS, SDPath, 0);
-	/*---------------------------------------------------------*/
-
+/*---------------------------------------------------------*/
+		 //strcpy(linebuff, linebuffer);
+/*---------------------------------------------------------*/
+		//  free (linebuffer);
+		 if (fres == FR_OK)
+			 return bytesRead;
+		 return -1;
 }
 /* USER CODE END Application */
 

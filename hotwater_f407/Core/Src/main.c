@@ -44,6 +44,7 @@
 #include "potis.h"
 #include "terminal.h"
 #include "command.h"
+#include "sdfile.h"
 
 /* USER CODE END Includes */
 
@@ -126,6 +127,8 @@ int main(void)
   Command_init();
    //init_cmdfile nach command_ini
   mfinit_prettylog(&prettylog);
+  init_sdfile_eeprom();
+  init_sdfile_happylog();
 
 
 

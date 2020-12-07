@@ -12,7 +12,7 @@
 #include "rtc.h"
 #include "PrettyLog.h"
 #include "fatfs.h"
-
+#include "sdfile.h"
 #include "delay.h"
 
 void Command_init()
@@ -27,6 +27,7 @@ void Command_init()
 
         term_lol_setCallback("sdwrite", "\filename string linenr\r",   "bool\r", sdwrite);
         term_lol_setCallback("sdread", "\rrtc filename\r",	    "bool\r", sdread);
+        term_lol_setCallback("readinit", "\read eeprom.hhw\r",	    "bool\r", readinit);
 
         term_lol_setCallback("selterm", "\rlog upd speed\r",    "bool\r", selterm);
         term_lol_setCallback("reset", "\rreset mit countdown\r","bool\r", reset);
@@ -173,7 +174,7 @@ void sdwrite(int argc, const char **argv)
 		int line;
 		sscanf(argv[3], "%d", &line);
 
-		bytesWrote = sd_lol_writeline(argv[1], argv[2], 32, line);
+		int bytesWrote = sd_lol_writeline(argv[1], argv[2], 32, line);
 		if (bytesWrote>0)
 			{
 			term_printf(&btTerm, "\rcmd nlogn: %d bytes Writen\r", bytesWrote);
@@ -183,37 +184,47 @@ void sdwrite(int argc, const char **argv)
 			term_printf(&btTerm, "\rcmd nlogn: not ready\r", bytesWrote);
 			}
 
-		free (filename);
-		free (linebuffer);
 		}
 
    	}
-
-
 void sdread(int argc, const char **argv)
-{
-	if (argc == 3)
+	{
+	if (argc == 4)
 		{
-		char* filename = calloc(32,1);
-		char* linebuffer = calloc(128,1);
-		int bytesWrote;
+
+		int bytesRead;
 		int lines, chars;
 
 		sscanf(argv[2], "%d", &chars);
 		sscanf(argv[3], "%d", &lines);
+		char* linebuffer = calloc(chars,1);
 
-		bytesWrote = sd_lol_readline(argv[1], linebuffer, chars, lines);
-		if (bytesWrote>0)
+		bytesRead = sd_lol_readline(argv[1], linebuffer, chars, lines);
+		if (bytesRead>0)
 			{
-			term_printf(&btTerm, "\rcmd nlogn: %d bytes Writen\r", bytesWrote);
+			term_printf(&btTerm, "\rcmd sdread: %d bytes Read:\r%s", bytesRead, linebuffer);
+			//term_printf(&btTerm, linebuffer);
 			}
 		else
 			{
-			term_printf(&btTerm, "\rcmd nlogn: not ready\r", bytesWrote);
+			term_printf(&btTerm, "\rcmd sdread: empty:\r%s", bytesRead, linebuffer);
 			}
-
-		free (filename);
 		free (linebuffer);
+		}
+
+	}
+void readinit(int argc, const char **argv)
+	{
+	int d = -1;
+	if (argc == 2)
+	{
+	sscanf(argv[1], "%d", &d);
+	int bytesRead;
+	char* linebuffer = calloc(eeprom.maxchars,1);
+	bytesRead = sd_lol_readline(eeprom.filename, linebuffer, eeprom.maxchars, d);
+	term_printf(&btTerm, "\rcmd sdread: %d bytes Read:\r%s", bytesRead, linebuffer);
+	free (linebuffer);
+	}
 }
 
 void selterm(int argc, const char **argv)

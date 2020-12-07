@@ -23,10 +23,9 @@ void setallin(int argc, const char **argv);
 void setword(int argc, const char **argv);
 // neue logdatei, filename ist parameter oder timestring
 void sdwrite(int argc, const char **argv);
-void newlog(int argc, const char **argv);
-// zeile aus init-datei drucken/schreiben/ausführen
 void sdread(int argc, const char **argv);
-void writeconf(int argc, const char **argv);
-void readconf(int argc, const char **argv);
+void readinit(int argc, const char **argv);
+// zeile aus init-datei drucken/schreiben/ausführen
+
 
 #endif /* PROPELLI_COMMAND_H_ */
