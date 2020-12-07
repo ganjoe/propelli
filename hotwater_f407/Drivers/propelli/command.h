@@ -22,10 +22,10 @@ void readpin(int argc, const char **argv);
 void setallin(int argc, const char **argv);
 void setword(int argc, const char **argv);
 // neue logdatei, filename ist parameter oder timestring
-void nlogn(int argc, const char **argv);
+void sdwrite(int argc, const char **argv);
 void newlog(int argc, const char **argv);
 // zeile aus init-datei drucken/schreiben/ausführen
-void showconf(int argc, const char **argv);
+void sdread(int argc, const char **argv);
 void writeconf(int argc, const char **argv);
 void readconf(int argc, const char **argv);
 

@@ -22,6 +22,7 @@
 #include "adc.h"
 #include "dac.h"
 #include "dma.h"
+#include "fatfs.h"
 #include "i2c.h"
 #include "rtc.h"
 #include "sdio.h"
@@ -115,6 +116,7 @@ int main(void)
   MX_I2C1_Init();
   MX_ADC1_Init();
   MX_I2C2_Init();
+  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
   //als erstes für uart
   delay_init(&delay, &htim2);

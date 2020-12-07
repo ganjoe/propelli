@@ -22,7 +22,7 @@ void mfinit_terminal(TD_TERMINAL* term)
 	modflag_init(&term->mf_cmd, HALTICK, 1);
 	term->callback_len = 40;
 	term->maxArguments = 4;
-	term->uart_buffer_rx_len = 32;
+	term->uart_buffer_rx_len = 128;
 	term->uart_buffer_tx_len = 128;
 	term->string_rx = calloc(term->uart_buffer_rx_len, 1);
 	term->string_tx = calloc(term->uart_buffer_tx_len, 1);
@@ -107,10 +107,11 @@ void term_lol_setCallback(const char *command, const char *help,
 
 void term_lol_parse(TD_TERMINAL* term)
     {
+	char* p2 = calloc(128, 1);
     int argc = 0;
     char *argv[term->maxArguments];
     //cmd ist der erste stringabschnitt von links
-    char *p2 = strtok(term->string_rx, term->sep);
+    p2 = strtok(term->string_rx, term->sep);
     //argumente separieren, und in ptr-array speichern
     while (p2 && argc < term->maxArguments)
 		{
@@ -118,6 +119,7 @@ void term_lol_parse(TD_TERMINAL* term)
 		//sachen passieren
 		p2 = strtok(0,term->sep);
 		}
+
     if (argc == 0)
 		{
 		term_printf(term, "No command received\n");
@@ -138,13 +140,13 @@ void term_lol_parse(TD_TERMINAL* term)
 	}
 
     for (int i = 0; i < callback_write; i++)
-	{
-	if (callbacks[i].cbf != 0 && strcmp(argv[0], callbacks[i].command) == 0)
-	    {
-	    callbacks[i].cbf(argc, (const char**) argv);
-	    return;
-	    }
-	}
+		{
+		if (callbacks[i].cbf != 0 && strcmp(argv[0], callbacks[i].command) == 0)
+			{
+			callbacks[i].cbf(argc, (const char**) argv);
+			return;
+			}
+		}free  (p2);
     }
 void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL* term)
     {

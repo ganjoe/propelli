@@ -11,6 +11,7 @@
 #include "utils.h"
 #include "rtc.h"
 #include "PrettyLog.h"
+#include "fatfs.h"
 
 #include "delay.h"
 
@@ -22,11 +23,8 @@ void Command_init()
         term_lol_setCallback("setallin", "\rGPIOA,B Input no Pullup\r",	    "bool\r", setallin);
         term_lol_setCallback("setdate", "\rDD MM YY\r",	    "bool\r", setdate);
         term_lol_setCallback("settime", "\rhh mm ss\r",	    "bool\r", settime);
-        term_lol_setCallback("nlogn", "\rfilename[32]\r",	    "bool\r", nlogn);
-        term_lol_setCallback("newlog", "\rrtc filename\r",	    "bool\r", newlog);
-        term_lol_setCallback("showconf", "\rrtc filename\r",	    "bool\r", showconf);
-        term_lol_setCallback("writeconf", "\rrtc filename\r",	    "bool\r", writeconf);
-        term_lol_setCallback("readconf", "\rrtc filename\r",	    "bool\r", readconf);
+        term_lol_setCallback("sdwrite", "\filename string linenr\r",   "bool\r", sdwrite);
+        term_lol_setCallback("sdread", "\rrtc filename\r",	    "bool\r", sdread);
         term_lol_setCallback("selterm", "\rlog upd speed\r",	    "bool\r", selterm);
         term_lol_setCallback("reset", "\rreset mit countdown\r",	    "bool\r", reset);
     }
@@ -165,30 +163,37 @@ void settime(int argc, const char **argv)
 	    term_printf(&btTerm, "\r3 argumente DD MM YY\r");
     }
 
-void nlogn(int argc, const char **argv)
+void sdwrite(int argc, const char **argv)
     {
-	if (argc == 2)
+	if (argc == 4)
 		{
 		char* filename = calloc(32,1);
-		//strcpy(filename, argv[1]);
-		filename = strtok(argv[1], "\r");
-		//filelog.sdinfo.Filename = memset()
+		char* linebuffer = calloc(32,1);
+		int bytesWrote;
+		int line;
 
+		strcpy(filename, argv[1]);
+		strcpy(linebuffer, argv[2]);
+		sscanf(argv[3], "%d", &line);
 
-		term_printf(&btTerm, "\rcmd nlogn ok\r");
+		bytesWrote = sd_lol_writeline(argv[1], argv[2], 32, line);
+		if (bytesWrote>0)
+			{
+			term_printf(&btTerm, "\rcmd nlogn: %d bytes Writen\r", bytesWrote);
+			}
+		else
+			{
+			term_printf(&btTerm, "\rcmd nlogn: not ready\r", bytesWrote);
+			}
 
 		free (filename);
+		free (linebuffer);
 		}
 
    	}
-void newlog(int argc, const char **argv)
-    {
 
-	term_printf(&btTerm, "\rcmd ok\r");
-	//term_printf(&btTerm, filelog.sdinfo.Filename);
-   	}
 
-void showconf(int argc, const char **argv)
+void sdread(int argc, const char **argv)
 {
 	int d = -1;	//
 	int itr=0;
@@ -198,15 +203,7 @@ void showconf(int argc, const char **argv)
 
 
 }
-void writeconf(int argc, const char **argv)
-{
 
-}
-void readconf(int argc, const char **argv)
-{
-//cmdfile_scan_cmd(&initcmd);
-
-}
 void selterm(int argc, const char **argv)
 {
 	float f = -1;

@@ -22,7 +22,7 @@
 #define HALTICK 1000.0
 #define SYSTICK 10000.0
 
-
+typedef unsigned int	uint;
 
 typedef enum
     {		//reihenfolge egal
