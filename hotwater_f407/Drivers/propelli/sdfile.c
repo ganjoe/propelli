@@ -23,11 +23,11 @@ void init_sdfile_happylog		(HHW_FILE_FORMAT* file)
 	{
 	file->filename=strdup("15.11.20 19:16:25.hhw");
 	file->header=strdup("log_date tlog_time volt_mcu battvolt temp_mcu coldwatr hotwater mcpinput loglines\r");
-	file->maxchars =strlen(file->header);	//jede zeile ist gleichlang
+	file->maxchars =120;	//jede zeile ist gleichlang
 	file->maxfilename =32;
-	file->maxlines =0xFFFF;	//jede datei hat gleich viele zeilen
+	file->maxlines =0xFF;	//jede datei hat gleich viele zeilen
 	file->flag = true;
-	sdfile_lol_newhappylog(file);
+	sdfile_lol_newhappylog();
 	}
 void sdfile_lol_set_filename	(HHW_FILE_FORMAT* file, 	char* filename)
 {
@@ -35,16 +35,16 @@ void sdfile_lol_set_filename	(HHW_FILE_FORMAT* file, 	char* filename)
 	utils_truncate_number_int(&stlen, 1, file->maxfilename);
 	strcpy(file->filename, filename);
 }
-void sdfile_lol_newhappylog		(HHW_FILE_FORMAT* happylog)
+void sdfile_lol_newhappylog		()
 {
-	char* buffer=calloc(happylog->maxfilename,1);
+	char buffer[128] = {0};
 	pl_rtc_timestring(buffer, DATETIMEFAT);
-	sdfile_lol_set_filename(happylog, buffer);
-	happylog->bytesWrote = sd_lol_writeline(happylog->filename, happylog->header,strlen(happylog->header),0);
-	if (happylog->bytesWrote <0)
-		happylog->flag = false;
-	happylog->act_line=1;
-	free (buffer);
+	sdfile_lol_set_filename(&happylog, buffer);
+	happylog.bytesWrote = sd_lol_writeline(happylog.filename, happylog.header, happylog.maxchars,0);
+	if (happylog.bytesWrote <0)
+		happylog.flag = false;
+	happylog.act_line=1;
+
 }
 void sdfile_add_logline			(HHW_FILE_FORMAT* happylog, char* buffer)
 	{
@@ -60,7 +60,7 @@ void sdfile_add_logline			(HHW_FILE_FORMAT* happylog, char* buffer)
 				}
 			else
 				{
-				sdfile_lol_newhappylog(happylog);
+				sdfile_lol_newhappylog();
 				}
 			}
 		else if ((byteswrote < 0))

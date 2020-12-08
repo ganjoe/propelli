@@ -122,11 +122,8 @@ void setdate(int argc, const char **argv)
 			HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
 			char buffer[]="\rrtc sagt: nein\r";
 			pl_rtc_timestring(buffer, DATEMONO);
-
 			term_printf(&btTerm, buffer);
 			sdfile_lol_newhappylog(&happylog);
-
-
 			}
 		}
     else
@@ -160,9 +157,11 @@ void settime(int argc, const char **argv)
 	    HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
 	    HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
 	    char buffer[]="\rrtc sagt: nein\r";
-	    pl_rtc_timestring(buffer, TIMEMONO);
-	    term_printf(&btTerm, buffer);
-	    sdfile_lol_newhappylog(&happylog);
+	    char* buffptr = &buffer;
+	    pl_rtc_timestring(buffptr, TIMEMONO);
+	    term_printf(&btTerm, buffptr);
+	    strcpy(happylog.filename,	buffer );
+	   // sdfile_lol_newhappylog(&happylog);
 
 	    }
 	}
@@ -188,9 +187,7 @@ void sdwrite(int argc, const char **argv)
 			{
 			term_printf(&btTerm, "\rcmd nlogn: not ready\r", bytesWrote);
 			}
-
 		}
-
    	}
 void sdread(int argc, const char **argv)
 	{
@@ -268,8 +265,13 @@ void nlog(int argc, const char **argv)
 {
 if (argc == 2)
 	{
-	sdfile_lol_newhappylog(&happylog);
-	term_printf(&btTerm, "\rcmd nlogn ok\r newlog:%s",happylog.filename);
+	pl_rtc_timestring(happylog.filename, DATETIMEFAT);
+	//strcpy(happylog.filename,	argv[1] );
+	happylog.act_line = 0;
+	happylog.bytesWrote = 0;
+
+	term_printf(&btTerm, "\rcmd nlogn ok\r");
+
 	}
 }
 
