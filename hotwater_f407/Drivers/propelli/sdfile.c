@@ -54,13 +54,13 @@ void sdfile_add_logline			(HHW_FILE_FORMAT* happylog, char* buffer)
 		if ((byteswrote > 0))
 			{
 			happylog->bytesWrote +=	byteswrote;
-			if (happylog->bytesWrote < happylog->maxlines)
+			if (happylog->act_line < happylog->maxlines)
 				{
 				happylog->act_line++;
 				}
 			else
 				{
-				sdfile_lol_newhappylog(&happylog);
+				sdfile_lol_newhappylog(happylog);
 				}
 			}
 		else if ((byteswrote < 0))
