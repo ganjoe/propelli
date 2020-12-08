@@ -60,7 +60,6 @@ void term_printf	(TD_TERMINAL* term, const char *fmt, ...)
     }
 //empfangspuffer für uart-dma
 
-
 float term_lol_delay(int len)
     {
     int halbaudrate = huart1.Init.BaudRate;
@@ -137,8 +136,9 @@ void term_lol_parse(TD_TERMINAL* term)
 		for (int i = 0; i < callback_write; i++)
 			{
 			term_printf(term, callbacks[i].command);
-			term_printf(term, " help: ");
+			term_printf(term, "\rhelp: ");
 			term_printf(term, callbacks[i].help);
+			term_printf(term, "\r");
 			}
     	}
 

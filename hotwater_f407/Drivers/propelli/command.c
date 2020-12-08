@@ -17,15 +17,16 @@
 
 void Command_init()
     {
-        term_lol_setCallback("setword", "help", 	"arghelp",	setword);
-        term_lol_setCallback("writepin", "help",    "arghelp", 	writepin);
-        term_lol_setCallback("readpin", "help",	    "arghelp", 	readpin);
+        term_lol_setCallback("setword", "mcp regs A und B mit wort setzen",	"dword",	setword);
+        term_lol_setCallback("writepin", "pin, state",		"bits ab port a setzen",	writepin);
+        term_lol_setCallback("readpin", "register lesen",	    "pinnr, pullupstate", 	readpin);
         term_lol_setCallback("setallin", "help",    "arghelp", 	setallin);
 
-        term_lol_setCallback("setdate", "help",	    "barghelp", setdate);
-        term_lol_setCallback("settime", "help",	    "arghelp", 	settime);
+        term_lol_setCallback("setdate", "dd mm yy",	    "rtc setzen", setdate);
+        term_lol_setCallback("settime", "hh mm ss",	    "rtc setzen", settime);
 
-        term_lol_setCallback("sdwrite", "help",		"arghelp", 	sdwrite);
+        term_lol_setCallback("sdwrite", "filename string chars lines","schreibt zu beginn einer zeile",	sdwrite);
+
         term_lol_setCallback("sdread", 	"help",	    "arghelp", 	sdread);
         term_lol_setCallback("readinit","help",	    "arghelp", 	readinit);
         term_lol_setCallback("writeinit","help",	"arghelp", 	writeinit);
