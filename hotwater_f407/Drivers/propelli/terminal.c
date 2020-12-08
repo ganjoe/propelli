@@ -107,7 +107,9 @@ void term_lol_setCallback(const char *command, const char *help,
 
 void term_lol_parse(TD_TERMINAL* term)
     {
-	char* p2 = calloc(128, 1);
+	//char* p2 = calloc(128, 1);
+	char p2arr[32]={0};
+	char* p2 = &p2arr;
     int argc = 0;
     char *argv[term->maxArguments];
     //cmd ist der erste stringabschnitt von links
@@ -119,6 +121,7 @@ void term_lol_parse(TD_TERMINAL* term)
 		//sachen passieren
 		p2 = strtok(0,term->sep);
 		}
+    //free  (p2);
 
     if (argc == 0)
 		{
@@ -146,27 +149,24 @@ void term_lol_parse(TD_TERMINAL* term)
 			callbacks[i].cbf(argc, (const char**) argv);
 			return;
 			}
-		}free  (p2);
+		}//
     }
 void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL* term)
     {
 	HAL_StatusTypeDef stat;
 	int txlen;
-	utils_truncate_number_int(&txlen, 1,term->uart_buffer_tx_len);
-	uint8_t* localbuff = calloc(term->uart_buffer_tx_len,1);
-	//uint8_t localbuff[txlen];
 
-	if (0 < vsprintf(localbuff, fmt, argp))
+	if (0 < vsprintf(term->string_tx, fmt, argp))
 	    {
 	    float del;
 	    //TODO: auf abschluss vorhandener übertragung warten
-	    txlen = strlen(localbuff);
-	    stat = HAL_UART_Transmit_DMA(&huart1, localbuff, txlen);
+	    txlen = strlen(term->string_tx);
+	    stat = HAL_UART_Transmit_DMA(&huart1, (uint8_t*)term->string_tx, txlen);
 	    del = term_lol_delay(txlen)*1000;
-	    delay_us(&delay, (uint32_t)del);
+	    delay_us(&delay, (uint32_t)del+1000);
 
 	    }
-	free (localbuff);
+
     }
 
 void term_lol_writebuff		(TD_TERMINAL* term)

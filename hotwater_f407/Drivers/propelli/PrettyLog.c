@@ -119,7 +119,7 @@ void mftask_prettylog(modflag *thismf)
     if (thismf->flag && thismf->init_done)
 		{
 		thismf->repeat = modflag_tickdiff(thismf);
-		char buffer[80]={0};
+		char buffer[120]={0};
 		db.names=DATE; 			pl_ppValues( buffer);
 		db.names=TIME;			pl_ppValues( buffer);
 		//db.names=MCUVOLT;   	pl_ppValues( buffer);
