@@ -93,7 +93,6 @@ void setword(int argc, const char **argv)
 
 	}
     }
-
 void setdate(int argc, const char **argv)
     {
     int d = -1;	//
@@ -120,9 +119,6 @@ void setdate(int argc, const char **argv)
 			date.Year = y;
 			HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
 			HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
-			char buffer[]="\rrtc sagt: nein\r";
-			pl_rtc_timestring(buffer, DATEMONO);
-			term_printf(&btTerm, buffer);
 			sdfile_lol_newhappylog(&happylog);
 			}
 		}
@@ -156,12 +152,8 @@ void settime(int argc, const char **argv)
 	    time.Seconds = s;
 	    HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
 	    HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
-	    char buffer[]="\rrtc sagt: nein\r";
-	    char* buffptr = &buffer;
-	    pl_rtc_timestring(buffptr, TIMEMONO);
-	    term_printf(&btTerm, buffptr);
-	    strcpy(happylog.filename,	buffer );
-	   // sdfile_lol_newhappylog(&happylog);
+
+	    sdfile_lol_newhappylog(&happylog);
 
 	    }
 	}
@@ -173,11 +165,11 @@ void sdwrite(int argc, const char **argv)
     {
 	if (argc == 4)
 		{
-		int lines, chars;
+		int lines=0;
+		int chars=0;
 
 		sscanf(argv[3], "%d", &chars);
 		sscanf(argv[4], "%d", &lines);
-
 		int bytesWrote = sd_lol_writeline(argv[1], argv[2], chars, lines);
 		if (bytesWrote>0)
 			{
@@ -245,10 +237,7 @@ if (argc == 3)
 		{
 		term_printf(&btTerm, "\rcmd writeinit: not ready\r", initcmd.bytesWrote);
 		}
-
 	}
-
-
 }
 
 void nlogn(int argc, const char **argv)
@@ -258,7 +247,6 @@ if (argc == 2)
 	strcpy(happylog.filename,	argv[1] );
 	happylog.act_line = 0;
 	happylog.bytesWrote = 0;
-
 	term_printf(&btTerm, "\rcmd nlogn ok\r");
 	}
 }
@@ -270,9 +258,7 @@ if (argc == 2)
 	//strcpy(happylog.filename,	argv[1] );
 	happylog.act_line = 0;
 	happylog.bytesWrote = 0;
-
 	term_printf(&btTerm, "\rcmd nlogn ok\r");
-
 	}
 }
 
@@ -280,11 +266,11 @@ void selterm(int argc, const char **argv)
 {
 	float f = -1;
 	if (argc == 2)
-	{
-	sscanf(argv[1], "%f", &f);
-	modflag_init(&prettylog.pp_modflag, HALTICK, f);
-	term_printf(&btTerm, "\rcmd selterm:%3.1fHz ok\r", f);
-	}
+		{
+		sscanf(argv[1], "%f", &f);
+		modflag_init(&prettylog.pp_modflag, HALTICK, f);
+		term_printf(&btTerm, "\rcmd selterm:%3.1fHz ok\r", f);
+		}
 }
 void reset(int argc, const char **argv)
 {

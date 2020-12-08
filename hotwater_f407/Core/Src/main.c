@@ -130,9 +130,6 @@ int main(void)
   init_sdfile_initcmd(&initcmd);
   init_sdfile_happylog(&happylog);
 
-
-
-
   mfinit_boardled();
   mfinit_mcp23017();
  // mfinit_poti(&analogchan);
@@ -154,6 +151,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 int a=0;
+
   while (1)
   {
 	mftask_terminal(&btTerm);

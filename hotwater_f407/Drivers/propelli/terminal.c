@@ -35,9 +35,12 @@ void mftask_terminal(TD_TERMINAL* term)
     if (&term->mf_cmd.flag && term->mf_cmd.init_done)
 		{
     	term->mf_cmd.repeat = modflag_tickdiff(&term->mf_cmd);
-
-		term_lol_readbyte(&btTerm);
-
+    	if(btTerm.flag_newString)
+    		{
+    		term_lol_parse(&btTerm);
+    		btTerm.flag_newString = false;
+    		}
+    	term_lol_readbyte(&btTerm);
 		term->mf_cmd.duration = modflag_tickdiff(&term->mf_cmd);
 		term->mf_cmd.callcount++;
 		term->mf_cmd.flag = false;
@@ -55,7 +58,6 @@ void term_printf	(TD_TERMINAL* term, const char *fmt, ...)
     term_lol_vprint(fmt, argp, term);
     va_end(argp);
     }
-
 //empfangspuffer für uart-dma
 
 
@@ -129,18 +131,16 @@ void term_lol_parse(TD_TERMINAL* term)
 		return;
 		}
     if (strcmp(argv[0], "help") == 0)
-	{
-	term_printf(term, "registered commands:\n");
+    	{
+		term_printf(term, "registered commands:\n");
 
-	for (int i = 0; i < callback_write; i++)
-	    {
-	    term_printf(term, callbacks[i].command);
-	    term_printf(term, " help: ");
-	    term_printf(term, callbacks[i].help);
-
-	    }
-
-	}
+		for (int i = 0; i < callback_write; i++)
+			{
+			term_printf(term, callbacks[i].command);
+			term_printf(term, " help: ");
+			term_printf(term, callbacks[i].help);
+			}
+    	}
 
     for (int i = 0; i < callback_write; i++)
 		{
@@ -164,7 +164,6 @@ void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL* term)
 	    stat = HAL_UART_Transmit(&huart1, (uint8_t*)term->string_tx, txlen, 1000);
 	    del = term_lol_delay(txlen)*1000;
 	    delay_us(&delay, (uint32_t)del+1000);
-
 	    }
 
     }
@@ -182,24 +181,30 @@ int  term_lol_readbyte		(TD_TERMINAL* term)
 }
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     {
-    btTerm.string_rx[btTerm.TerminalBufferItr] = btTerm.byte_received;
+		if (!btTerm.flag_newString)
+		{
+		btTerm.string_rx[btTerm.TerminalBufferItr] = btTerm.byte_received;
 
-	if (btTerm.TerminalBufferItr < btTerm.uart_buffer_rx_len)
-		{
-		btTerm.TerminalBufferItr++	;
-		}
-	else
-		{
-		btTerm.TerminalBufferItr=0;
-		//delay_us(&delay,100);
-		}
+		if (btTerm.TerminalBufferItr < btTerm.uart_buffer_rx_len)
+			{
+			btTerm.TerminalBufferItr++	;
+			}
+		else
+			{
+			btTerm.TerminalBufferItr=0;
+			//delay_us(&delay,100);
+			}
 
-	if (btTerm.byte_received == 13)
-		{
-		term_lol_parse(&btTerm);
-		btTerm.TerminalBufferItr = 0;
+		if (btTerm.byte_received == 13)
+			{
+			//term_lol_parse(&btTerm);
+			btTerm.flag_newString = true;
+			btTerm.TerminalBufferItr = 0;
+			}
+		else
+			{
+			term_lol_readbyte(&btTerm);
+			}
 		}
-	term_lol_readbyte(&btTerm);
     }
-
 TD_TERMINAL btTerm;
