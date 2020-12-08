@@ -124,7 +124,7 @@ void setdate(int argc, const char **argv)
 			pl_rtc_timestring(buffer, DATEMONO);
 
 			term_printf(&btTerm, buffer);
-			//pl_lol_newlog(&filelog);
+			sdfile_lol_newhappylog(&happylog);
 
 
 			}
@@ -162,7 +162,7 @@ void settime(int argc, const char **argv)
 	    char buffer[]="\rrtc sagt: nein\r";
 	    pl_rtc_timestring(buffer, TIMEMONO);
 	    term_printf(&btTerm, buffer);
-	    //pl_lol_newlog(&filelog);
+	    sdfile_lol_newhappylog(&happylog);
 
 	    }
 	}
@@ -257,7 +257,10 @@ void nlogn(int argc, const char **argv)
 {
 if (argc == 2)
 	{
-	strcpy(initcmd.filename,	argv[1] );
+	strcpy(happylog.filename,	argv[1] );
+	happylog.act_line = 0;
+	happylog.bytesWrote = 0;
+
 	term_printf(&btTerm, "\rcmd nlogn ok\r");
 	}
 }

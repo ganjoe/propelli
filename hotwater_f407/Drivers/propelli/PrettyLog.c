@@ -32,25 +32,28 @@ void pl_ppValues	(char* buffer)
 		sprintf(pbuffer, "%7.3f\0", db.batthwcurr);
 		break;
 	    case BATTHWPWR:
-		sprintf(pbuffer, "%1.3f\0", db.batthwpwr);
+		sprintf(pbuffer, "%1.3f", db.batthwpwr);
 		break;
 	    case TEMPHOT:
-		sprintf(pbuffer, "%2.1f\0", db.temphot);
+		sprintf(pbuffer, "%2.1f", db.temphot);
 		break;
 	    case TEMPCOLD:
-		sprintf(pbuffer, "%2.1f\0", db.tempcold);
+		sprintf(pbuffer, "%2.1f", db.tempcold);
 		break;
 	    case TEMPMCU:
-		sprintf(pbuffer, "%2.0f\0", db.tempmcu);
+		sprintf(pbuffer, "%2.0f", db.tempmcu);
 		break;
 	    case MCUVOLT:
-		sprintf(pbuffer, "%1.2f\0", db.mcuvolt);
+		sprintf(pbuffer, "%1.2f", db.mcuvolt);
 		break;
 	    case STATUS:
-		sprintf(pbuffer, "%d\0", db.iostatus);
+		sprintf(pbuffer, "%d", db.iostatus);
 		break;
 	    case LOGLINES:
-		sprintf(pbuffer, "%d\0", db.loglines);
+		sprintf(pbuffer, "%d", db.loglines);
+		break;
+	    case BYTESWROTE:
+		sprintf(pbuffer, "%f", (float)(db.loglines / 1024.0));
 		break;
 
 	    default:		break;
@@ -128,10 +131,11 @@ void mftask_prettylog(modflag *thismf)
 		db.names=TEMPHOT;   	pl_ppValues( buffer);
 		db.names=STATUS;		pl_ppValues( buffer);
 		db.names=LOGLINES;		pl_ppValues( buffer);
+		db.names=BYTESWROTE;	pl_ppValues( buffer);
 		strncat		(buffer,"\r",1);
-
-		term_printf(&btTerm, buffer);
 		sdfile_add_logline(&happylog, buffer);
+		term_printf(&btTerm, buffer);
+
 		thismf->duration = modflag_tickdiff(thismf);
 		thismf->flag = false;
 		}

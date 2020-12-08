@@ -18,6 +18,8 @@
 
 #include "fatfs.h"
 
+
+
 uint8_t retSD;    /* Return value for SD */
 char SDPath[4];   /* SD logical drive path */
 FATFS SDFatFS;    /* File system object for SD logical drive */
@@ -34,6 +36,8 @@ void MX_FATFS_Init(void)
 
   /* USER CODE BEGIN Init */
   FRESULT fres = 	f_mount(&SDFatFS, SDPath, 1);
+
+
   /* additional user code for init */
   /* USER CODE END Init */
 }
@@ -53,7 +57,7 @@ DWORD get_fattime(void)
 /* USER CODE BEGIN Application */
 int sd_lol_writeline(char* filename, char* linebuff, uint8_t chars, uint8_t line)
 {
-	UINT bytesWrote;
+	int bytesWrote = -1;
 	FRESULT fres;
 	int slen;
 	char* linebuffer;
@@ -79,15 +83,26 @@ int sd_lol_writeline(char* filename, char* linebuff, uint8_t chars, uint8_t line
 		 {
 		 fres =	f_open(&SDFile, filename, FA_CREATE_ALWAYS | FA_WRITE | FA_READ);
 		 }
+	if (fres == FR_DISK_ERR)
+		 {
+
+		 }
+	if (fres == FR_INVALID_DRIVE)
+		 {
+
+		 }
+	if (fres == FR_OK)
+	{
 	 fres =	f_lseek(&SDFile, chars * line);
 	 f_write(&SDFile, linebuffer, chars, &bytesWrote);
 	 f_close(&SDFile);
 	 f_mount(&SDFatFS, SDPath, 0);
+	}
+
+	 return bytesWrote;
 /*---------------------------------------------------------*/
 	 free (linebuffer);
-	 if (fres == FR_OK)
-		 return bytesWrote;
-	 return -1;
+
 }
 int sd_lol_readline (char* filename, char* linebuff, uint8_t chars, uint8_t line)
 {

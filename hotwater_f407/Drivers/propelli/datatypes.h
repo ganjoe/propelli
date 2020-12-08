@@ -37,6 +37,7 @@ typedef enum
     TEMPHOT,
     STATUS,
     LOGLINES,
+	BYTESWROTE,
     }
     colnames;
 

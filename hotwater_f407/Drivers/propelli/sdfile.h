@@ -11,10 +11,10 @@
 typedef struct
 {
 	uint16_t maxchars, maxlines, maxfilename;
-	char* header;
+	const char* header;
 	const char* filename;
-	uint16_t act_line;
-	uint64_t bytesWrote;	//TODO:jetzt nocht pro sd-karte wär schön
+	uint16_t act_line, flag;
+	int64_t bytesWrote;	//TODO:jetzt nocht pro sd-karte wär schön
 }
 HHW_FILE_FORMAT;
 extern HHW_FILE_FORMAT initcmd, happylog, eeprom;

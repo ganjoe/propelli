@@ -12,29 +12,22 @@
 
 void init_sdfile_initcmd		(HHW_FILE_FORMAT* file)
 	{
-	initcmd.filename=strdup("eeprom.hhw");
+	initcmd.filename=strdup("initcmd.hhw");
 	initcmd.header=strdup("batch file");
 	initcmd.maxchars =32;	//jede zeile ist gleichlang
 	initcmd.maxlines =0xF;	//im sinne von maxcommands
 	initcmd.maxfilename =32;
+
 	}
 void init_sdfile_happylog		(HHW_FILE_FORMAT* file)
 	{
-	happylog.filename=strdup("nodate.hhw");
-	happylog.header=strdup("log_date\t"
-						"log_time\t"
-						"volt_mcu\t"
-						"battvolt\t"
-						"temp_mcu\t"
-						"coldwatr\t"
-						"hotwater\t"
-						"mcpinput\t"
-						"loglines\t"
-						"\r");
-	happylog.maxchars =80;	//jede zeile ist gleichlang
-	happylog.maxfilename =32;
-	happylog.maxlines =0xFFFF;	//jede datei hat gleich viele zeilen
-	sdfile_lol_newhappylog(&happylog);
+	file->filename=strdup("15.11.20 19:16:25.hhw");
+	file->header=strdup("log_date tlog_time volt_mcu battvolt temp_mcu coldwatr hotwater mcpinput loglines\r");
+	file->maxchars =strlen(file->header);	//jede zeile ist gleichlang
+	file->maxfilename =32;
+	file->maxlines =0xFFFF;	//jede datei hat gleich viele zeilen
+	file->flag = true;
+	sdfile_lol_newhappylog(file);
 	}
 void sdfile_lol_set_filename	(HHW_FILE_FORMAT* file, 	char* filename)
 {
@@ -47,20 +40,37 @@ void sdfile_lol_newhappylog		(HHW_FILE_FORMAT* happylog)
 	char* buffer=calloc(happylog->maxfilename,1);
 	pl_rtc_timestring(buffer, DATETIMEFAT);
 	sdfile_lol_set_filename(happylog, buffer);
+	happylog->bytesWrote = sd_lol_writeline(happylog->filename, happylog->header,strlen(happylog->header),0);
+	if (happylog->bytesWrote <0)
+		happylog->flag = false;
 	happylog->act_line=1;
 	free (buffer);
 }
 void sdfile_add_logline			(HHW_FILE_FORMAT* happylog, char* buffer)
 	{
-		happylog->bytesWrote +=	sd_lol_writeline(happylog->filename, buffer, happylog->maxchars, happylog->act_line);
-		if (happylog->bytesWrote < happylog->maxlines)
+	if(happylog->flag)
+		{
+		int byteswrote = sd_lol_writeline(happylog->filename, buffer, happylog->maxchars, happylog->act_line);
+		if ((byteswrote > 0))
 			{
-			happylog->act_line++;
+			happylog->bytesWrote +=	byteswrote;
+			if (happylog->bytesWrote < happylog->maxlines)
+				{
+				happylog->act_line++;
+				}
+			else
+				{
+				sdfile_lol_newhappylog(&happylog);
+				}
 			}
-		else
+		else if ((byteswrote < 0))
 			{
-			sdfile_lol_newhappylog(&happylog);
+			happylog->bytesWrote =666;
+			happylog->flag = 0;
 			}
-   	}
+
+		}
+	}
+
 
 HHW_FILE_FORMAT initcmd, happylog, eeprom;
