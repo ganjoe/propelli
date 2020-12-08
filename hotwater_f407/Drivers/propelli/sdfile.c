@@ -19,6 +19,7 @@ void init_sdfile_initcmd		(HHW_FILE_FORMAT* file)
 	initcmd.maxfilename =32;
 
 	}
+
 void init_sdfile_happylog		(HHW_FILE_FORMAT* file)
 	{
 	file->filename=strdup("15.11.20 19:16:25.hhw");
@@ -29,12 +30,14 @@ void init_sdfile_happylog		(HHW_FILE_FORMAT* file)
 	file->flag = true;
 	sdfile_lol_newhappylog();
 	}
+
 void sdfile_lol_set_filename	(HHW_FILE_FORMAT* file, 	char* filename)
 {
 	int stlen = strlen(filename);
 	utils_truncate_number_int(&stlen, 1, file->maxfilename);
 	strcpy(file->filename, filename);
 }
+
 void sdfile_lol_newhappylog		()
 {
 	char buffer[128] = {0};
@@ -44,8 +47,8 @@ void sdfile_lol_newhappylog		()
 	if (happylog.bytesWrote <0)
 		happylog.flag = false;
 	happylog.act_line=1;
-
 }
+
 void sdfile_add_logline			(HHW_FILE_FORMAT* happylog, char* buffer)
 	{
 	if(happylog->flag)
@@ -68,7 +71,6 @@ void sdfile_add_logline			(HHW_FILE_FORMAT* happylog, char* buffer)
 			happylog->bytesWrote =666;
 			happylog->flag = 0;
 			}
-
 		}
 	}
 

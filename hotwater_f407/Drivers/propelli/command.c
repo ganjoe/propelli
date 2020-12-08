@@ -248,6 +248,7 @@ if (argc == 3)
 
 	}
 
+
 }
 
 void nlogn(int argc, const char **argv)

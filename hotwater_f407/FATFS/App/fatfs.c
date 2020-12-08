@@ -65,9 +65,9 @@ int sd_lol_writeline(char* filename, char* linebuff, uint8_t chars, uint8_t line
 	memcpy(linebuffer+chars-1, "\r",1);
 
 	if (line == 0)
-	{
+		{
 		//write header
-	}
+		}
 	slen =strlen(linebuffer);
 	if (slen>chars)
 		{
