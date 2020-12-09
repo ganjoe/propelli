@@ -64,10 +64,6 @@ int sd_lol_writeline(char* filename, char* linebuff, uint8_t chars, uint8_t line
 	strcpy(linebuffer, linebuff);
 	memcpy(linebuffer+chars-1, "\r",1);
 
-	if (line == 0)
-		{
-		//write header
-		}
 	slen =strlen(linebuffer);
 	if (slen>chars)
 		{
@@ -90,12 +86,12 @@ int sd_lol_writeline(char* filename, char* linebuff, uint8_t chars, uint8_t line
 
 		 }
 	if (fres == FR_OK)
-	{
-	 fres =	f_lseek(&SDFile, chars * line);
-	 f_write(&SDFile, linebuffer, chars, &bytesWrote);
-	 f_close(&SDFile);
-	 f_mount(&SDFatFS, SDPath, 0);
-	}
+		{
+		 f_lseek(&SDFile, chars * line);
+		 f_write(&SDFile, linebuffer, chars, &bytesWrote);
+		 f_close(&SDFile);
+		 f_mount(&SDFatFS, SDPath, 0);
+		}
 
 	 return bytesWrote;
 /*---------------------------------------------------------*/

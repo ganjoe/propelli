@@ -18,8 +18,8 @@ void init_sdfile_initcmd		(HHW_FILE_FORMAT* file)
 	initcmd.maxlines =0;	//im sinne von maxcommands
 	initcmd.maxfilename =32;
 
-	initcmd.bytesWrote = sd_lol_writeline(initcmd.filename, "setdate_9_12_20\r", initcmd.maxchars, initcmd.maxlines++);
-	initcmd.bytesWrote += sd_lol_writeline(initcmd.filename, "settime_00_24_00\r", initcmd.maxchars, initcmd.maxlines++);
+	//initcmd.bytesWrote = sd_lol_writeline(initcmd.filename, "setdate_9_12_20\r", initcmd.maxchars, initcmd.maxlines++);
+	//initcmd.bytesWrote += sd_lol_writeline(initcmd.filename, "settime_00_24_00\r", initcmd.maxchars, initcmd.maxlines++);
 
 	sdfile_parsecmds(&initcmd);
 
@@ -82,17 +82,27 @@ void sdfile_add_logline			(HHW_FILE_FORMAT* happylog, char* buffer)
 void sdfile_parsecmds			(HHW_FILE_FORMAT* file)
 	{
 	int bytesRead;
-	char linebuffer[file->maxchars];
-	 file->act_line = 0;
-	while(file->act_line <= file->maxlines)
+	file->act_line = 0;
+	//anzahl commands in file unbekannt
+	while(file->act_line < 0xF)
 		{
 		bytesRead= sd_lol_readline(file->filename, btTerm.string_rx, file->maxchars, file->act_line);
-		term_printf(&btTerm, "\rcmd sdread: %d bytes Read:\r%s\r", bytesRead,   btTerm.string_rx);
-		btTerm.sep = strdup("_");
-		term_lol_parse(&btTerm);
+		if(strchr(btTerm.string_rx, '#'))
+			{
+			file->maxlines = (file-> act_line) -1;
+			term_printf(&btTerm, "\rcmd sdfile_parsecmds:eof, new maxlines: %d\r", file->maxlines);
+			break;
+			}
+		else
+			{
+			term_printf(&btTerm, "\rcmd sdfile_parsecmds: %d bytes Read:\r%s\r", bytesRead,   btTerm.string_rx);
+			btTerm.sep = strdup("_");
+			term_lol_parse(&btTerm);
+			btTerm.sep = strdup(" ");
+			}
 		file->act_line++;
 		}
-	btTerm.sep = strdup(" ");
+
 	}
 
 HHW_FILE_FORMAT initcmd, happylog, eeprom;

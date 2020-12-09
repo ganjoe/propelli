@@ -10,7 +10,7 @@
 
 typedef struct
 {
-	uint16_t maxchars, maxlines, maxfilename;
+	int16_t maxchars, maxlines, maxfilename;
 	const char* header;
 	const char* filename;
 	uint16_t act_line, flag;

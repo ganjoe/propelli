@@ -26,12 +26,12 @@ void Command_init()
         term_lol_setCallback("settime", "hh mm ss",	    "rtc setzen", settime);
 
         term_lol_setCallback("sdwrite", "filename string chars lines","schreibt zu beginn einer zeile",	sdwrite);
-
         term_lol_setCallback("sdread", 	"help",	    "arghelp", 	sdread);
         term_lol_setCallback("readinit","help",	    "arghelp", 	readinit);
         term_lol_setCallback("writeinit","help",	"arghelp", 	writeinit);
         term_lol_setCallback("nlogn",	"help",		"arghelp", 	nlogn);
         term_lol_setCallback("nlog",	"help",		"arghelp", 	nlog);
+        term_lol_setCallback("clearinit","write blanks to initfile","lines to write", 	clearinit);
 
         term_lol_setCallback("selterm",	"help",		"arghelp", 	selterm);
         term_lol_setCallback("reset", 	"help",		"arghelp", 	reset);
@@ -218,7 +218,7 @@ void readinit(int argc, const char **argv)
 		int bytesRead;
 		char linebuffer[initcmd.maxchars];
 		bytesRead= sd_lol_readline(initcmd.filename, linebuffer, initcmd.maxchars, d);
-		term_printf(&btTerm, "\rcmd readinit: (%2d/%2d)%s\r", d, initcmd.act_line, linebuffer);
+		term_printf(&btTerm, "\rcmd readinit: (%2d/%2d)%s\r", d, initcmd.maxlines, linebuffer);
 		//free (linebuffer);
 		}
 	}
@@ -229,16 +229,18 @@ if (argc == 3)
 	int line;
 	sscanf(argv[2], "%d", &line);
 
-	if (utils_truncate_number_int(&line, 0, initcmd.maxlines))
+	if (line > initcmd.maxlines)
 		{
 		initcmd.maxlines++;
-		term_printf(&btTerm, "\rcmd writeinit:append cmd (%d)\r", initcmd.maxlines);
+		term_printf(&btTerm, "\rcmd writeinit:extend list with new cmd (%d)\r", initcmd.maxlines);
 		initcmd.bytesWrote = sd_lol_writeline(initcmd.filename, argv[1], initcmd.maxchars, initcmd.maxlines);
+		sd_lol_writeline(initcmd.filename, "#", initcmd.maxchars, (initcmd.maxlines) + 1);
+
 		}
-	else
+	if (line <= initcmd.maxlines)
 		{
-		initcmd.bytesWrote = sd_lol_writeline(initcmd.filename, argv[1], initcmd.maxchars,line);
-		term_printf(&btTerm, "\rcmd writeinit:replace cmd (%d)\r", line);
+		initcmd.bytesWrote = sd_lol_writeline(initcmd.filename, argv[1], initcmd.maxchars, line);
+		term_printf(&btTerm, "\rcmd writeinit:replace cmd in list(%d)\r", line);
 		}
 
 
@@ -248,9 +250,33 @@ if (argc == 3)
 		}
 	else
 		{
-		term_printf(&btTerm, "\rcmd writeinit: not ready\r", initcmd.bytesWrote);
+		term_printf(&btTerm, "\rcmd writeinit: not ready. disable initcmd.flag\r", initcmd.bytesWrote);
+		initcmd.flag = false;
 		}
 	}
+}
+void clearinit(int argc, const char **argv)
+{
+	int d = -1;
+	if (argc == 2)
+		{
+		sscanf(argv[1], "%d", &d);
+		int bytesWrote;
+		char* emptybuff = calloc(initcmd.maxchars -1 ,1);
+		memset(emptybuff,(int)'#', initcmd.maxchars -1);
+		for (int var = 0; var < d; ++var)
+			{
+			bytesWrote += sd_lol_writeline(initcmd.filename, emptybuff, initcmd.maxchars, var);
+			}
+		free(emptybuff);
+		term_printf(&btTerm, "\rcmd clearinit: %d lines cleard with %d blanks ok\r",d, bytesWrote);
+		}
+	else
+		{
+		term_printf(&btTerm, "\rcmd clearinit: params");
+		}
+
+
 }
 
 void nlogn(int argc, const char **argv)
