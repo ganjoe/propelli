@@ -18,7 +18,7 @@ static TD_TERMINAL_CALLBACKS callbacks[CALLBACK_LEN];
 static int callback_write = 0;
 
 void mfinit_terminal(TD_TERMINAL* term)
-{
+	{
 	modflag_init(&term->mf_cmd, HALTICK, 1);
 	term->callback_len = 40;
 	term->maxArguments = 4;
@@ -28,8 +28,8 @@ void mfinit_terminal(TD_TERMINAL* term)
 	term->string_tx = calloc(term->uart_buffer_tx_len, 1);
 	term->sep  = strdup(" ");
 	term->eoc = (char*)13;
+	}
 
-}
 void mftask_terminal(TD_TERMINAL* term)
 	{
     if (&term->mf_cmd.flag && term->mf_cmd.init_done)
@@ -207,4 +207,5 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 			}
 		}
     }
+
 TD_TERMINAL btTerm;

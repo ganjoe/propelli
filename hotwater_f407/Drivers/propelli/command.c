@@ -213,15 +213,15 @@ void readinit(int argc, const char **argv)
 	{
 	int d = -1;
 	if (argc == 2)
-	{
-	sscanf(argv[1], "%d", &d);
-	int bytesRead;
-	char* linebuffer = calloc(initcmd.maxchars,1);
-	bytesRead = sd_lol_readline(initcmd.filename, linebuffer, initcmd.maxchars, d);
-	term_printf(&btTerm, "\rcmd sdread: %d bytes Read:\r%s", bytesRead, linebuffer);
-	free (linebuffer);
+		{
+		sscanf(argv[1], "%d", &d);
+		int bytesRead;
+		char linebuffer[initcmd.maxchars];
+		bytesRead= sd_lol_readline(initcmd.filename, linebuffer, initcmd.maxchars, d);
+		term_printf(&btTerm, "\rcmd readinit: (%2d/%2d)%s\r", d, initcmd.act_line, linebuffer);
+		//free (linebuffer);
+		}
 	}
-}
 void writeinit(int argc, const char **argv)
 {
 if (argc == 3)
@@ -229,7 +229,19 @@ if (argc == 3)
 	int line;
 	sscanf(argv[2], "%d", &line);
 
-	initcmd.bytesWrote = sd_lol_writeline(initcmd.filename, argv[1], initcmd.maxchars, line);
+	if (utils_truncate_number_int(&line, 0, initcmd.maxlines))
+		{
+		initcmd.maxlines++;
+		term_printf(&btTerm, "\rcmd writeinit:append cmd (%d)\r", initcmd.maxlines);
+		initcmd.bytesWrote = sd_lol_writeline(initcmd.filename, argv[1], initcmd.maxchars, initcmd.maxlines);
+		}
+	else
+		{
+		initcmd.bytesWrote = sd_lol_writeline(initcmd.filename, argv[1], initcmd.maxchars,line);
+		term_printf(&btTerm, "\rcmd writeinit:replace cmd (%d)\r", line);
+		}
+
+
 	if (initcmd.bytesWrote>0)
 		{
 		term_printf(&btTerm, "\rcmd writeinit: %d bytes Writen\r", initcmd.bytesWrote);

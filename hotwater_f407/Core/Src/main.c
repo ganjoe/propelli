@@ -125,11 +125,11 @@ int main(void)
   mfinit_terminal(&btTerm);
   //als drittes für init commands
   Command_init();
-   //init_cmdfile nach command_ini
+   //init_cmdfile nach happylog
   mfinit_prettylog(&prettylog);
-  init_sdfile_initcmd(&initcmd);
-  init_sdfile_happylog(&happylog);
 
+  init_sdfile_happylog(&happylog);
+	init_sdfile_initcmd(&initcmd);
   mfinit_boardled();
   mfinit_mcp23017();
  // mfinit_poti(&analogchan);

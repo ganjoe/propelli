@@ -23,5 +23,5 @@ void init_sdfile_initcmd	(HHW_FILE_FORMAT* file);
 void init_sdfile_happylog	(HHW_FILE_FORMAT* file);
 void sdfile_lol_newhappylog	();
 void sdfile_add_logline		(HHW_FILE_FORMAT* happylog, char* buffer);
-
+void sdfile_parsecmds		(HHW_FILE_FORMAT* file);
 #endif /* PROPELLI_SDFILE_H_ */

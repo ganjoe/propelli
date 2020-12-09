@@ -15,8 +15,13 @@ void init_sdfile_initcmd		(HHW_FILE_FORMAT* file)
 	initcmd.filename=strdup("initcmd.hhw");
 	initcmd.header=strdup("batch file");
 	initcmd.maxchars =32;	//jede zeile ist gleichlang
-	initcmd.maxlines =0xF;	//im sinne von maxcommands
+	initcmd.maxlines =0;	//im sinne von maxcommands
 	initcmd.maxfilename =32;
+
+	initcmd.bytesWrote = sd_lol_writeline(initcmd.filename, "setdate_9_12_20\r", initcmd.maxchars, initcmd.maxlines++);
+	initcmd.bytesWrote += sd_lol_writeline(initcmd.filename, "settime_00_24_00\r", initcmd.maxchars, initcmd.maxlines++);
+
+	sdfile_parsecmds(&initcmd);
 
 	}
 
@@ -26,7 +31,7 @@ void init_sdfile_happylog		(HHW_FILE_FORMAT* file)
 	file->header=strdup("log_date tlog_time volt_mcu battvolt temp_mcu coldwatr hotwater mcpinput loglines\r");
 	file->maxchars =120;	//jede zeile ist gleichlang
 	file->maxfilename =32;
-	file->maxlines =0xFF;	//jede datei hat gleich viele zeilen
+	file->maxlines =0xFFF;	//jede datei hat gleich viele zeilen
 	file->flag = true;
 	sdfile_lol_newhappylog();
 	}
@@ -74,5 +79,20 @@ void sdfile_add_logline			(HHW_FILE_FORMAT* happylog, char* buffer)
 		}
 	}
 
+void sdfile_parsecmds			(HHW_FILE_FORMAT* file)
+	{
+	int bytesRead;
+	char linebuffer[file->maxchars];
+	 file->act_line = 0;
+	while(file->act_line <= file->maxlines)
+		{
+		bytesRead= sd_lol_readline(file->filename, btTerm.string_rx, file->maxchars, file->act_line);
+		term_printf(&btTerm, "\rcmd sdread: %d bytes Read:\r%s\r", bytesRead,   btTerm.string_rx);
+		btTerm.sep = strdup("_");
+		term_lol_parse(&btTerm);
+		file->act_line++;
+		}
+	btTerm.sep = strdup(" ");
+	}
 
 HHW_FILE_FORMAT initcmd, happylog, eeprom;
