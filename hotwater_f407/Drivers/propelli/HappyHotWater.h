@@ -37,6 +37,7 @@ typedef enum
 {
 	BTN_KALT,
 	BTN_WARM,
+	BTN_OFF,
 	//outputs
 	VALVE_DRAIN,
 	VALVE_SHOWR,
@@ -49,9 +50,10 @@ typedef enum
 
 	BTN_SPUELE,
 	BTN_BRAUSE,
-	//system inpus
-	LVLSW_UL,
-	LVLSW_LL,
+	//system inpus nur UL und LL in hardware vorhanden
+	LVLSW_FULL,	//ul und ll
+	LVLSW_EMPTY,	// kein signal
+	LVLSW_MID,	//	nur ll
 }
 HHW_WORD_NAMES;
 

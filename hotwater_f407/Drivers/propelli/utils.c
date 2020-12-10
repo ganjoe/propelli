@@ -193,3 +193,4 @@ int utils_get_bit_in_Word(uint16_t *word, uint16_t pos)
     if (*word & (1<<pos)) 	{return true;}
     else 					{return false;}
 }
+

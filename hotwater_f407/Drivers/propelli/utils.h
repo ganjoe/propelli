@@ -40,4 +40,5 @@ uint16_t utils_get_word_from_bytes(uint8_t lbyte, uint8_t hbyte, int swap);
 void utils_togg_bit_in_Word(uint16_t *word, uint8_t pos);
 
 int utils_get_bit_in_Word(uint16_t *word, uint16_t pos);
+
 #endif /* INC_UTILS_H_ */

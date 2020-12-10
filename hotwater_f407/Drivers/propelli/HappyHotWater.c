@@ -24,8 +24,9 @@ void mfinit_happyhotwater	(TD_HappyHotwater* hhw)
 	hhw->iowords[BTN_KALT] 		=	0x1;
 	hhw->iowords[BTN_SPUELE] 	=	0x4;
 	hhw->iowords[BTN_WARM] 		=	0x2;
-	hhw->iowords[LVLSW_UL] 		=	0x3;
-	hhw->iowords[LVLSW_LL] 		=	0x20;
+	hhw->iowords[LVLSW_EMPTY] 		=	0x3;
+	hhw->iowords[LVLSW_FULL] 		=	0x3;
+	hhw->iowords[LVLSW_MID] 		=	0x20;
 	hhw->iowords[HOTROD_300]	=	0x40;
 	hhw->iowords[VALVE_DRAIN]	=	0x80;
 	hhw->iowords[VALVE_SHOWR]	=	0x100;
@@ -59,36 +60,52 @@ void mftick_happyhotwater	(TD_HappyHotwater* hhw)
 void hhw_lol_update(TD_HappyHotwater* hhw,	Valuebuffer* db)
 	{
 
-	if (( !utils_get_bit_in_Word(&db->iostatus, 1))	&& ( utils_get_bit_in_Word(&db->iostatus, 2)))
-
+	if (hhw->iowords[BTN_KALT] && db->iostatus)
 		{
 		utils_set_bit_in_Word(&hhw->states, COLDWTR_SPUELE, true);
 		utils_set_bit_in_Word(&hhw->states, COLDWTR_SHOWER, true);
 		utils_set_bit_in_Word(&hhw->states, HOTWTR_SPUELE, false);
 		utils_set_bit_in_Word(&hhw->states, HOTWTR_SHOWER, false);
 		}
-
-	if (( !utils_get_bit_in_Word(&db->iostatus, 2))	&&	( utils_get_bit_in_Word(&db->iostatus, 1)))
+	if (hhw->iowords[BTN_WARM] && db->iostatus)
 		{
 		utils_set_bit_in_Word(&hhw->states, COLDWTR_SPUELE, false);
 		utils_set_bit_in_Word(&hhw->states, COLDWTR_SHOWER , false);
 		utils_set_bit_in_Word(&hhw->states, HOTWTR_SPUELE, true);
 		utils_set_bit_in_Word(&hhw->states, HOTWTR_SHOWER, true);
 		}
-	if (db->batthwvolt > hhw->VoltLevel_power_ok)
+	if (hhw->iowords[LVLSW_FULL] && db->iostatus)
 		{
-		utils_set_bit_in_Word(&hhw->states, STDBY_INV, true);
-		utils_set_bit_in_Word(&hhw->states, STDBY_LV, false);
+		utils_set_bit_in_Word(&hhw->states, TANK_HOT_FULL, true);
+		utils_set_bit_in_Word(&hhw->states, TANK_HOT_EMPTY , false);
+		utils_set_bit_in_Word(&hhw->states, TANK_HOT_MID, false);
 		}
-	else
+	if (hhw->iowords[LVLSW_MID] && db->iostatus)
 		{
-		utils_set_bit_in_Word(&hhw->states, STDBY_INV, false);
+		utils_set_bit_in_Word(&hhw->states, TANK_HOT_FULL, false);
+		utils_set_bit_in_Word(&hhw->states, TANK_HOT_EMPTY , false);
+		utils_set_bit_in_Word(&hhw->states, TANK_HOT_MID, true);
 		}
-		if (db->batthwvolt < hhw->VoltLevel_lowbatt)
+	if (hhw->iowords[LVLSW_EMPTY] && db->iostatus)
+		{
+		utils_set_bit_in_Word(&hhw->states, TANK_HOT_FULL, false);
+		utils_set_bit_in_Word(&hhw->states, TANK_HOT_EMPTY , true);
+		utils_set_bit_in_Word(&hhw->states, TANK_HOT_MID, false);
+		}
+
+	if (db->batthwvolt < hhw->VoltLevel_lowbatt)
 		{
 		utils_set_bit_in_Word(&hhw->states, STDBY_LV, true);
+		utils_set_bit_in_Word(&hhw->states, STDBY_INV, false);
 		}
-	}
+	if (db->batthwvolt > hhw->VoltLevel_power_ok)
+		{
+		utils_set_bit_in_Word(&hhw->states, STDBY_LV, false);
+		utils_set_bit_in_Word(&hhw->states, STDBY_INV, true);
+		}
+
+
+		}
 
 
 
