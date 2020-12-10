@@ -15,7 +15,7 @@
 typedef enum
 {
 	/*versorgungsart*/
-
+	//STDBY_OK,
 	STDBY_INV,
 	STDBY_LV,
 
@@ -35,6 +35,8 @@ HHW_STATES;
 
 typedef enum
 {
+	BTN_KALT,
+	BTN_WARM,
 	//outputs
 	VALVE_DRAIN,
 	VALVE_SHOWR,
@@ -44,8 +46,7 @@ typedef enum
 	PUMP_COLD,
 	HOTROD_300,	//heizung 300W
 	//user inputs
-	BTN_KALT,
-	BTN_WARM,
+
 	BTN_SPUELE,
 	BTN_BRAUSE,
 	//system inpus

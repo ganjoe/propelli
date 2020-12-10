@@ -139,6 +139,7 @@ uint16_t utils_swap_bytes(uint16_t word, uint8_t* lbyte, uint8_t* hbyte)
     *hbyte = highbyte;
     return dword;
     }
+
 void utils_get_bytes_in_word(uint16_t* word, uint8_t* lbyte, uint8_t* hbyte)
     {
     uint16_t dword=*word;
@@ -150,6 +151,7 @@ void utils_get_bytes_in_word(uint16_t* word, uint8_t* lbyte, uint8_t* hbyte)
     *hbyte =highbyte;
 
     }
+
 uint16_t utils_get_word_from_bytes(uint8_t lbyte, uint8_t hbyte, int swap)
     {
     uint8_t dword[2];
@@ -161,6 +163,7 @@ uint16_t utils_get_word_from_bytes(uint8_t lbyte, uint8_t hbyte, int swap)
     word |= dword[swap];
     return word;
     }
+
 void utils_get_word_from_bytes_ptr(uint16_t* word, uint8_t* lbyte, uint8_t* hbyte, int swap)
     {
 
@@ -188,5 +191,5 @@ void utils_togg_bit_in_Word(uint16_t *word, uint8_t pos)
 int utils_get_bit_in_Word(uint16_t *word, uint16_t pos)
 {
     if (*word & (1<<pos)) 	{return true;}
-    else 			{return false;}
+    else 					{return false;}
 }

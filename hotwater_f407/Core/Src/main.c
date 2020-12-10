@@ -44,6 +44,7 @@
 #include "potis.h"
 #include "terminal.h"
 #include "command.h"
+#include "HappyHotWater.h"
 #include "sdfile.h"
 
 /* USER CODE END Includes */
@@ -129,13 +130,14 @@ int main(void)
   mfinit_prettylog(&prettylog);
 
   init_sdfile_happylog(&happylog);
-	init_sdfile_initcmd(&initcmd);
+  init_sdfile_initcmd(&initcmd);
   mfinit_boardled();
   mfinit_mcp23017();
  // mfinit_poti(&analogchan);
  // mfinit_tsensor(&tsensor_cold);
  // mfinit_tsensor(&tsensor_hot);
   mfinit_ina219(&batt_hw);
+  mfinit_happyhotwater(&Hhw);
 
   tsensor_cold.wire.GPIO_InitStruct.Pin = onewire_Pin;
   tsensor_cold.wire.onewire_port 		= onewire_GPIO_Port;
@@ -161,6 +163,8 @@ int a=0;
     mftask_mcp23017(&mcp_io);
     mftask_prettylog(&prettylog.pp_modflag);
     mftask_ina219(&batt_hw);
+
+    mftask_happyhotwater(&Hhw, &db);
 
    // mftask_potis(&analogchan);
     // mftask_tsensor(&tsensor_hot);

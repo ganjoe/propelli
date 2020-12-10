@@ -20,7 +20,7 @@ void mfinit_ina219	(TD_INA219 *batt_hw)
     //bits im configbuffer werden nur durch reset gelöscht
 
     batt_hw->shunt = 0.1;
-    batt_hw->max_current = 2;
+    batt_hw->max_current = 3;
 
     ina_setup(batt_hw);
     batt_hw->mf_ina219.init_done=1;
