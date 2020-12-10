@@ -153,7 +153,7 @@ void mcp_lolReadBuffer	(TD_MCP *mcp_io, uint16_t *buffer, uint16_t addr)
 void mcp_lolWriteByte	(TD_MCP *io, uint16_t regaddr, uint8_t data)
     {
     HAL_StatusTypeDef complete = !HAL_OK;
-    complete = HAL_I2C_Mem_Write_DMA(&hi2c1, io->addr, regaddr, 1, &data, 1);
+    complete = HAL_I2C_Mem_Write(&hi2c1, io->addr, regaddr, 1, &data, 1,HAL_TIMEOUT);
     if (complete == !HAL_OK)
     	{
     	io->mf_mcp23017.init_done = false;
