@@ -19,11 +19,20 @@ typedef enum
 	STDBY_INV,
 	STDBY_LV,
 
-	/*Betriebsmodus*/
+	/*Betriebsmodi für kalt und warm*/
 	HOTWTR_SPUELE,
 	COLDWTR_SPUELE,
 	HOTWTR_SHOWER,
 	COLDWTR_SHOWER,
+	/*Betriebsmodi für Tank nachfüllen*/
+	TANK_ALWAYS_MID_TO_FULL,
+	TANK_ALWAYS_EMPTY_TO_FULL,
+	TANK_ALWAYS_EMPTY_TO_MID,
+	TANK_ALWAYS_FULL,
+	TANK_ALWAYS_EMPTY,
+	/*Betriebsmodi für Heizstab*/
+	HOTROD_FULL_POWER,
+	//HOTROD_HALF_POWER, //taktender Betrieb oder pwm
 
 	/*Betriebszustand*/
 	TANK_HOT_FULL,
@@ -47,13 +56,12 @@ typedef enum
 	PUMP_COLD,
 	HOTROD_300,	//heizung 300W
 	//user inputs
-
 	BTN_SPUELE,
 	BTN_BRAUSE,
 	//system inpus nur UL und LL in hardware vorhanden
-	LVLSW_FULL,	//ul und ll
+	LVLSW_FULL,		//ul und ll
 	LVLSW_EMPTY,	// kein signal
-	LVLSW_MID,	//	nur ll
+	LVLSW_MID,		//	nur ll
 }
 HHW_WORD_NAMES;
 
@@ -66,9 +74,6 @@ typedef struct
 
 	//bitmaske für Betriebszustände
 	uint16_t states;
-
-	/*--hhw_lol_shower--*/
-	/*--hhw_lol_drain--*/
 
 	//zielwert regelung
 	float hw_temperature;
@@ -86,11 +91,10 @@ typedef struct
 
 }
 TD_HappyHotwater;
+
 void mfinit_happyhotwater	(TD_HappyHotwater* hhw);
-
-void mftask_happyhotwater(TD_HappyHotwater* hhw, Valuebuffer* db);
-
-int hhw_lol_bimetal(float *value, float delta, float setpoint);
+void mftask_happyhotwater	(TD_HappyHotwater* hhw, Valuebuffer* db);
+void mftick_happyhotwater	(TD_HappyHotwater* hhw);
 
 extern TD_HappyHotwater Hhw;
 
