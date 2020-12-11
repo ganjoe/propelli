@@ -71,7 +71,7 @@ void readpin(int argc, const char **argv)
 			{
 			mcp_PinMode(&mcp_io, INPUT, d);
 			}
-		term_printf(&btTerm, "\rcmd readpin:pinnr %d pullup %d\r", &d, &e);
+		term_printf(&btTerm, "\rcmd readpin:pinnr %d pullup %d\r", d, e);
 		}
     }
 void setallin(int argc, const char **argv)

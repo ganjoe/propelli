@@ -44,7 +44,7 @@ void mftask_happyhotwater	(TD_HappyHotwater* hhw,	Valuebuffer* db)
 		{
 		hhw->mf_modflag.repeat = modflag_tickdiff(&hhw->mf_modflag);
 		hhw_lol_update(hhw, db);
-		hhw_lol_report(hhw);
+		//hhw_lol_report(hhw);
 		//hhw_lol_drain(hhw);
 		//hhw_lol_shower(hhw);
 

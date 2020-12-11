@@ -8,7 +8,7 @@
 #include "PrettyLog.h"
 #include "rtc.h"
 #include "sdfile.h"
-
+#include "HappyHotWater.h"
 #include "terminal.h"
 #include "usart.h"
 
@@ -135,6 +135,7 @@ void mftask_prettylog(modflag *thismf)
 		strncat		(buffer,"\r",1);
 		sdfile_add_logline(&happylog, buffer);
 		term_printf(&btTerm, buffer);
+		hhw_lol_report(&Hhw);
 
 		thismf->duration = modflag_tickdiff(thismf);
 		thismf->flag = false;

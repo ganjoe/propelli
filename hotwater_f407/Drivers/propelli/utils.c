@@ -174,10 +174,10 @@ void utils_set_bit_in_Word(uint16_t *word, uint8_t pos, bool state)
 	switch (state)
 	    {
 	    case 1:
-		*word |=1<<pos;
+		*word |= 1UL << pos;
 		break;
 	    case 0:
-		*word &=~1<<pos;
+		*word &= ~(1UL << pos);
 		break;
 	    }
 

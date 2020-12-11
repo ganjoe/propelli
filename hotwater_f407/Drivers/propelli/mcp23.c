@@ -17,7 +17,7 @@ void mfinit_mcp23017()
     mcp_io.hi2c = hi2c1;
     mcp_io.addr = 0x20 << 1;
 
-    mcp_PinMode(&mcp_io, OUTPUT, 1);
+   // mcp_PinMode(&mcp_io, OUTPUT, 1);
     //mcp_io.outlatch = 0xFFFF;	// alle lampen an
     //AddressIOCON.BANK = 0 - default
     }
