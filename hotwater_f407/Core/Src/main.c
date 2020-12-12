@@ -164,7 +164,12 @@ int a=0;
     mftask_prettylog(&prettylog.pp_modflag);
     mftask_ina219(&batt_hw);
 
-    mftask_happyhotwater(&Hhw, &db);
+    if (batt_hw.voltbuff < 0)
+    {
+    	ina_setup(&batt_hw);
+    }
+
+    //mftask_happyhotwater(&Hhw, &db);
 
    // mftask_potis(&analogchan);
     // mftask_tsensor(&tsensor_hot);

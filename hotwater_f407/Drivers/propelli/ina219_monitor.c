@@ -19,7 +19,7 @@ void mfinit_ina219	(TD_INA219 *batt_hw)
     batt_hw->addr = 0x40 << 1;
     //bits im configbuffer werden nur durch reset gelöscht
 
-    batt_hw->shunt = 0.1;
+    batt_hw->shunt = 0.05;
     batt_hw->max_current = 3;
 
     ina_setup(batt_hw);
@@ -50,6 +50,7 @@ void mftask_ina219	(TD_INA219 *batt_hw)
 			{
 			ina_getpower(batt_hw);
 			 }
+
 
 		batt_hw->mf_ina219.duration = modflag_tickdiff(&batt_hw->mf_ina219);
 		batt_hw->mf_ina219.callcount++;

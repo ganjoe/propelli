@@ -11,8 +11,9 @@
 
 void hhw_lol_update			(TD_HappyHotwater* hhw,	Valuebuffer* db);
 void hhw_lol_drain			(TD_HappyHotwater *hhw, TD_MCP *mcp_io);
-void hhw_lol_report			(TD_HappyHotwater *hhw);
+void hhw_lol_report(TD_HappyHotwater *hhw, Valuebuffer* db);
 void hhw_lol_refill			(TD_HappyHotwater* hhw,	Valuebuffer* db);
+void hhw_lol_battery_soc (TD_HappyHotwater* hhw,	Valuebuffer* db);
 
 void mfinit_happyhotwater	(TD_HappyHotwater* hhw)
 {
@@ -22,20 +23,25 @@ void mfinit_happyhotwater	(TD_HappyHotwater* hhw)
 	 * für ein und ausgänge werden im array
 	 * gespeichert und über enums adressiert
 	 */
-	hhw->iowords[BTN_BRAUSE] 	=	0x0;
-	hhw->iowords[BTN_KALT] 		=	0x1;
-	hhw->iowords[BTN_SPUELE] 	=	0x4;
-	hhw->iowords[BTN_WARM] 		=	0x2;
+	hhw->iowords[BTN_WARM] 		=	0x5;
+	hhw->iowords[BTN_KALT] 		=	0x3;
+	hhw->iowords[BTN_OFF] 		=	0x6;		//invertiert abfragen
+	hhw->iowords[BTN_BRAUSE] 	=	0x20;
+	hhw->iowords[BTN_SPUELE] 	=	0x40;
 	hhw->iowords[LVLSW_EMPTY]	=	0x3;
-	hhw->iowords[LVLSW_FULL] 	=	0x3;
-	hhw->iowords[LVLSW_MID]     =	0x20;
-	hhw->iowords[HOTROD_300]	=	0x40;
-	hhw->iowords[VALVE_DRAIN]	=	0x80;
-	hhw->iowords[VALVE_SHOWR]	=	0x100;
-	hhw->iowords[VALVE_COLD]	=	0x200;
-	hhw->iowords[VALVE_HOT]		=	0x400;
-	hhw->iowords[PUMP_HOT]		=	0x800;
-	hhw->iowords[PUMP_COLD]		=	0x1000;
+	hhw->iowords[LVLSW_FULL] 	=	0x19;
+	hhw->iowords[LVLSW_MID]     =	0x11;
+	hhw->iowords[HOTROD_300]	=	0x400;
+	hhw->iowords[VALVE_DRAIN]	=	0x10000;
+	hhw->iowords[VALVE_SHOWR]	=	0x8000;
+	hhw->iowords[VALVE_COLD]	=	0x4000;
+	hhw->iowords[VALVE_HOT]		=	0x2000;
+	hhw->iowords[PUMP_HOT]		=	0x1000;
+	hhw->iowords[PUMP_COLD]		=	0x800;
+
+	hhw->VoltLevel_lowbatt = 11.8;
+	hhw->VoltLevel_power_inv = 13.5;
+	hhw->VoltLevel_highbatt = 12.72;
 }
 
 void mftask_happyhotwater	(TD_HappyHotwater* hhw,	Valuebuffer* db)
@@ -45,8 +51,8 @@ void mftask_happyhotwater	(TD_HappyHotwater* hhw,	Valuebuffer* db)
 		hhw->mf_modflag.repeat = modflag_tickdiff(&hhw->mf_modflag);
 		hhw_lol_update(hhw, db);
 		//hhw_lol_report(hhw);
-		//hhw_lol_drain(hhw);
-		//hhw_lol_shower(hhw);
+		hhw_lol_drain(&Hhw,&mcp_io);
+
 
 		hhw->mf_modflag.duration = modflag_tickdiff(&hhw->mf_modflag);
 		hhw->mf_modflag.callcount++;
@@ -61,108 +67,212 @@ void mftick_happyhotwater	(TD_HappyHotwater* hhw)
 
 void hhw_lol_update(TD_HappyHotwater* hhw,	Valuebuffer* db)
 	{
-
-	if (hhw->iowords[BTN_KALT] && db->iostatus)
+	if (! utils_get_bits_in_Word(&db->iostatus, hhw->iowords[BTN_OFF]))
+		{
+		utils_set_bit_in_Word(&hhw->states, COLDWTR_SPUELE, false);
+		utils_set_bit_in_Word(&hhw->states, COLDWTR_SHOWER , false);
+		utils_set_bit_in_Word(&hhw->states, HOTWTR_SPUELE, false);
+		utils_set_bit_in_Word(&hhw->states, HOTWTR_SHOWER, false);
+		}
+	if (utils_get_bits_in_Word(&db->iostatus, hhw->iowords[BTN_KALT]))
 		{
 		utils_set_bit_in_Word(&hhw->states, COLDWTR_SPUELE, true);
 		utils_set_bit_in_Word(&hhw->states, COLDWTR_SHOWER, true);
 		utils_set_bit_in_Word(&hhw->states, HOTWTR_SPUELE, false);
 		utils_set_bit_in_Word(&hhw->states, HOTWTR_SHOWER, false);
 		}
-	if (hhw->iowords[BTN_WARM] && db->iostatus)
+	if (utils_get_bits_in_Word(&db->iostatus, hhw->iowords[BTN_WARM]))
 		{
 		utils_set_bit_in_Word(&hhw->states, COLDWTR_SPUELE, false);
 		utils_set_bit_in_Word(&hhw->states, COLDWTR_SHOWER , false);
 		utils_set_bit_in_Word(&hhw->states, HOTWTR_SPUELE, true);
 		utils_set_bit_in_Word(&hhw->states, HOTWTR_SHOWER, true);
 		}
-	if (hhw->iowords[LVLSW_FULL] && db->iostatus)
+
+	utils_set_bit_in_Word(&hhw->states, TANK_HOT_EMPTY, true);
+
+	if (utils_get_bits_in_Word(&db->iostatus, hhw->iowords[LVLSW_MID]))
+		{
+		utils_set_bit_in_Word(&hhw->states, TANK_HOT_MID, true);
+		utils_set_bit_in_Word(&hhw->states, TANK_HOT_EMPTY, false);
+		}
+
+	if (utils_get_bits_in_Word(&db->iostatus, hhw->iowords[LVLSW_FULL]))
 		{
 		utils_set_bit_in_Word(&hhw->states, TANK_HOT_FULL, true);
 		utils_set_bit_in_Word(&hhw->states, TANK_HOT_EMPTY , false);
 		utils_set_bit_in_Word(&hhw->states, TANK_HOT_MID, false);
 		}
-	if (hhw->iowords[LVLSW_MID] && db->iostatus)
+	else
 		{
 		utils_set_bit_in_Word(&hhw->states, TANK_HOT_FULL, false);
-		utils_set_bit_in_Word(&hhw->states, TANK_HOT_EMPTY , false);
-		utils_set_bit_in_Word(&hhw->states, TANK_HOT_MID, true);
 		}
-	if (hhw->iowords[LVLSW_EMPTY] && db->iostatus)
+
+
+
+
+
+
+
+
+
+	if ((!utils_get_bits_in_Word(&db->iostatus, hhw->iowords[BTN_BRAUSE])) & (utils_get_bits_in_Word(&db->iostatus, hhw->iowords[BTN_SPUELE])))
 		{
-		utils_set_bit_in_Word(&hhw->states, TANK_HOT_FULL, false);
-		utils_set_bit_in_Word(&hhw->states, TANK_HOT_EMPTY , true);
-		utils_set_bit_in_Word(&hhw->states, TANK_HOT_MID, false);
+		utils_set_bit_in_Word(&hhw->states, DUSCHEN, true);
 		}
+	else
+		{
+		utils_set_bit_in_Word(&hhw->states, DUSCHEN, false);
+		}
+
+
+
+
+
+
+
+
+	if ((!utils_get_bits_in_Word(&db->iostatus, hhw->iowords[BTN_SPUELE])) &(utils_get_bits_in_Word(&db->iostatus, hhw->iowords[BTN_BRAUSE])))
+		{
+		utils_set_bit_in_Word(&hhw->states, SPUELEN, true);
+		}
+	else
+		{
+		utils_set_bit_in_Word(&hhw->states, SPUELEN, false);
+		}
+
+
+
+
+
+	if ((!utils_get_bits_in_Word(&db->iostatus, hhw->iowords[BTN_SPUELE])) &(!utils_get_bits_in_Word(&db->iostatus, hhw->iowords[BTN_BRAUSE])))
+		{
+		utils_set_bit_in_Word(&hhw->states, SPUELEN, true);
+		utils_set_bit_in_Word(&hhw->states, DUSCHEN, true);
+		}
+
+
+
+
+
+
+
+
 
 	if (db->batthwvolt < hhw->VoltLevel_lowbatt)
 		{
-		utils_set_bit_in_Word(&hhw->states, STDBY_LV, true);
-		utils_set_bit_in_Word(&hhw->states, STDBY_INV, false);
+		utils_set_bit_in_Word(&hhw->states, POWER_LV, true);
 		}
-	if (db->batthwvolt > hhw->VoltLevel_power_ok)
+	else
 		{
-		utils_set_bit_in_Word(&hhw->states, STDBY_LV, false);
-		utils_set_bit_in_Word(&hhw->states, STDBY_INV, true);
+		utils_set_bit_in_Word(&hhw->states, POWER_LV, false);
+		}
+
+
+
+
+
+
+
+
+
+	if (db->batthwcurr < 0)
+		{
+		utils_set_bit_in_Word(&hhw->states, POWER_INV, true);
+		}
+	else
+		{
+		utils_set_bit_in_Word(&hhw->states, POWER_INV, false);
+		}
+
+
+
+
+
+
+
+
+
+
+	if (db->batthwcurr > 0	)
+		{
+		utils_set_bit_in_Word(&hhw->states, POWER_VB, true);
+		}
+	else
+		{
+		utils_set_bit_in_Word(&hhw->states, POWER_VB, false);
 		}
 	}
 
-void hhw_lol_report(TD_HappyHotwater *hhw)
+void hhw_lol_report(TD_HappyHotwater *hhw, Valuebuffer* db)
 	{
-	term_printf(&btTerm, "hhw_lol_report_states: ");
-	if(utils_get_bit_in_Word(&hhw->states, STDBY_LV))		term_printf(&btTerm, "STDBY_LV");
-	if(utils_get_bit_in_Word(&hhw->states, STDBY_INV))		term_printf(&btTerm, "STDBY_INV");
-	if(utils_get_bit_in_Word(&hhw->states, TANK_HOT_FULL))	term_printf(&btTerm, "TANK_HOT_FULL");
-	if(utils_get_bit_in_Word(&hhw->states, TANK_HOT_MID))	term_printf(&btTerm, "TANK_HOT_MID");
-	if(utils_get_bit_in_Word(&hhw->states, TANK_HOT_EMPTY))	term_printf(&btTerm, "TANK_HOT_EMPTY");
-	if(utils_get_bit_in_Word(&hhw->states, COLDWTR_SPUELE))	term_printf(&btTerm, "COLDWTR_SPUELE");
-	if(utils_get_bit_in_Word(&hhw->states, COLDWTR_SHOWER))	term_printf(&btTerm, "COLDWTR_SHOWER");
-	if(utils_get_bit_in_Word(&hhw->states, HOTWTR_SHOWER))	term_printf(&btTerm, "HOTWTR_SHOWER");
-	if(utils_get_bit_in_Word(&hhw->states, HOTWTR_SPUELE))	term_printf(&btTerm, "HOTWTR_SPUELE");
+	term_printf(&btTerm, "\r***hhw_lol_report_states***\r");
+	if(utils_get_bit_in_Word(&hhw->states, POWER_LV))
+		term_printf(&btTerm, "POWER_LV (%2.2f < %2.1f)V\r", db->batthwvolt, hhw->VoltLevel_lowbatt);
+
+	if(utils_get_bit_in_Word(&hhw->states, POWER_INV))
+		term_printf(&btTerm, "POWER_INV (%2.2f > %2.1f)V\r", db->batthwvolt, hhw->VoltLevel_power_inv);
+
+	if(utils_get_bit_in_Word(&hhw->states, POWER_VB))
+		term_printf(&btTerm, "POWER_VB (%2.1f < %2.2f < %2.1f)V\r", hhw->VoltLevel_lowbatt, db->batthwvolt, hhw->VoltLevel_power_inv);
+
+	if(utils_get_bit_in_Word(&hhw->states, TANK_HOT_FULL))	term_printf(&btTerm, "TANK_HOT_FULL\r");
+	if(utils_get_bit_in_Word(&hhw->states, TANK_HOT_MID))	term_printf(&btTerm, "TANK_HOT_MID\r");
+	if(utils_get_bit_in_Word(&hhw->states, TANK_HOT_EMPTY))	term_printf(&btTerm, "TANK_HOT_EMPTY\r");
+	if(utils_get_bit_in_Word(&hhw->states, COLDWTR_SPUELE))	term_printf(&btTerm, "COLDWTR_SPUELE\r");
+	if(utils_get_bit_in_Word(&hhw->states, COLDWTR_SHOWER))	term_printf(&btTerm, "COLDWTR_SHOWER\r");
+	if(utils_get_bit_in_Word(&hhw->states, HOTWTR_SHOWER))	term_printf(&btTerm, "HOTWTR_SHOWER\r");
+	if(utils_get_bit_in_Word(&hhw->states, HOTWTR_SPUELE))	term_printf(&btTerm, "HOTWTR_SPUELE\r");
+	if(utils_get_bit_in_Word(&hhw->states, SPUELEN))		term_printf(&btTerm, "SPUELEN\r");
+	if(utils_get_bit_in_Word(&hhw->states, DUSCHEN))		term_printf(&btTerm, "DUSCHEN\r");
 	}
 
 void hhw_lol_drain(TD_HappyHotwater *hhw, TD_MCP *mcp_io)
 	{
-	if(utils_get_bit_in_Word(&hhw->states, STDBY_LV))
+	if(utils_get_bit_in_Word(&hhw->states, POWER_LV))
 		{
 		term_printf(&btTerm, "Fehler: HhW Batterie leer: Nachladen durch Einschalten vom Inverter");
 		}
 	else
 		{
-		if(utils_get_bit_in_Word(&hhw->states, COLDWTR_SPUELE))
+		mcp_io->outlatch = 0;
+		if(utils_get_bit_in_Word(&hhw->states, SPUELEN))
 			{
-			term_printf(&btTerm, "hhw_lol_drain:COLDWTR_SPUELE ok");
-			mcp_io->outlatch |= hhw->iowords[VALVE_COLD]; //bitweise oder verknüpfen
-			mcp_io->outlatch |= hhw->iowords[VALVE_DRAIN];
-			mcp_io->outlatch |= hhw->iowords[PUMP_COLD];
+			if(utils_get_bit_in_Word(&hhw->states, COLDWTR_SPUELE))
+				{
+				mcp_io->outlatch |= hhw->iowords[VALVE_COLD]; //bitweise oder verknüpfen
+				mcp_io->outlatch |= hhw->iowords[VALVE_DRAIN];
+				mcp_io->outlatch |= hhw->iowords[PUMP_COLD];
+				}
+			if(utils_get_bit_in_Word(&hhw->states, HOTWTR_SPUELE))
+				{
+				term_printf(&btTerm, "hhw_lol_drain:HOTWTR_SPUELE ok\r");
+				mcp_io->outlatch |= hhw->iowords[VALVE_HOT]; //bitweise oder verknüpfen
+				mcp_io->outlatch |= hhw->iowords[VALVE_DRAIN];
+				mcp_io->outlatch |= hhw->iowords[PUMP_HOT];
+				}
 			}
-		if(utils_get_bit_in_Word(&hhw->states, HOTWTR_SPUELE))
+		if(utils_get_bit_in_Word(&hhw->states, DUSCHEN))
 			{
-			term_printf(&btTerm, "hhw_lol_drain:HOTWTR_SPUELE ok");
-			mcp_io->outlatch |= hhw->iowords[VALVE_HOT]; //bitweise oder verknüpfen
-			mcp_io->outlatch |= hhw->iowords[VALVE_DRAIN];
-			mcp_io->outlatch |= hhw->iowords[PUMP_HOT];
-			}
-		if(utils_get_bit_in_Word(&hhw->states, COLDWTR_SHOWER))
-			{
-			term_printf(&btTerm, "hhw_lol_drain:COLDWTR_SHOWER ok");
-			mcp_io->outlatch |= hhw->iowords[VALVE_COLD]; //bitweise oder verknüpfen
-			mcp_io->outlatch |= hhw->iowords[VALVE_SHOWR];
-			mcp_io->outlatch |= hhw->iowords[PUMP_COLD];
-			}
-		if(utils_get_bit_in_Word(&hhw->states, HOTWTR_SHOWER))
-			{
-			term_printf(&btTerm, "hhw_lol_drain:HOTWTR_SHOWER ok");
-			mcp_io->outlatch |= hhw->iowords[VALVE_HOT]; //bitweise oder verknüpfen
-			mcp_io->outlatch |= hhw->iowords[VALVE_SHOWR];
-			mcp_io->outlatch |= hhw->iowords[PUMP_HOT];
+			if(utils_get_bit_in_Word(&hhw->states, COLDWTR_SHOWER))
+				{
+				mcp_io->outlatch |= hhw->iowords[VALVE_COLD]; //bitweise oder verknüpfen
+				mcp_io->outlatch |= hhw->iowords[VALVE_SHOWR];
+				mcp_io->outlatch |= hhw->iowords[PUMP_COLD];
+				}
+			if(utils_get_bit_in_Word(&hhw->states, HOTWTR_SHOWER))
+				{
+				mcp_io->outlatch |= hhw->iowords[VALVE_HOT]; //bitweise oder verknüpfen
+				mcp_io->outlatch |= hhw->iowords[VALVE_SHOWR];
+				mcp_io->outlatch |= hhw->iowords[PUMP_HOT];
+				}
 			}
 		}
 	}
 
 void hhw_lol_refill	(TD_HappyHotwater* hhw,	Valuebuffer* db)
 	{
-	if(utils_get_bit_in_Word(&hhw->states, TANK_ALWAYS_EMPTY_TO_MID))
+	if(utils_get_bit_in_Word(&hhw->states, TANK_ALWAYS_FULL))
 		{
 		if(utils_get_bit_in_Word(&hhw->states, LVLSW_EMPTY))
 			term_printf(&btTerm, "hhw_lol_refill: filling from empty to mid..");
@@ -173,7 +283,10 @@ void hhw_lol_refill	(TD_HappyHotwater* hhw,	Valuebuffer* db)
 		if(utils_get_bit_in_Word(&hhw->states, LVLSW_FULL))
 			term_printf(&btTerm, "hhw_lol_refill:draining from LVLSW_FULL to LVLSW_MID");
 		}
+	}
 
+void hhw_lol_battery_soc (TD_HappyHotwater* hhw,	Valuebuffer* db)
+	{
 
 	}
 TD_HappyHotwater Hhw;

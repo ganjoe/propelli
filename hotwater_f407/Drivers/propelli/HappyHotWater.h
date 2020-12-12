@@ -14,10 +14,6 @@
 
 typedef enum
 {
-	/*versorgungsart*/
-	//STDBY_OK,
-	STDBY_INV,
-	STDBY_LV,
 
 	/*Betriebsmodi für kalt und warm*/
 	HOTWTR_SPUELE,
@@ -25,20 +21,21 @@ typedef enum
 	HOTWTR_SHOWER,
 	COLDWTR_SHOWER,
 	/*Betriebsmodi für Tank nachfüllen*/
-	TANK_ALWAYS_MID_TO_FULL,
-	TANK_ALWAYS_EMPTY_TO_FULL,
-	TANK_ALWAYS_EMPTY_TO_MID,
-	TANK_ALWAYS_FULL,
+
 	TANK_ALWAYS_EMPTY,
-	/*Betriebsmodi für Heizstab*/
-	HOTROD_FULL_POWER,
+	TANK_ALWAYS_MID,
+	TANK_ALWAYS_FULL,
 	//HOTROD_HALF_POWER, //taktender Betrieb oder pwm
 
 	/*Betriebszustand*/
+	POWER_INV,
+	POWER_LV,
+	POWER_VB,
 	TANK_HOT_FULL,
 	TANK_HOT_MID,
 	TANK_HOT_EMPTY,
-	HEIZEN,
+	SPUELEN,
+	DUSCHEN,
 }
 HHW_STATES;
 
@@ -69,8 +66,8 @@ typedef struct
 {
 
 	//schaltzustände und deren zahl an aufrufen
-	uint16_t iowords[16];
-	uint16_t iocount[16];
+	uint32_t iowords[16];
+	uint32_t iocount[16];
 
 	//bitmaske für Betriebszustände
 	uint16_t states;
@@ -82,7 +79,10 @@ typedef struct
 	float hw_tempdelta;
 
 	//Spannungsschwellen für Betrieb
-	float VoltLevel_power_ok, VoltLevel_lowbatt;
+	float VoltLevel_power_inv, VoltLevel_lowbatt, VoltLevel_highbatt;
+
+	//Batteriekapazität in Prozent zwischen lowbatt und batt
+	float state_of_charge;
 
 	//enums als zeiger auf array mit bitsets
 	HHW_WORD_NAMES outnames;

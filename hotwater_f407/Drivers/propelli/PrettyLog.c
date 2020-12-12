@@ -135,7 +135,7 @@ void mftask_prettylog(modflag *thismf)
 		strncat		(buffer,"\r",1);
 		sdfile_add_logline(&happylog, buffer);
 		term_printf(&btTerm, buffer);
-		hhw_lol_report(&Hhw);
+		hhw_lol_report(&Hhw, &db);
 
 		thismf->duration = modflag_tickdiff(thismf);
 		thismf->flag = false;

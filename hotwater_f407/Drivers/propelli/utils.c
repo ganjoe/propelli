@@ -194,3 +194,16 @@ int utils_get_bit_in_Word(uint16_t *word, uint16_t pos)
     else 					{return false;}
 }
 
+int utils_get_bits_in_Word(uint16_t *word, uint16_t bitmask)
+{
+    if ((*word & bitmask) == bitmask)
+    {
+    	return true;
+    }
+    else
+    {
+    	return false;
+    }
+
+}
+
