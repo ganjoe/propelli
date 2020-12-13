@@ -13,6 +13,7 @@ void Command_init();
 //	config
 void reset(int argc, const char **argv);
 void selterm(int argc, const char **argv);
+void selhhw(int argc, const char **argv);
 void settime(int argc, const char **argv);
 void setdate(int argc, const char **argv);
 //	gpios setzen

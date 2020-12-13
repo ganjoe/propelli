@@ -188,13 +188,21 @@ void utils_togg_bit_in_Word(uint16_t *word, uint8_t pos)
     *word ^=1<<pos;
     }
 
-int utils_get_bit_in_Word(uint16_t *word, uint16_t pos)
+int utils_get_bit_in_Word(uint32_t *word, uint32_t  pos)
 {
     if (*word & (1<<pos)) 	{return true;}
     else 					{return false;}
 }
+int utils_get_inv_bit_in_Word(uint32_t *word, uint32_t pos)
+{
+	uint16_t lword;
+	lword = *word;
+	lword = ~lword;
+    if ((lword) & (1<<pos)) 	{return true;}
+    else 						{return false;}
+}
 
-int utils_get_bits_in_Word(uint16_t *word, uint16_t bitmask)
+int utils_get_bits_in_Word(uint32_t *word, uint32_t bitmask)
 {
     if ((*word & bitmask) == bitmask)
     {
@@ -204,6 +212,22 @@ int utils_get_bits_in_Word(uint16_t *word, uint16_t bitmask)
     {
     	return false;
     }
+
+}
+
+int utils_get_inv_bits_in_Word(uint32_t *word, uint32_t bitmask)
+{
+	uint16_t lword;
+	lword = *word;
+	lword ^= lword;
+    if ((lword & bitmask) == bitmask)
+    	{
+    	return true;
+    	}
+    else
+    	{
+    	return false;
+    	}
 
 }
 

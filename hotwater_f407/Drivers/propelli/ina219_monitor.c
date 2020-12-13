@@ -41,6 +41,8 @@ void mftask_ina219	(TD_INA219 *batt_hw)
 		if (batt_hw->mf_ina219.rampcounter==0)
 			{
 			ina_getvoltage(batt_hw);
+			if(batt_hw->voltbuff < 0)
+				ina_setup(batt_hw);
 			}
 		if (batt_hw->mf_ina219.rampcounter==1)
 			{

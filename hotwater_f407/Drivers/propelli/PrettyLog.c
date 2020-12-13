@@ -26,10 +26,10 @@ void pl_ppValues	(char* buffer)
 		pl_rtc_timestring(pbuffer,TIMEMONO);
 		break;
 	    case BATTHWVOLT:
-		sprintf(pbuffer, "%2.2f\0", db.batthwvolt);
+		sprintf(pbuffer, "%2.2f", db.batthwvolt);
 		break;
 	    case BATTHWCURR:
-		sprintf(pbuffer, "%7.3f\0", db.batthwcurr);
+		sprintf(pbuffer, "%7.3f", db.batthwcurr);
 		break;
 	    case BATTHWPWR:
 		sprintf(pbuffer, "%1.3f", db.batthwpwr);
@@ -47,13 +47,13 @@ void pl_ppValues	(char* buffer)
 		sprintf(pbuffer, "%1.2f", db.mcuvolt);
 		break;
 	    case STATUS:
-		sprintf(pbuffer, "%d", db.iostatus);
+		sprintf(pbuffer, "%2d", db.iostatus);
 		break;
 	    case LOGLINES:
-		sprintf(pbuffer, "%d", db.loglines);
+		sprintf(pbuffer, "%4d", db.loglines);
 		break;
 	    case BYTESWROTE:
-		sprintf(pbuffer, "%f", (float)(db.loglines / 1024.0));
+		sprintf(pbuffer, "%1.3f", (float)(db.loglines / 1024.0));
 		break;
 
 	    default:		break;

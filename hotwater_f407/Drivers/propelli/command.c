@@ -14,6 +14,7 @@
 #include "fatfs.h"
 #include "sdfile.h"
 #include "delay.h"
+#include "HappyHotWater.h"
 
 void Command_init()
     {
@@ -35,6 +36,7 @@ void Command_init()
 
         term_lol_setCallback("selterm",	"help",		"arghelp", 	selterm);
         term_lol_setCallback("reset", 	"help",		"arghelp", 	reset);
+        term_lol_setCallback("selhhw", 	"help",		"arghelp", 	selhhw);
     }
 
 RTC_DateTypeDef date;
@@ -309,6 +311,16 @@ void selterm(int argc, const char **argv)
 		sscanf(argv[1], "%f", &f);
 		modflag_init(&prettylog.pp_modflag, HALTICK, f);
 		term_printf(&btTerm, "\rcmd selterm:%3.1fHz ok\r", f);
+		}
+}
+void selhhw(int argc, const char **argv)
+{
+	float f = -1;
+	if (argc == 2)
+		{
+		sscanf(argv[1], "%f", &f);
+		modflag_init(&Hhw.mf_modflag, HALTICK, f);
+		term_printf(&btTerm, "\rcmd selhhw:%3.1fHz ok\r", f);
 		}
 }
 void reset(int argc, const char **argv)

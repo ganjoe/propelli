@@ -21,7 +21,6 @@ typedef enum
 	HOTWTR_SHOWER,
 	COLDWTR_SHOWER,
 	/*Betriebsmodi für Tank nachfüllen*/
-
 	TANK_ALWAYS_EMPTY,
 	TANK_ALWAYS_MID,
 	TANK_ALWAYS_FULL,
@@ -43,8 +42,14 @@ typedef enum
 {
 	BTN_KALT,
 	BTN_WARM,
-	BTN_OFF,
-	//outputs
+	BTN_SPUELE,
+	BTN_BRAUSE,
+	LVLSW_FULL,
+	LVLSW_MID,
+}
+HHW_INWORD_NAMES;
+typedef enum
+{
 	VALVE_DRAIN,
 	VALVE_SHOWR,
 	VALVE_COLD,
@@ -52,25 +57,19 @@ typedef enum
 	PUMP_HOT,
 	PUMP_COLD,
 	HOTROD_300,	//heizung 300W
-	//user inputs
-	BTN_SPUELE,
-	BTN_BRAUSE,
-	//system inpus nur UL und LL in hardware vorhanden
-	LVLSW_FULL,		//ul und ll
-	LVLSW_EMPTY,	// kein signal
-	LVLSW_MID,		//	nur ll
-}
-HHW_WORD_NAMES;
 
+}
+HHW_OUTWORD_NAMES;
 typedef struct
 {
 
 	//schaltzustände und deren zahl an aufrufen
-	uint32_t iowords[16];
+	uint32_t inwords[16];
+	uint32_t outwords[16];
 	uint32_t iocount[16];
 
 	//bitmaske für Betriebszustände
-	uint16_t states;
+	uint32_t states;
 
 	//zielwert regelung
 	float hw_temperature;
@@ -85,7 +84,7 @@ typedef struct
 	float state_of_charge;
 
 	//enums als zeiger auf array mit bitsets
-	HHW_WORD_NAMES outnames;
+	HHW_INWORD_NAMES outnames;
 
 	modflag mf_modflag;
 

@@ -169,7 +169,7 @@ int a=0;
     	ina_setup(&batt_hw);
     }
 
-    //mftask_happyhotwater(&Hhw, &db);
+   mftask_happyhotwater(&Hhw, &db);
 
    // mftask_potis(&analogchan);
     // mftask_tsensor(&tsensor_hot);

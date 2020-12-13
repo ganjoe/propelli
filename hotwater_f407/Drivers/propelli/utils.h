@@ -39,7 +39,9 @@ void utils_get_word_from_bytes_ptr(uint16_t* word, uint8_t* lbyte, uint8_t* hbyt
 uint16_t utils_get_word_from_bytes(uint8_t lbyte, uint8_t hbyte, int swap);
 void utils_togg_bit_in_Word(uint16_t *word, uint8_t pos);
 
-int utils_get_bit_in_Word(uint16_t *word, uint16_t pos);
-int utils_get_bits_in_Word(uint16_t *word, uint16_t bitmask);
+int utils_get_bit_in_Word(uint32_t *word, uint32_t  pos);
+int utils_get_bits_in_Word(uint32_t *word, uint32_t bitmask);
+int utils_get_inv_bit_in_Word(uint32_t *word, uint32_t pos);
+int utils_get_inv_bits_in_Word(uint32_t *word, uint32_t bitmask);
 
 #endif /* INC_UTILS_H_ */
