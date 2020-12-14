@@ -135,7 +135,7 @@ int main(void)
   mfinit_mcp23017();
  // mfinit_poti(&analogchan);
  // mfinit_tsensor(&tsensor_cold);
- // mfinit_tsensor(&tsensor_hot);
+  mfinit_tsensor(&tsensor_hot);
   mfinit_ina219(&batt_hw);
   mfinit_happyhotwater(&Hhw);
 
@@ -158,6 +158,7 @@ int a=0;
   {
 	mftask_terminal(&btTerm);
     mftask_tsensor(&tsensor_cold);
+    mftask_tsensor(&tsensor_hot);
     mftask_boardled();
 
     mftask_mcp23017(&mcp_io);
@@ -169,10 +170,10 @@ int a=0;
     	ina_setup(&batt_hw);
     }
 
-   mftask_happyhotwater(&Hhw, &db);
+   mftask_happyhotwater(&Hhw);
 
    // mftask_potis(&analogchan);
-    // mftask_tsensor(&tsensor_hot);
+
 
     db.temphot = tsensor_hot.lastTempF;
     db.tempcold = tsensor_cold.lastTempF;

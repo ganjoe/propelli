@@ -188,7 +188,18 @@ void utils_togg_bit_in_Word(uint16_t *word, uint8_t pos)
     *word ^=1<<pos;
     }
 
-int utils_get_bit_in_Word(uint32_t *word, uint32_t  pos)
+int utils_get_Bit_in_Byte(uint8_t *byte, uint8_t  pos)
+{
+    if (*byte & (1<<pos)) 	{return true;}
+    else 					{return false;}
+}
+
+int utils_get_bit_in_Word(uint16_t *word, uint16_t  pos)
+{
+    if (*word & (1<<pos)) 	{return true;}
+    else 					{return false;}
+}
+int utils_get_bit_in_dWord(uint32_t *word, uint32_t  pos)
 {
     if (*word & (1<<pos)) 	{return true;}
     else 					{return false;}

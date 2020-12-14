@@ -9,13 +9,18 @@
 #include "terminal.h"
 #include "mcp23.h"
 
-void hhw_lol_update			(TD_HappyHotwater* hhw,	Valuebuffer* db);
-void hhw_lol_drain			(TD_HappyHotwater *hhw, TD_MCP *mcp_io);
-void hhw_lol_report			(TD_HappyHotwater *hhw, Valuebuffer* db);
-void hhw_lol_refill			(TD_HappyHotwater* hhw,	Valuebuffer* db);
-void hhw_lol_battery_soc 	(TD_HappyHotwater* hhw,	Valuebuffer* db);
-int hhw_lol_chk_input(TD_HappyHotwater* hhw, HHW_INWORD_NAMES ioitr, HHW_STATES stateitr, uint32_t iobuffer, int inv);
+void hhw_lol_update			(TD_HappyHotwater* 	hhw,	Valuebuffer* db);
+void hhw_lol_drain			(TD_HappyHotwater*	hhw, 	TD_MCP *mcp_io);
+void hhw_lol_report			(TD_HappyHotwater*	hhw, 	Valuebuffer* db);
+void hhw_lol_refill			(TD_HappyHotwater* 	hhw,	Valuebuffer* db, TD_MCP *mcp_io);
+void hhw_lol_battery_soc 	(TD_HappyHotwater* 	hhw,	Valuebuffer* db);
 
+int  hhw_set_instate		(TD_HappyHotwater* hhw, HHW_INWORD_NAMES ioitr, HHW_STATES stateitr, uint32_t iobuffer, int inv);
+void hhw_set_state			(TD_HappyHotwater* hhw, HHW_STATES stateitr, int state);
+int  hhw_get_state			(TD_HappyHotwater* hhw, HHW_STATES stateitr);
+void hhw_set_outstates		(TD_HappyHotwater* hhw, HHW_OUTWORD_NAMES ioitr, HHW_STATES stateitr, TD_MCP *mcp_io);
+void hhw_set_out2states		(TD_HappyHotwater* hhw, HHW_OUTWORD_NAMES ioitr, HHW_STATES stateitr0,HHW_STATES stateitr1, TD_MCP *mcp_io);
+void hhw_set_out			(TD_HappyHotwater* hhw, HHW_OUTWORD_NAMES ioitr, TD_MCP *mcp_io, int state);
 void mfinit_happyhotwater	(TD_HappyHotwater* hhw)
 {
 	modflag_init(&hhw->mf_modflag, HALTICK, 10);
@@ -42,18 +47,18 @@ void mfinit_happyhotwater	(TD_HappyHotwater* hhw)
 	hhw->VoltLevel_lowbatt = 11.8;
 	hhw->VoltLevel_power_inv = 13.5;
 	hhw->VoltLevel_highbatt = 12.72;
+	utils_set_bit_in_Word(&hhw->states, TANK_ALWAYS_MID, true);
 }
 
-void mftask_happyhotwater	(TD_HappyHotwater* hhw,	Valuebuffer* db)
+void mftask_happyhotwater	(TD_HappyHotwater* hhw)
 	{
 	 if (hhw->mf_modflag.flag && hhw->mf_modflag.init_done)
 		{
 		hhw->mf_modflag.repeat = modflag_tickdiff(&hhw->mf_modflag);
-		hhw_lol_update(hhw, db);
-		//hhw_lol_report(hhw);
-		hhw_lol_drain(&Hhw,&mcp_io);
-
-
+		mcp_io.outlatch = 0;
+		hhw_lol_update(hhw, &db);
+		hhw_lol_drain(hhw,&mcp_io);
+		hhw_lol_refill(hhw, &db, &mcp_io);
 		hhw->mf_modflag.duration = modflag_tickdiff(&hhw->mf_modflag);
 		hhw->mf_modflag.callcount++;
 		hhw->mf_modflag.flag = false;
@@ -65,7 +70,8 @@ void mftick_happyhotwater	(TD_HappyHotwater* hhw)
 	modflag_upd_regular(&hhw->mf_modflag);
 	}
 
-int hhw_lol_chk_input(TD_HappyHotwater* hhw, HHW_INWORD_NAMES ioitr, HHW_STATES stateitr, uint32_t iobuffer, int inv)
+
+int hhw_set_instate(TD_HappyHotwater* hhw, HHW_INWORD_NAMES ioitr, HHW_STATES stateitr, uint32_t iobuffer, int inv)
 	{
 	if (inv)
 		{
@@ -90,69 +96,123 @@ int hhw_lol_chk_input(TD_HappyHotwater* hhw, HHW_INWORD_NAMES ioitr, HHW_STATES 
 	}
 	}
 
+void hhw_set_state(TD_HappyHotwater* hhw, HHW_STATES stateitr, int state)
+	{
+	utils_set_bit_in_Word(&hhw->states, stateitr, state);
+	}
+
+int hhw_get_state(TD_HappyHotwater* hhw, HHW_STATES stateitr)
+	{
+	return utils_get_bit_in_Word(&hhw->states, stateitr);
+	}
+
+void hhw_set_outstates(TD_HappyHotwater* hhw, HHW_OUTWORD_NAMES ioitr, HHW_STATES stateitr, TD_MCP *mcp_io)
+	{
+	if (hhw_get_state(hhw, stateitr))
+		utils_set_bit_in_Word(&mcp_io->outlatch, hhw->outwords[ioitr], 1);
+	else
+		utils_set_bit_in_Word(&mcp_io->outlatch, hhw->outwords[ioitr], 0);
+	}
+void hhw_set_out2states(TD_HappyHotwater* hhw, HHW_OUTWORD_NAMES ioitr, HHW_STATES stateitr0,HHW_STATES stateitr1, TD_MCP *mcp_io)
+	{
+	if ((hhw_get_state(hhw, stateitr0)) & (hhw_get_state(hhw, stateitr1)))
+		utils_set_bit_in_Word(&mcp_io->outlatch, hhw->outwords[ioitr], 1);
+	else
+		utils_set_bit_in_Word(&mcp_io->outlatch, hhw->outwords[ioitr], 0);
+	}
+void hhw_set_out(TD_HappyHotwater* hhw, HHW_OUTWORD_NAMES ioitr, TD_MCP *mcp_io, int state)
+	{
+	utils_set_bit_in_Word(&mcp_io->outlatch, hhw->outwords[ioitr], state);
+	}
+
 void hhw_lol_update(TD_HappyHotwater* hhw,	Valuebuffer* db)
 	{
+	hhw_set_instate(hhw, BTN_KALT, COLDWTR_SPUELE, db->iostatus, 0);
+	hhw_set_instate(hhw, BTN_KALT, COLDWTR_SHOWER, db->iostatus, 0);
 
-	hhw_lol_chk_input(hhw, BTN_KALT, COLDWTR_SPUELE, db->iostatus, 0);
-	hhw_lol_chk_input(hhw, BTN_KALT, COLDWTR_SHOWER, db->iostatus, 0);
+	hhw_set_instate(hhw, BTN_WARM, HOTWTR_SHOWER, db->iostatus, 0);
+	hhw_set_instate(hhw, BTN_WARM, HOTWTR_SPUELE, db->iostatus, 0);
 
-	hhw_lol_chk_input(hhw, BTN_WARM, HOTWTR_SHOWER, db->iostatus, 0);
-	hhw_lol_chk_input(hhw, BTN_WARM, HOTWTR_SPUELE, db->iostatus, 0);
+	hhw_set_instate(hhw, LVLSW_MID, TANK_HOT_MID, db->iostatus, 0);
+	hhw_set_instate(hhw, LVLSW_FULL, TANK_HOT_FULL, db->iostatus, 0);
 
-	hhw_lol_chk_input(hhw, LVLSW_MID, TANK_HOT_MID, db->iostatus, 1);
-	hhw_lol_chk_input(hhw, LVLSW_FULL, TANK_HOT_FULL, db->iostatus, 1);
+	hhw_set_instate(hhw, BTN_BRAUSE, DUSCHEN, db->iostatus, 1);
+	hhw_set_instate(hhw, BTN_SPUELE, SPUELEN, db->iostatus, 1);
 
-	hhw_lol_chk_input(hhw, BTN_BRAUSE, DUSCHEN, db->iostatus, 1);
-	hhw_lol_chk_input(hhw, BTN_SPUELE, SPUELEN, db->iostatus, 1);
-
-
-
-	if (db->batthwvolt < hhw->VoltLevel_lowbatt)
-				utils_set_bit_in_Word((uint16_t*)hhw->states, POWER_LV, true);
-		else	utils_set_bit_in_Word((uint16_t*)hhw->states, POWER_LV, false);
+	hhw_set_state(hhw, POWER_LV, (db->batthwvolt < hhw->VoltLevel_lowbatt));
+	hhw_set_state(hhw, POWER_INV, (db->batthwcurr < 0));
+	hhw_set_state(hhw, POWER_VB, (db->batthwvolt > hhw->VoltLevel_lowbatt));
 
 
-	if (db->batthwcurr < 0)
-				utils_set_bit_in_Word((uint16_t*)hhw->states, POWER_INV, true);
-		else	utils_set_bit_in_Word((uint16_t*)hhw->states, POWER_INV, false);
-
-	if (db->batthwcurr > 0	)
-				utils_set_bit_in_Word((uint16_t*)hhw->states, POWER_VB, true);
-		else	utils_set_bit_in_Word((uint16_t*)hhw->states, POWER_VB, false);
 	}
 
-void hhw_lol_report(TD_HappyHotwater *hhw, Valuebuffer* db)
+void hhw_lol_report(TD_HappyHotwater* hhw, Valuebuffer* db)
 	{
-	term_printf(&btTerm, "\r***hhw_lol_report_states***\r");
-	if(utils_get_bit_in_Word(&hhw->states, POWER_LV))
-		term_printf(&btTerm, "POWER_LV (%2.2f < %2.1f)V\r", db->batthwvolt, hhw->VoltLevel_lowbatt);
 
-	if(utils_get_bit_in_Word(&hhw->states, POWER_INV))
-		term_printf(&btTerm, "POWER_INV (%2.2f > %2.1f)V\r", db->batthwvolt, hhw->VoltLevel_power_inv);
+	term_printf(&btTerm, "\r***hhw states***\r");
+	if(utils_get_bit_in_Word(&hhw->states, TANK_HOT_FULL))	term_printf(&btTerm, "_TANK_HOT_FULL_");
+	if(utils_get_bit_in_Word(&hhw->states, TANK_HOT_MID))	term_printf(&btTerm, "_TANK_HOT_MID_");
+	if(utils_get_bit_in_Word(&hhw->states, TANK_HOT_EMPTY))	term_printf(&btTerm, "_TANK_HOT_EMPTY_");
+	if(utils_get_bit_in_Word(&hhw->states, COLDWTR_SPUELE))	term_printf(&btTerm, "_COLDWTR_SPUELE_");
+	if(utils_get_bit_in_Word(&hhw->states, COLDWTR_SHOWER))	term_printf(&btTerm, "_COLDWTR_SHOWER_");
+	if(utils_get_bit_in_Word(&hhw->states, HOTWTR_SHOWER))	term_printf(&btTerm, "_HOTWTR_SHOWER_");
+	if(utils_get_bit_in_Word(&hhw->states, HOTWTR_SPUELE))	term_printf(&btTerm, "_HOTWTR_SPUELE_");
+	if(utils_get_bit_in_Word(&hhw->states, SPUELEN))		term_printf(&btTerm, "_SPUELEN_");
+	if(utils_get_bit_in_Word(&hhw->states, DUSCHEN))		term_printf(&btTerm, "_DUSCHEN_");
+	if(utils_get_bit_in_Word(&hhw->states, REFILL))			term_printf(&btTerm, "_REFILL_");
+	if(utils_get_bit_in_Word(&hhw->states, POWER_LV))		term_printf(&btTerm, "_POWER_LV_");
+	if(utils_get_bit_in_Word(&hhw->states, POWER_INV))		term_printf(&btTerm, "_POWER_INV_");
+	if(utils_get_bit_in_Word(&hhw->states, POWER_VB))		term_printf(&btTerm, "_POWER_VB_");
+	term_printf(&btTerm, "\r***outputs***\r");
+	if(utils_get_bit_in_Word(&mcp_io.outlatch, hhw->outwords[VALVE_COLD]))term_printf(&btTerm, "_VALVE_COLD_");
+	if(utils_get_bit_in_Word(&mcp_io.outlatch, hhw->outwords[VALVE_DRAIN]))term_printf(&btTerm, "_VALVE_DRAIN_");
+	if(utils_get_bit_in_Word(&mcp_io.outlatch, hhw->outwords[VALVE_HOT]))	term_printf(&btTerm, "_VALVE_HOT_");
+	if(utils_get_bit_in_Word(&mcp_io.outlatch, hhw->outwords[VALVE_SHOWR]))term_printf(&btTerm, "_VALVE_SHOWR_");
+	if(utils_get_bit_in_Word(&mcp_io.outlatch, hhw->outwords[HOTROD_300]))	term_printf(&btTerm, "_HOTROD_300_");
+	if(utils_get_bit_in_Word(&mcp_io.outlatch, hhw->outwords[PUMP_COLD]))	term_printf(&btTerm, "_PUMP_COLD_");
+	if(utils_get_bit_in_Word(&mcp_io.outlatch, hhw->outwords[PUMP_HOT]))	term_printf(&btTerm, "_PUMP_HOT_");
 
-	if(utils_get_bit_in_Word(&hhw->states, POWER_VB))
-		term_printf(&btTerm, "POWER_VB (%2.1f < %2.2f < %2.1f)V\r", hhw->VoltLevel_lowbatt, db->batthwvolt, hhw->VoltLevel_power_inv);
 
-	if(utils_get_bit_in_Word(&hhw->states, TANK_HOT_FULL))	term_printf(&btTerm, "TANK_HOT_FULL\r");
-	if(utils_get_bit_in_Word(&hhw->states, TANK_HOT_MID))	term_printf(&btTerm, "TANK_HOT_MID\r");
-	if(utils_get_bit_in_Word(&hhw->states, TANK_HOT_EMPTY))	term_printf(&btTerm, "TANK_HOT_EMPTY\r");
-	if(utils_get_bit_in_Word(&hhw->states, COLDWTR_SPUELE))	term_printf(&btTerm, "COLDWTR_SPUELE\r");
-	if(utils_get_bit_in_Word(&hhw->states, COLDWTR_SHOWER))	term_printf(&btTerm, "COLDWTR_SHOWER\r");
-	if(utils_get_bit_in_Word(&hhw->states, HOTWTR_SHOWER))	term_printf(&btTerm, "HOTWTR_SHOWER\r");
-	if(utils_get_bit_in_Word(&hhw->states, HOTWTR_SPUELE))	term_printf(&btTerm, "HOTWTR_SPUELE\r");
-	if(utils_get_bit_in_Word(&hhw->states, SPUELEN))		term_printf(&btTerm, "SPUELEN\r");
-	if(utils_get_bit_in_Word(&hhw->states, DUSCHEN))		term_printf(&btTerm, "DUSCHEN\r");
 	}
 
-void hhw_lol_drain(TD_HappyHotwater *hhw, TD_MCP *mcp_io)
+void hhw_lol_drain(TD_HappyHotwater* hhw, TD_MCP *mcp_io)
 	{
-	if(utils_get_bit_in_Word(&hhw->states, POWER_LV))
+	hhw_set_state(hhw, REFILL, false);
+	if(((hhw_get_state(hhw, POWER_INV)) & hhw_get_state(hhw, POWER_VB)))
 		{
-		term_printf(&btTerm, "Fehler: HhW Batterie leer: Nachladen durch Einschalten vom Inverter");
+		hhw_set_state(hhw, REFILL, true);
+		if(((hhw_get_state(hhw, COLDWTR_SPUELE)) & hhw_get_state(hhw, SPUELEN)))
+		{
+		hhw_set_out(hhw, VALVE_COLD,  mcp_io, true);
+		hhw_set_out(hhw, PUMP_COLD,  mcp_io, true);
+		hhw_set_out(hhw, VALVE_DRAIN,  mcp_io, true);
+		hhw_set_state(hhw, REFILL, false);
 		}
-	else
+		if(((hhw_get_state(hhw, HOTWTR_SPUELE)) & hhw_get_state(hhw, SPUELEN)))
 		{
-		mcp_io->outlatch = 0;
+		hhw_set_out(hhw, VALVE_HOT,  mcp_io, true);
+		hhw_set_out(hhw, VALVE_DRAIN,  mcp_io, true);
+		hhw_set_out(hhw, PUMP_HOT,  mcp_io, true);
+		hhw_set_state(hhw, REFILL, false);
+		}
+		if(((hhw_get_state(hhw, COLDWTR_SHOWER)) & hhw_get_state(hhw, DUSCHEN)))
+		{
+		hhw_set_out(hhw, VALVE_COLD,  mcp_io, true);
+		hhw_set_out(hhw, VALVE_SHOWR,  mcp_io, true);
+		hhw_set_out(hhw, PUMP_COLD,  mcp_io, true);
+		hhw_set_state(hhw, REFILL, false);
+		}
+		if(((hhw_get_state(hhw, HOTWTR_SHOWER)) & hhw_get_state(hhw, DUSCHEN)))
+		{
+		hhw_set_out(hhw, VALVE_HOT,  mcp_io, true);
+		hhw_set_out(hhw, VALVE_SHOWR,  mcp_io, true);
+		hhw_set_out(hhw, PUMP_HOT,  mcp_io, true);
+		hhw_set_state(hhw, REFILL, false);
+		}
+
+		}
+
+/*
 		if(utils_get_bit_in_Word(&hhw->states, SPUELEN))
 			{
 			if(utils_get_bit_in_Word(&hhw->states, COLDWTR_SPUELE))
@@ -168,6 +228,7 @@ void hhw_lol_drain(TD_HappyHotwater *hhw, TD_MCP *mcp_io)
 				utils_set_bit_in_Word(&mcp_io->outlatch, hhw->outwords[PUMP_HOT], 1);
 				}
 			}
+
 		if(utils_get_bit_in_Word(&hhw->states, DUSCHEN))
 			{
 			if(utils_get_bit_in_Word(&hhw->states, COLDWTR_SHOWER))
@@ -183,23 +244,30 @@ void hhw_lol_drain(TD_HappyHotwater *hhw, TD_MCP *mcp_io)
 				utils_set_bit_in_Word(&mcp_io->outlatch, hhw->outwords[PUMP_HOT], 1);
 				}
 			}
-		}
-	}
+*/
 
-void hhw_lol_refill	(TD_HappyHotwater* hhw,	Valuebuffer* db)
+		}
+
+void hhw_lol_refill	(TD_HappyHotwater* hhw,	Valuebuffer* db, TD_MCP *mcp_io)
 	{
-	if(utils_get_bit_in_Word(&hhw->states, TANK_ALWAYS_FULL))
+	if	(( hhw_get_state(hhw, REFILL)) &( hhw_get_state(hhw,POWER_VB ))&( hhw_get_state(hhw,POWER_INV )))
 		{
-		if(utils_get_bit_in_Word(&hhw->states, 1))
-			term_printf(&btTerm, "hhw_lol_refill: filling from empty to mid..");
+		if	( hhw_get_state(hhw,TANK_HOT_MID ) == 0)
+			{
+			hhw_set_outstates(hhw, VALVE_COLD, TANK_ALWAYS_MID, mcp_io);
+			hhw_set_outstates(hhw, VALVE_HOT, TANK_ALWAYS_MID, mcp_io);
+			hhw_set_outstates(hhw, PUMP_COLD, TANK_ALWAYS_MID, mcp_io);
+			}
+		if	( hhw_get_state(hhw,TANK_HOT_FULL ))
+			{
+			hhw_set_outstates(hhw, VALVE_COLD, TANK_ALWAYS_FULL, mcp_io);
+			hhw_set_outstates(hhw, VALVE_HOT, TANK_ALWAYS_FULL, mcp_io);
+			hhw_set_outstates(hhw, PUMP_COLD, TANK_ALWAYS_FULL, mcp_io);
 
-		if(utils_get_bit_in_Word(&hhw->states, LVLSW_MID))
-			term_printf(&btTerm, "hhw_lol_refill: filling to mid is done..");
-
-		if(utils_get_bit_in_Word(&hhw->states, LVLSW_FULL))
-			term_printf(&btTerm, "hhw_lol_refill:draining from LVLSW_FULL to LVLSW_MID");
+			}
 		}
 	}
+
 
 void hhw_lol_battery_soc (TD_HappyHotwater* hhw,	Valuebuffer* db)
 	{

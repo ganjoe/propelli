@@ -30,14 +30,16 @@ typedef enum
 	POWER_INV,
 	POWER_LV,
 	POWER_VB,
+	/*Tank*/
 	TANK_HOT_FULL,
 	TANK_HOT_MID,
 	TANK_HOT_EMPTY,
+	/*Wasser Marsch*/
 	SPUELEN,
 	DUSCHEN,
+	REFILL,
 }
 HHW_STATES;
-
 typedef enum
 {
 	BTN_KALT,
@@ -57,19 +59,18 @@ typedef enum
 	PUMP_HOT,
 	PUMP_COLD,
 	HOTROD_300,	//heizung 300W
-
 }
 HHW_OUTWORD_NAMES;
 typedef struct
 {
 
 	//schaltzustände und deren zahl an aufrufen
-	uint32_t inwords[16];
-	uint32_t outwords[16];
-	uint32_t iocount[16];
+	uint16_t inwords[16];
+	uint16_t outwords[16];
+	uint16_t iocount[16];
 
 	//bitmaske für Betriebszustände
-	uint32_t states;
+	uint16_t states;
 
 	//zielwert regelung
 	float hw_temperature;
@@ -83,6 +84,7 @@ typedef struct
 	//Batteriekapazität in Prozent zwischen lowbatt und batt
 	float state_of_charge;
 
+
 	//enums als zeiger auf array mit bitsets
 	HHW_INWORD_NAMES outnames;
 
@@ -92,7 +94,7 @@ typedef struct
 TD_HappyHotwater;
 
 void mfinit_happyhotwater	(TD_HappyHotwater* hhw);
-void mftask_happyhotwater	(TD_HappyHotwater* hhw, Valuebuffer* db);
+void mftask_happyhotwater	(TD_HappyHotwater* hhw);
 void mftick_happyhotwater	(TD_HappyHotwater* hhw);
 
 extern TD_HappyHotwater Hhw;
