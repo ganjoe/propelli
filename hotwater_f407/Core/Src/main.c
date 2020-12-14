@@ -134,7 +134,7 @@ int main(void)
   mfinit_boardled();
   mfinit_mcp23017();
  // mfinit_poti(&analogchan);
- // mfinit_tsensor(&tsensor_cold);
+  mfinit_tsensor(&tsensor_cold);
   mfinit_tsensor(&tsensor_hot);
   mfinit_ina219(&batt_hw);
   mfinit_happyhotwater(&Hhw);

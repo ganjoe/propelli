@@ -10,6 +10,17 @@
 #include "PrettyLog.h"
 #include "terminal.h"
 
+/* feste Positionen da periodisch aktualisiert */
+typedef enum
+{
+	SETTIME,
+	SETDATE,
+	SETWTRLVLHOT,
+	SETWTRLVLCOLD,
+}
+TD_BACKUPCMDS;
+
+
 void init_sdfile_initcmd		(HHW_FILE_FORMAT* file)
 	{
 	initcmd.filename=strdup("initcmd.hhw");
@@ -22,6 +33,21 @@ void init_sdfile_initcmd		(HHW_FILE_FORMAT* file)
 	//initcmd.bytesWrote += sd_lol_writeline(initcmd.filename, "settime_00_24_00\r", initcmd.maxchars, initcmd.maxlines++);
 
 	sdfile_parsecmds(&initcmd);
+
+	}
+
+void init_sdfile_backupcmd		(HHW_FILE_FORMAT* file)
+	{
+	initcmd.filename=strdup("backupcmd.hhw");
+	initcmd.header=strdup("backupcmd batch file");
+	initcmd.maxchars =32;	//jede zeile ist gleichlang
+	initcmd.maxlines =0;	//im sinne von maxcommands
+	initcmd.maxfilename =32;
+
+	//initcmd.bytesWrote = sd_lol_writeline(initcmd.filename, "setdate_9_12_20\r", initcmd.maxchars, initcmd.maxlines++);
+	//initcmd.bytesWrote += sd_lol_writeline(initcmd.filename, "settime_00_24_00\r", initcmd.maxchars, initcmd.maxlines++);
+
+	sdfile_parsecmds(&eeprom);
 
 	}
 
@@ -104,5 +130,32 @@ void sdfile_parsecmds			(HHW_FILE_FORMAT* file)
 		}
 
 	}
+
+void sdfile_writecmd			(HHW_FILE_FORMAT* file, char* buffer, int line)
+	{
+	if (line > file->maxlines)
+		{
+		file->maxlines++;
+		term_printf(&btTerm, "\rwritecmd:extend with new (%d)\r", file->maxlines);
+		file->bytesWrote = sd_lol_writeline(file->filename, buffer, file->maxchars, file->maxlines);
+		sd_lol_writeline(file->filename, "#", file->maxchars, (file->maxlines) + 1);
+		}
+	if (line <= file->maxlines)
+		{
+		file->bytesWrote = sd_lol_writeline(file->filename, buffer, file->maxchars, line);
+		term_printf(&btTerm, "\rwritecmd:replace with new (%d)\r", line);
+		}
+	if (file->bytesWrote>0)
+		{
+		term_printf(&btTerm, "\rwritecmd: %d bytes Writen\r", file->bytesWrote);
+		}
+	else
+		{
+		term_printf(&btTerm, "\rwritecmd: not ready. wait reset\r", file->bytesWrote);
+		file->flag = false;
+		}
+
+	}
+
 
 HHW_FILE_FORMAT initcmd, happylog, eeprom;
