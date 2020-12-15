@@ -213,7 +213,19 @@ int utils_get_inv_bit_in_Word(uint32_t *word, uint32_t pos)
     else 						{return false;}
 }
 
-int utils_get_bits_in_Word(uint32_t *word, uint32_t bitmask)
+int utils_get_bits_in_dWord(uint32_t *word, uint32_t bitmask)
+{
+    if ((*word & bitmask) == bitmask)
+    {
+    	return true;
+    }
+    else
+    {
+    	return false;
+    }
+
+}
+int utils_get_bits_in_Word(uint16_t *word, uint16_t bitmask)
 {
     if ((*word & bitmask) == bitmask)
     {
@@ -226,11 +238,37 @@ int utils_get_bits_in_Word(uint32_t *word, uint32_t bitmask)
 
 }
 
-int utils_get_inv_bits_in_Word(uint32_t *word, uint32_t bitmask)
+void utils_set_bits_in_dWord(uint32_t *word, uint32_t bitmask, int state)
 {
-	uint16_t lword;
-	lword = *word;
-	lword ^= lword;
+	switch (state)
+	{
+	case true:
+	*word |= bitmask;
+	break;
+	case false:
+	*word &= ~(bitmask);
+	break;
+	}
+
+}
+void utils_set_bits_in_Word(uint16_t* word, uint16_t bitmask, int state)
+{
+	switch (state)
+	{
+	case true:
+	*word |= bitmask;
+	break;
+	case false:
+	*word &= ~(bitmask);
+	break;
+	}
+
+}
+int utils_get_inv_bits_in_dWord(uint32_t *word, uint32_t bitmask)
+{
+	uint32_t lword = 0;
+	lword = ~(*word);
+
     if ((lword & bitmask) == bitmask)
     	{
     	return true;
@@ -239,6 +277,5 @@ int utils_get_inv_bits_in_Word(uint32_t *word, uint32_t bitmask)
     	{
     	return false;
     	}
-
 }
 

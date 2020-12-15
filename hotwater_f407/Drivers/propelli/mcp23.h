@@ -37,12 +37,7 @@ void mcp_set_all_input	(TD_MCP *mcp_io);
 void mcp_WriteWord	(TD_MCP *mcp_io, uint16_t word);
 
 
-// lowlevel
-void mcp_lolWriteBuffer(TD_MCP *mcp_io, uint16_t *buffer, uint16_t addr);
-void mcp_lolReadBuffer(TD_MCP *mcp_io, uint16_t *buffer, uint16_t addr);
-// hardwarelevel
-void mcp_lolWriteByte(TD_MCP *mcp_io, uint16_t regaddr, uint8_t data);
-void mcp_lolReadByte(TD_MCP *mcp_io, uint16_t regaddr, uint8_t *data);
+
 // modflag
 void mfinit_mcp23017();
 void mftick_mcp23017(modflag *thismf);

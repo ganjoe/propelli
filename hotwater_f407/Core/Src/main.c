@@ -156,6 +156,7 @@ int a=0;
 
   while (1)
   {
+
 	mftask_terminal(&btTerm);
     mftask_tsensor(&tsensor_cold);
     mftask_tsensor(&tsensor_hot);
@@ -167,12 +168,18 @@ int a=0;
 
     if (batt_hw.voltbuff < 0)
     {
-    	ina_setup(&batt_hw);
+    	//ina_setup(&batt_hw);
+    	HAL_NVIC_SystemReset();
     }
-
+   if (!mcp_io.mf_mcp23017.init_done)
+    {
+    	//db.iostatus=666;
+    	HAL_NVIC_SystemReset();
+    }
    mftask_happyhotwater(&Hhw);
 
    // mftask_potis(&analogchan);
+
 
 
     db.temphot = tsensor_hot.lastTempF;
