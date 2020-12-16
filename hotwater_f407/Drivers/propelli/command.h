@@ -28,8 +28,14 @@ void sdread(int argc, const char **argv);
 void readinit(int argc, const char **argv);
 void writeinit(int argc, const char **argv);
 void clearinit(int argc, const char **argv);
+void readrom(int argc, const char **argv);
+void writerom(int argc, const char **argv);
+void clearrom(int argc, const char **argv);
 void nlog(int argc, const char **argv);
 void nlogn(int argc, const char **argv);
+void vrange(int argc, const char **argv);
+void mode(int argc, const char **argv);
+void trange(int argc, const char **argv);
 // zeile aus init-datei drucken/schreiben/ausführen
 
 

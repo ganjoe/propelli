@@ -15,6 +15,7 @@
 #include "sdfile.h"
 #include "delay.h"
 #include "HappyHotWater.h"
+#include "backup_command.h"
 
 void Command_init()
     {
@@ -28,11 +29,21 @@ void Command_init()
 
         term_lol_setCallback("sdwrite", "filename string chars lines","schreibt zu beginn einer zeile",	sdwrite);
         term_lol_setCallback("sdread", 	"help",	    "arghelp", 	sdread);
+
         term_lol_setCallback("readinit","help",	    "arghelp", 	readinit);
         term_lol_setCallback("writeinit","help",	"arghelp", 	writeinit);
+        term_lol_setCallback("clearinit","write blanks to initfile","lines to write", 	clearinit);
+
+        term_lol_setCallback("readrom","help",   "arghelp", readrom);
+        term_lol_setCallback("writerom","help",	"arghelp", 	writerom);
+        term_lol_setCallback("clearrom","write blanks to eeprom","lines to write", 	clearrom);
+
         term_lol_setCallback("nlogn",	"help",		"arghelp", 	nlogn);
         term_lol_setCallback("nlog",	"help",		"arghelp", 	nlog);
-        term_lol_setCallback("clearinit","write blanks to initfile","lines to write", 	clearinit);
+
+        term_lol_setCallback("vrange","USV Spannungslevel. Bsp: 10.5 12.8 13.6 ","lowlimit(SoC:0%) highlimit(SoC:100%) invlimit(only charging)",vrange);
+        term_lol_setCallback("mode","Heizung Betriebsmodus","0: eco 1: full", 	mode);
+        term_lol_setCallback("trange","Heizung Temperaturschwellen","lowlimit<float>_highlimit<float>", 	trange);
 
         term_lol_setCallback("selterm",	"help",		"arghelp", 	selterm);
         term_lol_setCallback("reset", 	"help",		"arghelp", 	reset);
@@ -120,9 +131,12 @@ void setdate(int argc, const char **argv)
 			date.Month = m;
 			date.Date = d;
 			date.Year = y;
+			date.WeekDay = RTC_WEEKDAY_SUNDAY;
 			HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
 			HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
+			term_printf(&btTerm, "[cmd setdate] ok\r");
 			sdfile_lol_newhappylog(&happylog);
+
 			}
 		}
     else
@@ -146,13 +160,16 @@ void settime(int argc, const char **argv)
     	wparam = utils_truncate_number_int(&m, 0, 59);
     	wparam = utils_truncate_number_int(&s, 0, 59);
     	if (wparam)
-    	    term_printf(&btTerm, "\rrange ist 23 59 59\r");
+    	    term_printf(&btTerm, "[cmd settime][Fehler] Range ist 23 59 59\r");
     	else
 	    {
-    	term_printf(&btTerm, "\rsettime\r");
-	    time.Hours = h;
-	    time.Minutes = m;
-	    time.Seconds = s;
+    	term_printf(&btTerm, "[cmd settime] ok\r");
+    	time.Hours = h;
+    	 time.Minutes = m;
+    	 time.Seconds = s;
+    	 time.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+    	 time.StoreOperation = RTC_STOREOPERATION_RESET;
+
 	    HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
 	    HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
 
@@ -277,8 +294,118 @@ void clearinit(int argc, const char **argv)
 		{
 		term_printf(&btTerm, "\rcmd clearinit: params");
 		}
+}
 
+void readrom(int argc, const char **argv)
+	{
+	int d = -1;
+	if (argc == 2)
+		{
+		sscanf(argv[1], "%d", &d);
+		int bytesRead;
+		char linebuffer[eeprom.maxchars];
+		bytesRead= sd_lol_readline(eeprom.filename, linebuffer, eeprom.maxchars, d);
+		term_printf(&btTerm, "\rcmd readrom: (%2d/%2d)%s", d, eeprom.maxlines, linebuffer);
+		}
+	}
+void writerom(int argc, const char **argv)
+	{
+	if (argc == 3)
+		{
+		int line;
+		sscanf(argv[2], "%d", &line);
+		sdfile_lol_write_backup(&eeprom, argv[1], line);
+		}
+	}
+void clearrom(int argc, const char **argv)
+{
+	int d = -1;
+	if (argc == 2)
+		{
+		sscanf(argv[1], "%d", &d);
+		int bytesWrote;
+		char* emptybuff = calloc(eeprom.maxchars -1 ,1);
+		memset(emptybuff,(int)'#', eeprom.maxchars -1);
+		for (int var = 0; var < d; ++var)
+			{
+			bytesWrote += sd_lol_writeline(eeprom.filename, emptybuff, eeprom.maxchars, var);
+			}
+		free(emptybuff);
+		term_printf(&btTerm, "\rcmd clearrom: %d cmds cleard with %d blanks ok\r",d, bytesWrote);
+		}
+	else
+		{
+		term_printf(&btTerm, "\rcmd clearrom: params");
+		}
+}
 
+void vrange(int argc, const char **argv)
+{
+	float min = -1;	float max = -1;	float inv = -1;
+
+	if (argc == 4)
+		{
+		sscanf(argv[1], "%f", &min);
+		sscanf(argv[2], "%f", &max);
+		sscanf(argv[3], "%f", &inv);
+
+		Hhw.VoltLevel_highbatt = max;
+		Hhw.VoltLevel_lowbatt = min;
+		Hhw.VoltLevel_power_inv = inv;
+
+		term_printf(&btTerm, "\r[cmd vrange]: ok\r");
+		backup_voltrange(&eeprom);
+		}
+	else
+		{
+		term_printf(&btTerm, "\rcmd vrange: 3 params needed");
+		}
+}
+void mode(int argc, const char **argv)
+{
+	int mode = -1;
+
+	if (argc == 2)
+		{
+		sscanf(argv[1], "%d", &mode);
+		if (mode==1)
+			{
+			hhw_set_state(&Hhw, TANK_MODE_FULL, true);
+			hhw_set_state(&Hhw, TANK_MODE_ECO, false);
+			term_printf(&btTerm, "\r[cmd mode] new: TANK_MODE_FULL");
+			}
+		if (mode==0)
+			{
+			hhw_set_state(&Hhw, TANK_MODE_FULL, false);
+			hhw_set_state(&Hhw, TANK_MODE_ECO, true);
+			term_printf(&btTerm, "\r[cmd mode] new: TANK_MODE_ECO");
+			}
+		backup_all();
+		}
+	else
+		{
+		term_printf(&btTerm, "\rcmd mode: 1 params needed");
+		}
+}
+void trange(int argc, const char **argv)
+{
+	float min = -1;	float max = -1;
+	if (argc == 3)
+		{
+		sscanf(argv[1], "%f", &min);
+		sscanf(argv[2], "%f", &max);
+
+		Hhw.TempLevel_high = max;
+		Hhw.TempLevel_low = min;
+
+		term_printf(&btTerm, "\rcmd trange: ok\r");
+		backup_all();
+
+		}
+	else
+		{
+		term_printf(&btTerm, "\rcmd trange: 2 params needed");
+		}
 }
 
 void nlogn(int argc, const char **argv)
@@ -299,7 +426,9 @@ if (argc == 2)
 	//strcpy(happylog.filename,	argv[1] );
 	happylog.act_line = 0;
 	happylog.bytesWrote = 0;
+
 	term_printf(&btTerm, "\rcmd nlogn ok\r");
+
 	}
 }
 
@@ -328,6 +457,7 @@ void reset(int argc, const char **argv)
 
 	if (argc == 2)
 	{
+	backup_all();
 	float f = -1;
 	float counter;
 	float cntdownms = 300;

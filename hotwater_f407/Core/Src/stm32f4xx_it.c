@@ -33,6 +33,8 @@
 #include "ina219_monitor.h"
 #include "terminal.h"
 #include "HappyHotWater.h"
+#include "sdfile.h"
+#include "backup_command.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -217,6 +219,8 @@ void SysTick_Handler(void)
     mftick_tsensor(&tsensor_hot);
     mftick_terminal(&btTerm);
     mftick_happyhotwater(&Hhw);
+    mftick_sdfile_backup(&eeprom);
+    mftick_sdfile_happylog(&happylog);
 
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();

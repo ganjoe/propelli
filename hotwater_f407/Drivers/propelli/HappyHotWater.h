@@ -85,10 +85,6 @@ typedef struct
 	//Temperaturschwellen für Heizstab (Single)
 	float TempLevel_low, TempLevel_high;
 
-	//Batteriekapazität in Prozent zwischen lowbatt und batt
-	float state_of_charge;
-
-
 	//enums als zeiger auf array mit bitsets
 	HHW_INWORD_NAMES outnames;
 

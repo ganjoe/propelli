@@ -21,13 +21,13 @@ void mfinit_happyhotwater	(TD_HappyHotwater* hhw)
 	hhw->inwords[BTN_SPUELE] 	=	BIT5;
 	hhw->inwords[BTN_BRAUSE] 	=	BIT6;
 
-	hhw->outwords[HOTROD_300]	=	BIT15;
-	hhw->outwords[VALVE_DRAIN]	=	BIT14;
-	hhw->outwords[VALVE_SHOWR]	=	BIT13;
-	hhw->outwords[VALVE_COLD]	=	BIT12;
-	hhw->outwords[VALVE_HOT]	=	BIT11;
-	hhw->outwords[PUMP_HOT]		=	BIT10;
-	hhw->outwords[PUMP_COLD]	=	BIT9;
+	hhw->outwords[HOTROD_300]	=	BIT9;
+	hhw->outwords[VALVE_DRAIN]	=	BIT15;
+	hhw->outwords[VALVE_SHOWR]	=	BIT14;
+	hhw->outwords[VALVE_COLD]	=	BIT13;
+	hhw->outwords[VALVE_HOT]	=	BIT12;
+	hhw->outwords[PUMP_HOT]		=	BIT11;
+	hhw->outwords[PUMP_COLD]	=	BIT10;
 
 	hhw->VoltLevel_lowbatt = 11.8;
 	hhw->VoltLevel_highbatt = 12.72;
@@ -55,7 +55,6 @@ void mftask_happyhotwater	(TD_HappyHotwater* hhw)
 		hhw_lol_drain(hhw,&mcp_io);
 		hhw_lol_fillnheat(hhw, &db, &mcp_io);
 		mcp_io.outlatch = hhw->outword;
-
 
 		hhw->mf_modflag.duration = modflag_tickdiff(&hhw->mf_modflag);
 		hhw->mf_modflag.callcount++;
@@ -117,7 +116,6 @@ void hhw_set_outstates(TD_HappyHotwater* hhw, int ioitr, int stateitr, TD_MCP *m
 		hhw_set_out(hhw, ioitr,  0);
 	}
 
-
 void hhw_set_out(TD_HappyHotwater* hhw, uint16_t outnamesmask, int state)
 
 	{
@@ -151,11 +149,22 @@ void hhw_lol_update(TD_HappyHotwater* hhw,	Valuebuffer* db)
 	if (db->temphot > hhw->TempLevel_high)
 		{
 		hhw_set_state(hhw, FREIG_HEIZEN, 0);
-
 		}
 
-	hhw_set_state(hhw, POWER_INV, (db->batthwcurr < 0));
-	hhw_set_state(hhw, POWER_VB, (db->batthwvolt > hhw->VoltLevel_lowbatt));
+	if ( db->batthwcurr < 0)
+		{
+		/* falls der shunt gebrückt ist (=0)erfolgt die erkennung fürs laden durch den spannungslevel */
+		hhw_set_state(hhw, POWER_VB, db->batthwvolt > hhw->VoltLevel_power_inv);
+		hhw_set_state(hhw, POWER_INV, 1);
+		}
+	else
+		{
+		hhw_set_state(hhw, POWER_INV, 0);
+		hhw_set_state(hhw, POWER_VB, db->batthwvolt > hhw->VoltLevel_lowbatt);
+		hhw_set_state(hhw, POWER_LV, db->batthwvolt < hhw->VoltLevel_lowbatt);
+		}
+
+	db->battsoc = utils_map(db->batthwvolt, hhw->VoltLevel_lowbatt, hhw->VoltLevel_highbatt, 0.0, 100.0);
 
 
 	}
@@ -193,6 +202,7 @@ void hhw_lol_report(TD_HappyHotwater* hhw, Valuebuffer* db)
 	if(utils_get_bits_in_dWord(&hhw->outword,  hhw->outwords[HOTROD_300]))	term_printf(&btTerm, "_HOTROD_300_");
 	if(utils_get_bits_in_dWord(&hhw->outword,  hhw->outwords[PUMP_COLD]))	term_printf(&btTerm, "_PUMP_COLD_");
 	if(utils_get_bits_in_dWord(&hhw->outword,  hhw->outwords[PUMP_HOT]))	term_printf(&btTerm, "_PUMP_HOT_");
+	term_printf(&btTerm, "\r");
 
 	}
 
@@ -202,7 +212,7 @@ void hhw_lol_drain(TD_HappyHotwater* hhw, TD_MCP *mcp_io)
 	hhw_set_state(hhw, REFILL, true);
 
 
-	if(hhw_get_state(hhw, (POWER_VB)))
+	if(hhw_get_state(hhw, (POWER_VB | POWER_INV)))
 		{
 
 		if(hhw_get_state(hhw, (COLDWTR_SPUELE | SPUELEN)))
@@ -239,39 +249,61 @@ void hhw_lol_drain(TD_HappyHotwater* hhw, TD_MCP *mcp_io)
 
 void hhw_lol_fillnheat	(TD_HappyHotwater* hhw,	Valuebuffer* db, TD_MCP *mcp_io)
 	{
-
-	if(hhw_get_state(hhw, ( POWER_VB | TANK_MODE_ECO )))
-
+	/* jedes powerlevel ausser batt low */
+	if (hhw_get_state(hhw,(POWER_VB)) |  hhw_get_state(hhw, ( POWER_INV )) )
 		{
-		if(hhw_get_state(hhw, (REFILL )) & (!hhw_get_state(hhw, ( TANK_HOT_MID)))& (!hhw_get_state(hhw, ( TANK_HOT_FULL))))
+
+		if(hhw_get_state(hhw,(TANK_MODE_ECO)) )
 			{
-			utils_set_bits_in_dWord(&hhw->outword, ((hhw->outwords[VALVE_COLD]) |
-													(hhw->outwords[VALVE_HOT])	|
-													(hhw->outwords[PUMP_COLD])), 1);
+			if(hhw_get_state(hhw, (REFILL )) & (!hhw_get_state(hhw, ( TANK_HOT_MID)))& (!hhw_get_state(hhw, ( TANK_HOT_FULL))))
+				{
+				utils_set_bits_in_dWord(&hhw->outword, ((hhw->outwords[VALVE_COLD]) |
+														(hhw->outwords[VALVE_HOT])	|
+														(hhw->outwords[PUMP_COLD])), 1);
+				}
+
+			if(hhw_get_state(hhw, (FREIG_HEIZEN  | TANK_HOT_MID )))
+				{
+				utils_set_bits_in_dWord(&hhw->outword, (hhw->outwords[HOTROD_300]), 1);
+				}
 			}
 
-		if(hhw_get_state(hhw, (POWER_INV |FREIG_HEIZEN  | TANK_HOT_MID )))
+		if(hhw_get_state(hhw, (  TANK_MODE_FULL )))
 			{
-			utils_set_bits_in_dWord(&hhw->outword, (hhw->outwords[HOTROD_300]), 1);
-			}
+
+			/* aktiv bis tank unteren anschlag erreicht hat, heizung aus, weil könnte auch leer sein */
+			if(hhw_get_state(hhw, (REFILL ))
+			& (!hhw_get_state(hhw, ( TANK_HOT_MID)))
+			& (!hhw_get_state(hhw, ( TANK_HOT_FULL))))
+				{
+				utils_set_bits_in_dWord(&hhw->outword, ((hhw->outwords[VALVE_COLD]) |
+														(hhw->outwords[VALVE_HOT])	|
+														(hhw->outwords[PUMP_COLD])), 1);
+
+				}
+			/* wenn der untere aber nicht der obere anschlag belegt ist, wird nachgefüllt solange es zu heiß ist */
+			if(hhw_get_state(hhw, (REFILL | TANK_HOT_MID))
+			& (!hhw_get_state(hhw, ( FREIG_HEIZEN)))
+			& (!hhw_get_state(hhw, ( TANK_HOT_FULL))))
+				{
+				utils_set_bits_in_dWord(&hhw->outword, ((hhw->outwords[VALVE_COLD]) |
+														(hhw->outwords[VALVE_HOT])	|
+														(hhw->outwords[PUMP_COLD])), 1);
+				utils_set_bits_in_dWord(&hhw->outword,  (hhw->outwords[HOTROD_300]), 0);
+				}
+			/* wenn der untere aber nicht der obere anschlag belegt ist, dann wird erst nachgefüllt wenn es zu heiß geworden ist */
+			if(hhw_get_state(hhw, (REFILL | TANK_HOT_MID | FREIG_HEIZEN))
+			& (!hhw_get_state(hhw, ( TANK_HOT_FULL))))
+				{
+				utils_set_bits_in_dWord(&hhw->outword, ((hhw->outwords[VALVE_COLD]) |
+														(hhw->outwords[VALVE_HOT])	|
+														(hhw->outwords[HOTROD_300])	|
+														(hhw->outwords[PUMP_COLD])), 1);
+				}
+
 		}
-
-	if(hhw_get_state(hhw, ( POWER_VB | TANK_MODE_FULL )))
-		{
-		if(hhw_get_state(hhw, (REFILL )) & (!hhw_get_state(hhw, ( TANK_HOT_MID)))& (!hhw_get_state(hhw, ( TANK_HOT_FULL))))
-			{
-			utils_set_bits_in_dWord(&hhw->outword, ((hhw->outwords[VALVE_COLD]) |
-													(hhw->outwords[VALVE_HOT])	|
-													(hhw->outwords[PUMP_COLD])), 1);
-			}
-
-		if(hhw_get_state(hhw, (FREIG_HEIZEN  | TANK_HOT_MID )))
-			{
-			utils_set_bits_in_dWord(&hhw->outword, (hhw->outwords[HOTROD_300]), 1);
-			}
-		}
-
 	}
+}
 
 void hhw_lol_battery_soc (TD_HappyHotwater* hhw,	Valuebuffer* db)
 	{

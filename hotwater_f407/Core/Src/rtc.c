@@ -51,7 +51,7 @@ void MX_RTC_Init(void)
   /* USER CODE END Check_RTC_BKUP */
 
   /** Initialize RTC and set the Time and Date
-  */
+
   sTime.Hours = 19;
   sTime.Minutes = 16;
   sTime.Seconds = 0;
@@ -70,7 +70,7 @@ void MX_RTC_Init(void)
   {
     Error_Handler();
   }
-
+*/
 }
 
 void HAL_RTC_MspInit(RTC_HandleTypeDef* rtcHandle)

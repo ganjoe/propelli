@@ -46,6 +46,7 @@
 #include "command.h"
 #include "HappyHotWater.h"
 #include "sdfile.h"
+#include "backup_command.h"
 
 /* USER CODE END Includes */
 
@@ -129,8 +130,8 @@ int main(void)
    //init_cmdfile nach happylog
   mfinit_prettylog(&prettylog);
 
-  init_sdfile_happylog(&happylog);
-  init_sdfile_initcmd(&initcmd);
+
+  
   mfinit_boardled();
   mfinit_mcp23017();
  // mfinit_poti(&analogchan);
@@ -148,6 +149,10 @@ int main(void)
   oneWire_drivePin(&tsensor_hot.wire, OW_INPUT_HIGHZ);
   //schnellen tasktimer starten
   HAL_TIM_Base_Start_IT(&htim6);
+  //zuletzt starten um defaults zu überschreiben
+  init_sdfile_happylog(&happylog);
+  init_sdfile_initcmd();
+  mfinit_sdfile_backup();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -165,6 +170,8 @@ int a=0;
     mftask_mcp23017(&mcp_io);
     mftask_prettylog(&prettylog.pp_modflag);
     mftask_ina219(&batt_hw);
+    mftask_sdfile_backup(&eeprom);
+    mftask_sdfile_happylog(&happylog);
 
     if (batt_hw.voltbuff < 0)
     {

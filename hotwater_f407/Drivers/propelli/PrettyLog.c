@@ -33,6 +33,8 @@ void pl_ppValues	(char* buffer)
 		break;
 	    case BATTHWPWR:
 		sprintf(pbuffer, "%1.3f", db.batthwpwr);
+	    case BATTSOC:
+		sprintf(pbuffer, "%3.1f", db.battsoc);
 		break;
 	    case TEMPHOT:
 		sprintf(pbuffer, "%2.1f", db.temphot);
@@ -77,9 +79,17 @@ int pl_rtc_timestring	(char* buffer, int fmt)
 
     switch (fmt)
 	{
+	case TIMECMD:
+	    {
+	    sprintf(buffer,"settime_%d_%d_0", rtc.Hours, rtc.Minutes);
+	    }break;
+	case DATECMD:
+	    {
+	    sprintf(buffer,"setdate_%d_%d_%d", rtd.Date, rtd.Month, rtd.Year);
+	    }break;
 	case DATEMONO:
 	    {
-	    sprintf(buffer,"%2d.%2d.%2d\0", rtd.Date, rtd.Month, rtd.Year);
+	    sprintf(buffer,"%2d.%2d.%2d", rtd.Date, rtd.Month, rtd.Year);
 	    }break;
 	case TIMEMONO:
 	    {
@@ -124,13 +134,14 @@ void mftask_prettylog(modflag *thismf)
 		db.names=TIME;			pl_ppValues( buffer);
 		//db.names=MCUVOLT;   	pl_ppValues( buffer);
 		db.names=BATTHWVOLT;	pl_ppValues( buffer);
+		db.names=BATTSOC;		pl_ppValues( buffer);
 		db.names=BATTHWCURR;	pl_ppValues( buffer);
-		db.names=BATTHWPWR;		pl_ppValues( buffer);
+		//db.names=BATTHWPWR;	pl_ppValues( buffer);
 		//db.names=TEMPMCU;   	pl_ppValues( buffer);
 		db.names=TEMPCOLD;  	pl_ppValues( buffer);
 		db.names=TEMPHOT;   	pl_ppValues( buffer);
-		db.names=STATUS;		pl_ppValues( buffer);
-		db.names=LOGLINES;		pl_ppValues( buffer);
+		//db.names=STATUS;		pl_ppValues( buffer);
+		//db.names=LOGLINES;	pl_ppValues( buffer);
 		db.names=BYTESWROTE;	pl_ppValues( buffer);
 		strncat		(buffer,"\r",1);
 		sdfile_add_logline(&happylog, buffer);

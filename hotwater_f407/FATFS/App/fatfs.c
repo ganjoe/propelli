@@ -79,11 +79,11 @@ int sd_lol_writeline(char* filename, char* linebuff, uint8_t chars, uint8_t line
 		 }
 	if (fres == FR_DISK_ERR)
 		 {
-
+		bytesWrote = -1;
 		 }
 	if (fres == FR_INVALID_DRIVE)
 		 {
-
+		bytesWrote = -1;
 		 }
 	if (fres == FR_OK)
 		{
@@ -93,10 +93,10 @@ int sd_lol_writeline(char* filename, char* linebuff, uint8_t chars, uint8_t line
 		 f_mount(&SDFatFS, SDPath, 0);
 		}
 
-	 return bytesWrote;
+
 /*---------------------------------------------------------*/
 	 free (linebuffer);
-
+		return bytesWrote;
 }
 int sd_lol_readline (char* filename, char* linebuff, uint8_t chars, uint8_t line)
 {

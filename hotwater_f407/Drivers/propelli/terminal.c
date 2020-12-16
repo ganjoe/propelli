@@ -11,7 +11,7 @@
 #include "datatypes.h"
 #include "delay.h"
 
-// TODO: formalisieren und aufräumen
+
 
 
 static TD_TERMINAL_CALLBACKS callbacks[CALLBACK_LEN];

@@ -46,6 +46,7 @@ typedef enum
     TIME,
     MCUVOLT,
     BATTHWVOLT,
+	BATTSOC,
     BATTHWCURR,
     BATTHWPWR,
     TEMPMCU,
@@ -66,10 +67,12 @@ typedef struct
 			tempmcu,
 			batthwcurr,
 			batthwvolt,
+			battsoc,
 			batthwpwr;
     uint16_t iostatus,
 			loglines;
     colnames names;
+    char	ppbuffer[120];
     }
     Valuebuffer;
 

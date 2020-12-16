@@ -14,16 +14,21 @@
 #define PROPELLI_PRETTYLOG_H_
 //FATFS/APP/
 
-
+/* Jahreszahl,bzw. Jahrzehnt immer ab 20 */
 typedef enum
     {
-    DATETIMEMONO = 0,	//"14.03.12 13:30:56"
-    DATETIMEFAT,
+
     DATETIMESHORT,	//"14.3 13:30"
-    DATEMONO,		//"14.03.12"
+    DATETIMEMONO,	//"14.03.12 13:30:56"
+	DATETIMEFAT,	//"14.03.12 13:30:56.hhw"
+    DATESHORT,		//"14.3.20"
+    DATEMONO,		//"14.03.20"
+	DATECMD,		//"14_3_20"
+	WEEKDAY,		//"Sunday"
+	TIMECMD,		//"18_37_00"
     TIMEMONO,		//"13:30:56"
     TIMENOSEC,		//"13:30"
-    TIMEMONOSUBS,		//"13:30:56.323"
+    TIMEMONOSUBS,	//"13:30:56.323"
     }
     pp_timestringstyle;
 
