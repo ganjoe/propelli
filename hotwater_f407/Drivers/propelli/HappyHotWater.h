@@ -37,7 +37,8 @@ typedef enum
 	/*Wasser Marsch*/
 	SPUELEN,
 	DUSCHEN,
-	REFILL,
+	FREIG_REFILL,
+	TANK_MODE_NOHEAT,
 }
 HHW_STATES_NAMES;
 typedef enum
@@ -72,7 +73,7 @@ typedef struct
 	uint32_t states[32];
 	//aktuelle kombination von betriebszuständen
 	uint32_t state, outword;
-
+	//TODO: inwords ??
 	//zielwert regelung
 	float hw_temperature;
 
@@ -107,7 +108,7 @@ TD_HappyHotwater;
 #define TANK_TEMP_HL		BIT11
 #define SPUELEN				BIT12
 #define DUSCHEN				BIT13
-#define REFILL				BIT14
+#define FREIG_REFILL				BIT14
 #define HOTWTR_SPUELE		BIT15
 
 void mfinit_happyhotwater	(TD_HappyHotwater* hhw);

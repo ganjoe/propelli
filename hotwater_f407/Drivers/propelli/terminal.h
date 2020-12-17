@@ -56,7 +56,6 @@ void term_printf(TD_TERMINAL* term, const char *fmt, ...);
 //cmd-string separieren und callbacks aufrufen
 void term_lol_parse(TD_TERMINAL* term);
 //funktionsnamen und deren namensstrings mit funktionspointern verknüpfen
-//TODO:
 void term_lol_setCallback	(const char* command,
 							 const char *help,
 							 const char *arg_names,

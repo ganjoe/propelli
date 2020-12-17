@@ -18,7 +18,7 @@ typedef struct
 	char* header;
 	char* filename;
 	uint16_t act_line, flag;
-	int64_t bytesWrote;	//TODO:jetzt nocht pro sd-karte wär schön
+	int64_t bytesWrote;
 }
 HHW_FILE_FORMAT;
 extern HHW_FILE_FORMAT initcmd, happylog;

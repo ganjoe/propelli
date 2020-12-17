@@ -111,7 +111,9 @@ void sdfile_lol_parsecmd		(HHW_FILE_FORMAT* file)
 			}
 		else
 			{
-			term_printf(&btTerm, "\r[sdfile_lol_parsecmd] %d bytes Read:\r%s\r", bytesRead,   btTerm.string_rx);
+
+			term_printf(&btTerm, "\r[sdfile_lol_parsecmd] %d bytes Read:%s", bytesRead,   btTerm.string_rx);
+
 			btTerm.sep = strdup("_");
 			term_lol_parse(&btTerm);
 			btTerm.sep = strdup(" ");
@@ -162,12 +164,15 @@ void sdfile_lol_write_backup	(HHW_FILE_FORMAT* file, const char* buffer, int lin
 			{
 			file->bytesWrote = sd_lol_writeline(file->filename, buffer, file->maxchars, line);
 			term_printf(&btTerm, "\r[write_backup] Replace line %d with new backupcmd", line);
+
+			term_printf(&btTerm, "\r[write_backup] %d bytes Writen", file->bytesWrote);
+
 			}
 		else
 			{
 			term_printf(&btTerm, "\r[write_backup] Skip line %d", line);
 			}
-		term_printf(&btTerm, "\r[write_backup] %d bytes Writen", file->bytesWrote);
+
 		free (emptybuff);
 		}
 

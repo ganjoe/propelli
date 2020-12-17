@@ -159,7 +159,6 @@ void term_lol_vprint(const char *fmt, va_list argp, TD_TERMINAL* term)
 	if (0 < vsprintf(term->string_tx, fmt, argp))
 	    {
 	    float del;
-	    //TODO: auf abschluss vorhandener übertragung warten
 	    txlen = strlen(term->string_tx);
 	    stat = HAL_UART_Transmit(&huart1, (uint8_t*)term->string_tx, txlen, 1000);
 	    del = term_lol_delay(txlen)*1000;
