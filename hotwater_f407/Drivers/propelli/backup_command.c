@@ -15,6 +15,7 @@
 #include "datatypes.h"
 #include "sdfile.h"
 #include "HappyHotWater.h"
+#include "terminal.h"
 
 void backup_datetime		(HHW_FILE_FORMAT* 	eeprom);
 void backup_voltrange		(HHW_FILE_FORMAT*	eeprom);
@@ -60,6 +61,24 @@ void mftick_sdfile_backup		(HHW_FILE_FORMAT* file)
 	modflag_upd_regular(&file->this_mf);
 	}
 
+int backup_read			(HHW_FILE_FORMAT*	eeprom, BACKUP_CMD_LIST line, float* argbuffer)
+{
+	char p2arr[eeprom->maxchars];
+	char* p2 = &p2arr;
+	int argc = 0;
+	    char *argv[btTerm.maxArguments];
+
+	    p2 = strtok(btTerm.string_rx,btTerm.sep);
+
+	    while (p2 && argc < btTerm.maxArguments)
+			{
+			argv[argc++] = p2;
+			p2 = strtok(0,btTerm.sep);
+			argbuffer[argc] = scanf(p2,"%f");
+			}
+	    return argc;
+}
+
 void backup_all()
 {
 	backup_datetime(&eeprom);
@@ -68,7 +87,7 @@ void backup_all()
 	backup_mode(&eeprom);
 }
 
-
+/* TODO: neues interface das aus callbacknummer und arg liste den string baut */
 void backup_datetime	(HHW_FILE_FORMAT	*eeprom)
 	{
 	char timestring[32];
@@ -90,7 +109,7 @@ void backup_trange		(HHW_FILE_FORMAT	*eeprom)
 	sprintf(cmdstring, "trange_%2.1f_%2.1f", Hhw.TempLevel_low, Hhw.TempLevel_high);
 	sdfile_lol_write_backup(eeprom, cmdstring, LINE_TRANGE);
 	}
-void backup_mode			(HHW_FILE_FORMAT*	eeprom)
+void backup_mode		(HHW_FILE_FORMAT*	eeprom)
 	{
 	char cmdstring[32];
 	if(hhw_get_state(&Hhw, TANK_MODE_FULL))

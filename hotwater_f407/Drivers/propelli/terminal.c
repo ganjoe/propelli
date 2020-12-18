@@ -119,7 +119,6 @@ void term_lol_parse(TD_TERMINAL* term)
     while (p2 && argc < term->maxArguments)
 		{
 		argv[argc++] = p2;
-		//sachen passieren
 		p2 = strtok(0,term->sep);
 		}
     //free  (p2);

@@ -64,6 +64,31 @@ typedef enum
 HHW_OUTWORD_NAMES;
 typedef struct
 {
+	uint64_t revcounter;		//absolute anzahl umdrehungen. preload durch initrom
+	uint16_t *Ticks_Edge;		//systicks bis auftreten von flanke des flowmetersignales
+	uint16_t TicksPrescale;		//Anzahl von Ticks zusammenfasse
+	uint16_t Ticks_EdgeSize;	//größe ringpuffer
+	uint16_t *Ticks_LiterCoeffs;//koeefizienten für Plonynom
+	uint8_t Ticks_LiterCoeffSize;//ordnung des polynoms
+	modflag this_mf;	//verwendung typischer
+
+}
+HHW_TANK;
+
+typedef struct
+{
+
+	uint8_t Ticks_LiterCoeffSize;//ordnung des polynoms
+	uint16_t *Ticks_Edge;		//systicks bis auftreten von flanke des flowmetersignales
+	uint16_t TicksPrescale;		//Anzahl von Ticks zusammenfasse
+	uint16_t Ticks_EdgeSize;	//größe ringpuffer
+	uint16_t *Ticks_LiterCoeffs;//koeefizienten für Plonynom
+
+}
+HHW_FLOWMETER;
+
+typedef struct
+{
 
 	//schaltzustände und deren zahl an aufrufen
 	uint64_t iocount[16];
@@ -91,6 +116,10 @@ typedef struct
 
 	modflag mf_modflag;
 
+	HHW_TANK hotTank, coldTank;
+
+	HHW_FLOWMETER flowmtr_typa
+
 }
 TD_HappyHotwater;
 
@@ -112,6 +141,7 @@ TD_HappyHotwater;
 #define HOTWTR_SPUELE		BIT15
 
 void mfinit_happyhotwater	(TD_HappyHotwater* hhw);
+void mfinit_hhw_freqcount	(TD_HappyHotwater* hhw);
 void mftask_happyhotwater	(TD_HappyHotwater* hhw);
 void mftick_happyhotwater	(TD_HappyHotwater* hhw);
 

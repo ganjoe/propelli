@@ -7,6 +7,7 @@
 
 #include "HappyHotWater.h"
 #include "terminal.h"
+#include "backup_command.h"
 
 void mfinit_happyhotwater	(TD_HappyHotwater* hhw)
 {
@@ -34,12 +35,41 @@ void mfinit_happyhotwater	(TD_HappyHotwater* hhw)
 
 	hhw_set_state(hhw, TANK_MODE_ECO, true);
 }
+
+/* init für frequenzähler */
+void mfinit_hhw_freqcount	(TD_HappyHotwater* hhw)
+	{
+	/* prescaler für flanken festlegen */
+	hhw->coldTank.TicksPrescale = 1;
+	hhw->hotTank.TicksPrescale = 1;
+	modflag_init(&hhw->hotTank.this_mf, SYSTICK, SYSTICK/hhw->hotTank.TicksPrescale);	//indirekt divisor setzen
+	modflag_init(&hhw->coldTank.this_mf, SYSTICK, SYSTICK/hhw->coldTank.TicksPrescale);
+	/* ausgleichs und skalieren */
+	hhw->hotTank.Ticks_LiterCoeffs =calloc(3,sizeof(uint16_t));
+	hhw->hotTank.Ticks_LiterCoeffs[0]	= 3.234;
+	hhw->hotTank.Ticks_LiterCoeffs[1]	= 0;
+	hhw->hotTank.Ticks_LiterCoeffs[2]	= 0;
+
+	/* Ringbuffer für Rohdaten  */
+	//hhw->Ticks_Edge = calloc (8, sizeof(uint16_t));
+
+	/* Refcounter vom flash laden. ja, eeprom wär besser */
+	float buffer[3];
+	if (backup_read(&eeprom,LINE_CNT_FLOW,buffer))
+	{
+
+	}
+	//	hhw->revcounter = (uint64_t)buffer[1];
+
+
 	/* programmablaufmerker, registerbits   */
+
 
 
 
 	/* kombinierte relaiszustände  */
 
+	}
 
 void mftask_happyhotwater	(TD_HappyHotwater* hhw)
 	{
@@ -72,7 +102,6 @@ int hhw_get_state	(TD_HappyHotwater* hhw, int stateitr)
 	{
 	return utils_get_bits_in_dWord(&hhw->state, stateitr );
 	}
-
 
 int hhw_get_invstate(TD_HappyHotwater* hhw, int stateitr)
 	{

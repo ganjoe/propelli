@@ -27,6 +27,7 @@ TD_TERMINAL_CALLBACKS;
 
 typedef struct
 {
+	/* maxArguments zählt auch für eeprom und initcmd */
 	int callback_len, uart_buffer_rx_len, maxArguments, TerminalBufferItr;
 	char byte_received;
 	char* sep;
