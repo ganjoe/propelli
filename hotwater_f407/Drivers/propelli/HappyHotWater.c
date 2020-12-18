@@ -30,35 +30,31 @@ void mfinit_happyhotwater	(TD_HappyHotwater* hhw)
 	hhw->outwords[PUMP_HOT]		=	BIT11;
 	hhw->outwords[PUMP_COLD]	=	BIT10;
 
-	hhw->TempLevel_high = 26.0;
-	hhw->TempLevel_low = 25.0;
-
-	hhw_set_state(hhw, TANK_MODE_ECO, true);
-}
-
-/* init für frequenzähler */
-void mfinit_hhw_freqcount	(TD_HappyHotwater* hhw)
-	{
-	/* prescaler für flanken festlegen */
-	hhw->coldTank.TicksPrescale = 1;
-	hhw->hotTank.TicksPrescale = 1;
-	modflag_init(&hhw->hotTank.this_mf, SYSTICK, SYSTICK/hhw->hotTank.TicksPrescale);	//indirekt divisor setzen
-	modflag_init(&hhw->coldTank.this_mf, SYSTICK, SYSTICK/hhw->coldTank.TicksPrescale);
-	/* ausgleichs und skalieren */
-	hhw->hotTank.Ticks_LiterCoeffs =calloc(3,sizeof(uint16_t));
-	hhw->hotTank.Ticks_LiterCoeffs[0]	= 3.234;
-	hhw->hotTank.Ticks_LiterCoeffs[1]	= 0;
-	hhw->hotTank.Ticks_LiterCoeffs[2]	= 0;
-
-	/* Ringbuffer für Rohdaten  */
-	//hhw->Ticks_Edge = calloc (8, sizeof(uint16_t));
-
 	/* Refcounter vom flash laden. ja, eeprom wär besser */
 	float buffer[3];
 	if (backup_read(&eeprom,LINE_CNT_FLOW,buffer))
 	{
 
 	}
+}
+
+/* init für frequenzähler bzw. flowmeter */
+void mfinit_hhw_freqcount	(TD_HappyHotwater* hhw)
+	{
+	/* prescaler für flanken festlegen */
+	hhw->flowmtr_typa.TicksPrescale = 1;
+	modflag_init(&hhw->flowmtr_typa.this_mf, SYSTICK, SYSTICK/hhw->flowmtr_typa.TicksPrescale);	//indirekt divisor setzen
+
+	/* ausgleichs und skalieren */
+	hhw->flowmtr_typa.Ticks_LiterCoeffs =calloc(3,sizeof(float));
+	hhw->flowmtr_typa.Ticks_LiterCoeffs[0]	= 3.234;
+	hhw->flowmtr_typa.Ticks_LiterCoeffs[1]	= 0;
+	hhw->flowmtr_typa.Ticks_LiterCoeffs[2]	= 0;
+
+	/* Ringbuffer für Rohdaten  */
+	hhw->flowmtr_typa.Ticks_Edge = calloc (8, sizeof(uint16_t));
+
+
 	//	hhw->revcounter = (uint64_t)buffer[1];
 
 

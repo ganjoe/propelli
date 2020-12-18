@@ -65,11 +65,6 @@ HHW_OUTWORD_NAMES;
 typedef struct
 {
 	uint64_t revcounter;		//absolute anzahl umdrehungen. preload durch initrom
-	uint16_t *Ticks_Edge;		//systicks bis auftreten von flanke des flowmetersignales
-	uint16_t TicksPrescale;		//Anzahl von Ticks zusammenfasse
-	uint16_t Ticks_EdgeSize;	//größe ringpuffer
-	uint16_t *Ticks_LiterCoeffs;//koeefizienten für Plonynom
-	uint8_t Ticks_LiterCoeffSize;//ordnung des polynoms
 	modflag this_mf;	//verwendung typischer
 
 }
@@ -77,13 +72,12 @@ HHW_TANK;
 
 typedef struct
 {
-
 	uint8_t Ticks_LiterCoeffSize;//ordnung des polynoms
 	uint16_t *Ticks_Edge;		//systicks bis auftreten von flanke des flowmetersignales
 	uint16_t TicksPrescale;		//Anzahl von Ticks zusammenfasse
 	uint16_t Ticks_EdgeSize;	//größe ringpuffer
-	uint16_t *Ticks_LiterCoeffs;//koeefizienten für Plonynom
-
+	float *Ticks_LiterCoeffs;//koeefizienten für Plonynom
+modflag this_mf;	//verwendung typischer
 }
 HHW_FLOWMETER;
 
