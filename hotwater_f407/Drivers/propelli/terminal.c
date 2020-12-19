@@ -32,6 +32,7 @@ void mfinit_terminal(TD_TERMINAL* term)
 
 void mftask_terminal(TD_TERMINAL* term)
 	{
+
     if (&term->mf_cmd.flag && term->mf_cmd.init_done)
 		{
     	term->mf_cmd.repeat = modflag_tickdiff(&term->mf_cmd);

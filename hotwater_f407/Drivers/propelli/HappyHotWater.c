@@ -11,6 +11,7 @@
 
 void mfinit_happyhotwater	(TD_HappyHotwater* hhw)
 {
+
 	modflag_init(&hhw->mf_modflag, HALTICK, 10);
 
 	/* die bitmasken haben physische entsprechung (anschlussreihenfolge)*/

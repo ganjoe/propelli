@@ -76,8 +76,8 @@ typedef struct
 	uint16_t *Ticks_Edge;		//systicks bis auftreten von flanke des flowmetersignales
 	uint16_t TicksPrescale;		//Anzahl von Ticks zusammenfasse
 	uint16_t Ticks_EdgeSize;	//größe ringpuffer
-	float *Ticks_LiterCoeffs;//koeefizienten für Plonynom
-modflag this_mf;	//verwendung typischer
+	float *Ticks_LiterCoeffs;	//koeefizienten für Plonynom
+modflag this_mf;				//verwendung typischer
 }
 HHW_FLOWMETER;
 

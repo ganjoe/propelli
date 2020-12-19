@@ -47,6 +47,8 @@
 #include "HappyHotWater.h"
 #include "sdfile.h"
 #include "backup_command.h"
+#include "cpp_link.hpp"
+//#include "pMain.hpp"
 
 /* USER CODE END Includes */
 
@@ -130,7 +132,6 @@ int main(void)
    //init_cmdfile nach happylog
   mfinit_prettylog(&prettylog);
 
-
   
   mfinit_boardled();
   mfinit_mcp23017();
@@ -157,11 +158,12 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-int a=0;
+
+
 
   while (1)
   {
-
+	cpp_link();
 	mftask_terminal(&btTerm);
     mftask_tsensor(&tsensor_cold);
     mftask_tsensor(&tsensor_hot);
