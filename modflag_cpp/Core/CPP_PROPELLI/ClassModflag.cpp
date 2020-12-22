@@ -35,14 +35,18 @@ void ClassModflag::updRegular()
 
 void ClassModflag::tickDiff()
     {
+    /**
+     * Calculates the duration for a task-call.
+     * Timervalues for max and actual value have to be provided,
+     */
     uint32_t counter = ptrSystick->mfTimer.Instance->CNT;
     uint32_t tickdiff;
-
     systick = counter + (ptrSystick->ovf * ptrSystick->mfTimer.Instance->ARR);
     newTick = systick;
     tickdiff = newTick - oldTick;
     oldTick = newTick;
     repeat = tickdiff;
+    rampcounter = callcount % rampmod;
     }
 
 void ClassModflag::setStatus(bool enable)

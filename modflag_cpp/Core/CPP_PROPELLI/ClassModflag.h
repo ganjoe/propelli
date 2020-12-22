@@ -18,7 +18,7 @@ public:
     float setpoint_hz;
     bool initDone, taskFlag;
 
-    uint32_t systick, newTick, oldTick, counter, ovf, repeat, rampcounter;
+    uint32_t systick, newTick, oldTick, counter, ovf, repeat, rampcounter, rampmod, callcount;
 
     mfSystick* ptrSystick;
 

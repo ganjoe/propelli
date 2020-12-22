@@ -15,17 +15,24 @@
     	{
     #endif
 	#include "BoardLed.hpp"
+
+    	ClassBoardLed LedRed(5);
+    	ClassBoardLed LedGreen(2);
+
     	void cpp_tasks (void)
-    		{
-
-    		}
+    	    {
+    	    LedRed.task();
+    	    LedGreen.task();
+    	    }
     	void cpp_init (void)
-    		{
-    		init_mfSystick(&prop_systick, SYSTICK, 3.33);
-    		ClassBoardLed LedRed;
-
-
-    		}
+    	    {
+    	    init_mfSystick(&prop_systick, SYSTICK);
+ 	    }
+    	void cpp_update (void)
+ 	    {
+    	    LedGreen.updRegular();
+    	    LedRed.updRegular();
+    	    }
 
     #ifdef __cplusplus
     	}

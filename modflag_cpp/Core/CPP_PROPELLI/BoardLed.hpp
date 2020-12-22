@@ -16,16 +16,15 @@
 class ClassBoardLed : public ClassModflag
     {
 public:
-    ClassBoardLed()
-    :ClassModflag(HALTICK, 10000, &prop_systick)
-    {    }
+    ClassBoardLed(float setpointHz)
+    :ClassModflag(HALTICK, 10000, &prop_systick) {    }
+
     uint32_t task()
 	{
 	 if(taskFlag)
 	     {
-
+	     Toggle();
 	     }
-	    Toggle();
 	 }
 
 

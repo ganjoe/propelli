@@ -26,12 +26,10 @@ typedef struct
     {
     TIM_HandleTypeDef mfTimer;
     uint64_t counter, ovf;
-    uint32_t systick, divisor;
     }
 mfSystick;
 
-void init_mfSystick(mfSystick* thismf, uint32_t systick, uint32_t setpoint_hz);
-
+void init_mfSystick(mfSystick* thismf, uint32_t setpoint_hz);
 
 extern mfSystick prop_systick;
 

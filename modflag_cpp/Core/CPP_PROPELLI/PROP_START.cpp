@@ -7,13 +7,14 @@
 
 #include "PROP_START.hpp"
 
+/**Datatype for Softwaretimers
+ *
+ */
 
-
-void init_mfSystick(mfSystick* thismf, uint32_t systick, uint32_t setpoint_hz)
+void init_mfSystick(mfSystick* thismf,uint32_t setpoint_hz )
     {
-    utils_truncate_number_int((int*)setpoint_hz, 0, systick); // max 1h minimum: systick
-    thismf->systick = systick;
-    thismf->divisor = systick / setpoint_hz;
+    /**Timer Configuration done by CubeMX/HAL*/
+    thismf->mfTimer = htim6;
     }
 
 mfSystick prop_systick;

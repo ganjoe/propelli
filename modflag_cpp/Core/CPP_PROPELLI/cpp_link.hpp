@@ -15,6 +15,7 @@
 
     	void cpp_tasks (void);
     	void cpp_init (void);
+    	void cpp_update(void);
 
     #ifdef __cplusplus
     	}
