@@ -33,7 +33,7 @@ void ClassModflag::updRegular()
 
     }
 
-uint32_t ClassModflag::tickDiff()
+void ClassModflag::tickDiff()
     {
     uint32_t counter = ptrSystick->mfTimer.Instance->CNT;
     uint32_t tickdiff;
@@ -42,8 +42,7 @@ uint32_t ClassModflag::tickDiff()
     newTick = systick;
     tickdiff = newTick - oldTick;
     oldTick = newTick;
-    return tickdiff;
-
+    repeat = tickdiff;
     }
 
 void ClassModflag::setStatus(bool enable)

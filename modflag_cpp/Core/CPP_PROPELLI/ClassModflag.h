@@ -16,26 +16,20 @@ public:
     ClassModflag(uint32_t systick, float setpoint_hz, mfSystick* timer);
 
     float setpoint_hz;
+    bool initDone, taskFlag;
 
-private:
+    uint32_t systick, newTick, oldTick, counter, ovf, repeat, rampcounter;
 
-bool initDone, taskFlag;
+    mfSystick* ptrSystick;
 
-
-uint32_t systick, newTick, oldTick, counter, ovf;
-
-mfSystick* ptrSystick;
-
-
-
-   float divisor;
+    float divisor;
 
     void  updRegular();
 
-    uint32_t tickDiff();
+    void tickDiff();
 
     void setStatus(bool enable);
-
+private:
     };
 
 #endif /* INC_CLASSMODFLAG_H_ */

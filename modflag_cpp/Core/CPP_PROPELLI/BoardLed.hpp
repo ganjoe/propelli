@@ -19,10 +19,18 @@ public:
     ClassBoardLed()
     :ClassModflag(HALTICK, 10000, &prop_systick)
     {    }
+    uint32_t task()
+	{
+	 if(taskFlag)
+	     {
 
-   void Toggle()    { HAL_GPIO_TogglePin( led_green_GPIO_Port, led_green_Pin); }
+	     }
+	    Toggle();
+	 }
+
 
 private:
+   void Toggle()    { HAL_GPIO_TogglePin( led_green_GPIO_Port, led_green_Pin); }
 };
 
 
