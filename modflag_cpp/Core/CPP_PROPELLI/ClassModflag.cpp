@@ -7,11 +7,11 @@
 
 #include "ClassModflag.h"
 
-ClassModflag::ClassModflag(uint32_t systick, float setpoint_hz, mfSystick* timer)
+ClassModflag::ClassModflag(float setpoint_hz, mfSystick* timer)
     {
     utils_truncate_number(&setpoint_hz, 0, systick);
 
-    divisor = (float) systick / setpoint_hz;
+    divisor = (float) timer->systick / setpoint_hz;
 
     if (setpoint_hz == 0)
 	initDone = false;

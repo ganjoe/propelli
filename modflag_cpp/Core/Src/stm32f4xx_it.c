@@ -390,7 +390,7 @@ void SDIO_IRQHandler(void)
 void TIM6_DAC_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
-
+    cpp_update();
   /* USER CODE END TIM6_DAC_IRQn 0 */
   HAL_DAC_IRQHandler(&hdac);
   HAL_TIM_IRQHandler(&htim6);

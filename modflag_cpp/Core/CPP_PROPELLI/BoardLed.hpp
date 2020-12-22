@@ -17,20 +17,19 @@ class ClassBoardLed : public ClassModflag
     {
 public:
     ClassBoardLed(float setpointHz)
-    :ClassModflag(HALTICK, 10000, &prop_systick) {    }
+    :ClassModflag(this->setpoint_hz, &prop_systick)
+    {
+    this->setpoint_hz = setpointHz;
+    }
 
-    uint32_t task()
-	{
-	 if(taskFlag)
-	     {
-	     Toggle();
-	     }
-	 }
+    uint32_t task();
+
 
 
 private:
    void Toggle()    { HAL_GPIO_TogglePin( led_green_GPIO_Port, led_green_Pin); }
 };
+
 
 
 #endif /* INC_BOARDLED_HPP_ */

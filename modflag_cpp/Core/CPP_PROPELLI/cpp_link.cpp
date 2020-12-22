@@ -9,29 +9,32 @@
 
 #include "cpp_link.hpp"
 #include "PROP_START.hpp"
+#include "BoardLed.hpp"
 
     #ifdef __cplusplus
     	extern "C"
     	{
     #endif
-	#include "BoardLed.hpp"
 
-    	ClassBoardLed LedRed(5);
-    	ClassBoardLed LedGreen(2);
+/* call hier direkt nach resethandler wenn klasse im stack initialisiert wird */
 
-    	void cpp_tasks (void)
+    	ClassBoardLed *LedRed, *LedGreen;
+
+    	void cpp_tasks ()
     	    {
-    	    LedRed.task();
-    	    LedGreen.task();
+    	    LedRed->task();
+    	    LedGreen->task();
     	    }
-    	void cpp_init (void)
+    	void cpp_init ()
     	    {
+    	    LedRed = new ClassBoardLed(10);
+    	    LedGreen = new ClassBoardLed(2);
     	    init_mfSystick(&prop_systick, SYSTICK);
  	    }
-    	void cpp_update (void)
+    	void cpp_update ()
  	    {
-    	    LedGreen.updRegular();
-    	    LedRed.updRegular();
+    	    LedGreen->updRegular();
+    	    LedRed->updRegular();
     	    }
 
     #ifdef __cplusplus

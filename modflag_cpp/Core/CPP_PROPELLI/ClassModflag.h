@@ -13,7 +13,7 @@
 class ClassModflag
     {
 public:
-    ClassModflag(uint32_t systick, float setpoint_hz, mfSystick* timer);
+    ClassModflag(float setpoint_hz, mfSystick* timer);
 
     float setpoint_hz;
     bool initDone, taskFlag;

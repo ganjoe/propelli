@@ -13,9 +13,9 @@
     	{
     #endif
 
-    	void cpp_tasks (void);
-    	void cpp_init (void);
-    	void cpp_update(void);
+    	void cpp_tasks ();
+    	void cpp_init ();
+    	void cpp_update();
 
     #ifdef __cplusplus
     	}

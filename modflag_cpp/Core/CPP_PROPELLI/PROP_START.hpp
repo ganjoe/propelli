@@ -12,9 +12,7 @@
 #include "tim.h"
 #include "utils.hpp"
 
-
-
-#define HALTICK 1000
+//! user-defined.
 #define SYSTICK 10000
 
 /**
@@ -25,7 +23,7 @@
 typedef struct
     {
     TIM_HandleTypeDef mfTimer;
-    uint64_t counter, ovf;
+    uint64_t counter, ovf, systick;
     }
 mfSystick;
 
